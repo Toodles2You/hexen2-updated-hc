@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/mezzoman.hc 74    9/25/97 12:16p Mgummelt $
+ * $Header: /H2 Mission Pack/HCode/mezzoman.hc 24    3/09/98 3:05p Mgummelt $
  */
 
 /*
@@ -120,22 +120,6 @@ string soundstr;
 	sound(self,CHAN_VOICE,soundstr,1,ATTN_NORM);
 }
 
-/*
-void mezzo_possum_up (void)// [-- $death14..$death1]
-{
-	if (cycle_wrapped)
-		self.think=self.th_run;
-}
-
-void mezzo_playdead (void)
-{
-//	self.frame=$death14;
-	self.think=mezzo_playdead;
-	thinktime self : 0.1;
-	ai_stand();
-}
-*/
-
 void mezzo_roll_right () [-- $Roll18 .. $Roll1]
 {
 //	if(self.shield.velocity!='0 0 0'&&self.shield.model!="models/null.spr")
@@ -236,19 +220,46 @@ vector newmaxs;
 
 float mezzo_check_duck (entity proj)
 {
+entity proj_owner;
 vector proj_mins,duck_hite,proj_dir;
-	proj_mins=proj.origin;
-	proj_mins_z=proj.origin_z - proj.mins_z;
+vector temp_f,temp_r,temp_u;
 
 	duck_hite=self.origin;
 	duck_hite_z=self.origin_z + self.maxs_z/2;
+	if(proj==self.enemy)
+	{
+		proj_owner=proj;
+		proj_mins=self.enemy.origin+self.enemy.proj_ofs;
+		temp_f=v_forward;
+		temp_r=v_right;
+		temp_u=v_up;
+		if(self.enemy.classname=="player")
+			makevectors(self.enemy.v_angle);
+		else
+			makevectors(self.enemy.angles);
+		proj_dir=v_forward;
+		v_forward=temp_f;
+		v_right=temp_r;
+		v_up=temp_u;
+	}
+	else
+	{
+		proj_owner=proj.owner;
+		proj_mins=proj.origin;
+		proj_mins_z=proj.origin_z - proj.mins_z;
+		proj_dir=normalize(duck_hite-proj_mins);
+	}
+	if(!proj_owner)
+		proj_owner=proj;
 
-	proj_dir=normalize(duck_hite-proj_mins);
+	traceline(proj_mins,duck_hite+proj_dir*8,FALSE,proj_owner);
 
-	traceline(proj_mins,duck_hite+proj_dir*8,FALSE,self);
-
-	if(trace_ent!=self||trace_endpos_z>duck_hite_z)
+	if(trace_ent!=self)//||trace_endpos_z>duck_hite_z)
+	{
+//		dprint(trace_ent.classname);
+//		dprint(" at end of trace- ok to duck!\n");
 		return TRUE;
+	}
 	else
 		return FALSE;
 }
@@ -372,7 +383,7 @@ void mezzo_check_defense ()
 //	if(self.shield.velocity!='0 0 0'&&self.shield.model!="models/null.spr")
 //		dprint("what the?\n");
 //NOTE: Add random chance of failure based on difficulty level - highest diff means no chance of failure here
-	if(skill+self.skin/5<random(6))
+	if(skill+self.strength/5<random(6))
 		return;
 
 	if((self.enemy.last_attack+0.5<time&&self.oldenemy.last_attack+0.5<time)||self.aflag)
@@ -395,7 +406,7 @@ float r;
 		self.velocity='0 0 0';//Clear velocity from last jump so he doesn't go nuts
 
 	r=range(enemy_proj);
-	if(self.enemy.weapon==IT_WEAPON1&&r<=RANGE_NEAR)
+	if(self.enemy.weapon==IT_WEAPON1&&r<=RANGE_NEAR&&self.enemy.playerclass!=CLASS_SUCCUBUS)
 	{
 		thinktime self : 0;
 		if(r==RANGE_MELEE)
@@ -587,7 +598,7 @@ float inertia;
 vector punchdir;
 	makevectors(self.angles);
 	punchdir=v_forward*300+'0 0 100';
-	T_Damage(other,self,self,5*(self.skin+1)*(self.aflag+1)*(coop + 1));
+	T_Damage(other,self,self,5*(self.strength+1)*(self.aflag+1)*(coop + 1));
 	other.velocity+=punchdir*(1/inertia);
 	other.flags(-)FL_ONGROUND;
 
@@ -632,7 +643,7 @@ float magnitude;//remainder, reflect_count,
 	if(self.owner.classname=="monster_mezzoman")
 		sound(self,CHAN_AUTO,"mezzo/slam.wav",1,ATTN_NORM);
 
-	if(!self.owner.skin&&self.owner.classname=="monster_mezzoman")
+	if(!self.owner.strength&&self.owner.classname=="monster_mezzoman")
 	{//Just block it
 		if(!other.flags2&FL_ALIVE)
 			other.flags2(+)FL_NODAMAGE;
@@ -643,14 +654,14 @@ float magnitude;//remainder, reflect_count,
 		{
 			sound (self, CHAN_WEAPON, "fangel/deflect.wav", 1, ATTN_NORM);
 			CreateWhiteFlash(trace_endpos);
-			if(self.owner.classname=="monster_fallen_angel")
+			if(self.owner.classname=="monster_fallen_angel")//deflect
 			{
 				dir=dir*-1;
 				makevectors(dir);
 				dir=v_forward + v_up*random(-0.75,.75) + v_right*random(-0.75,.75);
 				dir=normalize(dir);
 			}
-			else// if(visible(other.owner))
+			else// if(visible(other.owner))//reflect
 			{
 				v_forward=normalize(other.owner.origin+other.owner.view_ofs-other.origin);
 				dir+= 2*v_forward;
@@ -663,9 +674,14 @@ float magnitude;//remainder, reflect_count,
 		{
 			sound(self,CHAN_AUTO,"mezzo/reflect.wav",1,ATTN_NORM);
 			starteffect(CE_MEZZO_REFLECT,self.origin);
-			makevectors(trace_ent.angles);
-			dir+= 2*v_forward;
-			dir=normalize(dir);
+			if(self.owner.strength>=3&&other.owner!=world)//Tiger reflects
+				dir=normalize(other.owner.origin+other.owner.view_ofs-other.origin);
+			else//others deflect
+			{
+				makevectors(trace_ent.angles);
+				dir+= 2*v_forward;
+				dir=normalize(dir);
+			}
 		}
 
 		if(other.movedir)
@@ -755,14 +771,17 @@ float zofs;
 		if(trace_ent.movetype&&trace_ent.movetype!=MOVETYPE_PUSH)
 			trace_ent.velocity+=v_forward*200-v_right*100+'0 0 100';
 		if(trace_ent.takedamage)
-			T_Damage(trace_ent,self,self,5*(self.skin+1)*(self.aflag+1)*(coop + 1));
+			T_Damage(trace_ent,self,self,5*(self.strength+1)*(self.aflag+1)*(coop + 1));
 		if(trace_ent.classname=="player")
 			if(infront_of_ent(self,trace_ent))
 				trace_ent.punchangle_y=4;
 	}
 	else if(cycle_wrapped)
 	{
-		self.attack_finished=time+0.5;
+		if(skill>=4)
+			self.attack_finished=0;
+		else
+			self.attack_finished=time+0.5;
 		thinktime self : 0;
 		self.think=self.th_run;
 	}
@@ -780,7 +799,10 @@ void mezzo_sword() [++ $sword1 .. $sword13]
 	ai_charge(3);
 	if(cycle_wrapped)
 	{
-		self.attack_finished=time+0.3;
+		if(skill>=4)
+			self.attack_finished=0;
+		else
+			self.attack_finished=time+0.3;
 		thinktime self : 0;
 		self.think=self.th_run;
 	}
@@ -797,17 +819,16 @@ void mezzo_sword() [++ $sword1 .. $sword13]
 	vector dir;
 		makevectors(self.angles);
 		ofs=($sword10 - self.frame)*4;
-		dir_z=ofs - 8;
-		dir+=v_right*(ofs - 8)+v_forward*(48 - fabs(16 - ofs));
+		dir=v_right*(ofs - 8)+v_forward*(48 - fabs(16 - ofs))+'0 0 1'*(ofs - 8);
 		dir=normalize(dir);
 
-		zofs = self.enemy.origin_z - self.origin_z;
-		if(zofs>20)
-			zofs=20;
-		else if(zofs<-20)
-			zofs=-20;
+		zofs = (self.enemy.origin_z+self.enemy.view_ofs_z) - (self.origin_z+37);
+		if(zofs>36)
+			zofs=36;
+		else if(zofs<-36)
+			zofs=-36;
 
-		traceline(self.origin+'0 0 37',self.origin+'0 0 37'+dir*48+v_up*zofs,FALSE,self);
+		traceline(self.origin+'0 0 37'+'0 0 1'*zofs,self.origin+'0 0 37'+dir*48+'0 0 1'*zofs,FALSE,self);
 		if(trace_fraction==1)
 			return;
 
@@ -818,7 +839,7 @@ void mezzo_sword() [++ $sword1 .. $sword13]
 		}
 
 		if(trace_ent.takedamage)
-			T_Damage(trace_ent,self,self,2*(self.skin+1)*(self.aflag+1)*(coop + 1));
+			T_Damage(trace_ent,self,self,(2+skill)*(self.strength+1)*(self.aflag+1)*(coop + 1));
 		if(trace_ent.thingtype==THINGTYPE_FLESH&&self.frame==$sword9)
 		{
 			MeatChunks (trace_endpos,v_right*random(-100,-300)+'0 0 200', 3,trace_ent);
@@ -916,7 +937,7 @@ void mezzo_pain (entity attacker, float damage)
 				self.oldenemy=self.enemy;
 			self.enemy=attacker;
 		}
-		self.pain_finished=time+1+self.skin;
+		self.pain_finished=time+1+self.strength;
 		self.think=mezzo_pain_seq;
 	}
 	thinktime self : 0;
@@ -925,7 +946,7 @@ void mezzo_pain (entity attacker, float damage)
 void mezzo_land () [++ $jump13 .. $jump22]
 {
 //SOUND?
-//	dprint("landing\n");
+	self.touch=SUB_Null;
 	if(cycle_wrapped)
 	{
 		thinktime self : 0;
@@ -939,6 +960,16 @@ void mezzo_in_air ()
 {
 //	dprint("in air\n");
 	self.frame=$jump12;
+	if(!self.flags&FL_ONGROUND)
+	{
+		if(random()<0.1)
+		{
+			tracearea(self.origin,self.origin + '0 0 -1',self.mins,self.maxs,FALSE,self);
+			if(trace_fraction<1&&(trace_ent.solid==SOLID_BBOX||trace_ent.solid==SOLID_SLIDEBOX))
+				self.flags(+)FL_ONGROUND;
+		}
+	}
+
 	if(self.flags&FL_ONGROUND)
 	{
 		thinktime self : 0;
@@ -964,8 +995,8 @@ void mezzo_in_air ()
 void mezzo_jump () [++ $jump1 .. $jump11]
 {
 //SOUND?
-//	dprint("jumping\n");
 	ai_face();
+	self.touch=impact_touch_hurt_no_push;
 	if(self.flags&FL_ONGROUND)
 	{
 		thinktime self : 0;
@@ -1051,7 +1082,10 @@ void mezzo_charge () [++ $charge1 .. $charge8]
 		self.last_attack=time;
 		self.ltime=0;
 		self.touch=mezzo_slam;
-		self.attack_finished=time+1.25;
+		if(skill>=4)
+			self.attack_finished=0;
+		else
+			self.attack_finished=time+1.25;
 	}
 	walkmove(self.angles_y,15,FALSE);
 }
@@ -1167,7 +1201,10 @@ float skidspeed, anim_stretch;
 
 	if(cycle_wrapped)
 	{
-		self.attack_finished=time+3;
+		if(skill>=4)
+			self.attack_finished=0;
+		else
+			self.attack_finished=time+3;
 		thinktime self : 0;
 		self.think=mezzo_block_return;
 	}
@@ -1188,6 +1225,8 @@ float skidspeed, anim_stretch;
 void mezzo_roar () [++ $roar1 .. $roar30] 
 {
 	self.health+=1.1;
+	if(self.health>self.max_health)
+		self.max_health=self.health;
 
 	if(self.frame==$roar30)
 	{
@@ -1460,8 +1499,11 @@ void mezzo_stand () [++ $stand1 .. $stand10]
 }
 
 
-/*QUAKED monster_werejaguar (1 0.3 0) (-16 -16 0) (16 16 56) AMBUSH STUCK JUMP PLAY_DEAD DORMANT
+/*QUAKED monster_werejaguar (1 0.3 0) (-16 -16 0) (16 16 56) AMBUSH STUCK JUMP x DORMANT
 WereCat with jaguar skin
+"health" - default 250
+"experience_value" - default 150
+
 If they're targetted by a trigger and used, they'll atack the activator of the target
 If they can't see the activator, they'll roll left or right (in the direction of the activator)
 Their roll is 128 units long, so place the mezzoman 128 units away from where you want the roll to stop
@@ -1476,12 +1518,15 @@ void() monster_werejaguar =
       remove(self);
       return;
    }
-
-	if (!self.flags2&FL_SUMMONED)
+	if(!self.th_init)
 	{
-		precache_model2 ("models/mezzoman.mdl");
+		self.th_init=monster_werejaguar;
+		self.init_org=self.origin;
+	}
+
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	{
 		precache_model2 ("models/mezzoref.spr");
-		precache_model2 ("models/h_mez.mdl");
 		precache_sound2 ("mezzo/skid.wav");
 		precache_sound2 ("mezzo/roar.wav");
 		precache_sound2 ("mezzo/reflect.wav");
@@ -1499,20 +1544,68 @@ void() monster_werejaguar =
 	self.view_ofs = '0 0 53';
 	self.speed=10;
 	self.yaw_speed = 10;
-	self.health = 250;
 	self.experience_value = 150;
 	self.monsterclass = CLASS_HENCHMAN;
 	self.mass = 10;
 	self.mintel = 15;//Animal sense of smell makes him a good tracker
-	if(self.classname=="monster_werepanther")
+	self.noise="mezzo/attack.wav";
+	if(self.classname=="monster_weresnowleopard")
 	{
 		self.monsterclass = CLASS_LEADER;
-		self.experience_value = 300;
-		self.health=400;
-		self.skin=1;
+		self.experience_value = 350;
+		if(!self.health)
+			self.health=475;
+		self.scale=0.8+random(0.2);
+		self.drawflags(+)SCALE_ORIGIN_BOTTOM;
+		if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+			precache_model4 ("models/snowleopard.mdl");
+		setmodel (self, "models/snowleopard.mdl");
 	}
-
+	else if(self.classname=="monster_weretiger")
+	{
+		self.speed=12;
+		self.monsterclass = CLASS_LEADER;
+		self.experience_value = 400;
+		if(!self.health)
+			self.health=650;
+		self.skin=1;
+		self.scale=1+random(0.2);
+		self.drawflags(+)SCALE_ORIGIN_BOTTOM;
+		if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+		{
+			precache_model4 ("models/snowleopard.mdl");
+			precache_model4 ("models/h_mez2.mdl");
+		}
+		self.headmodel="models/h_mez2.mdl";
+		setmodel (self, "models/snowleopard.mdl");
+	}
+	else
+	{
+		if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+		{
+			precache_model2 ("models/mezzoman.mdl");
+			precache_model2 ("models/h_mez.mdl");
+		}
+		self.headmodel="models/h_mez.mdl";
+		setmodel (self, "models/mezzoman.mdl");
+		if(self.classname=="monster_werepanther")
+		{
+			self.monsterclass = CLASS_LEADER;
+			self.experience_value = 300;
+			if(!self.health)
+				self.health=400;
+			self.skin=1;
+		}
+		else if(!self.health)
+			self.health = 250;
+	}
+	if(!self.max_health)
+		self.max_health=self.health;
+	self.strength=self.skin;
+	if(self.model=="models/snowleopard.mdl")
+		self.strength=(self.strength+1)*2;
 	self.classname="monster_mezzoman";
+	self.mass*=self.scale;
 
 	self.th_stand=mezzo_stand;
 	self.th_walk=mezzo_walk;
@@ -1522,18 +1615,14 @@ void() monster_werejaguar =
 	self.th_missile=mezzo_missile;
 	self.th_jump=mezzo_jump;
 	self.th_die=mezzo_die;
-//	self.th_possum = mezzo_playdead;
-//	self.th_possum_up = mezzo_possum_up;
 
 	self.spawnflags (+) JUMP;
-
-	setmodel (self, "models/mezzoman.mdl");
-	self.headmodel="models/h_mez.mdl";
 
 	setsize (self, '-16 -16 0', '16 16 56');
 
 	self.frame=$stand1;
 
+	self.init_exp_val = self.experience_value;
 	walkmonster_start();
 };
 
@@ -1542,8 +1631,11 @@ void monster_mezzoman (void)
 	monster_werejaguar();
 }
 
-/*QUAKED monster_werepanther (1 0.3 0) (-16 -16 0) (16 16 56) AMBUSH STUCK JUMP PLAY_DEAD DORMANT
+/*QUAKED monster_werepanther (1 0.3 0) (-16 -16 0) (16 16 56) AMBUSH STUCK JUMP x DORMANT
 WereCat with panther skin
+"health" - default 400
+"experience_value" - default 300
+
 If they're targetted by a trigger and used, they'll atack the activator of the target
 If they can't see the activator, they'll roll left or right (in the direction of the activator)
 Their roll is 128 units long, so place the mezzoman 128 units away from where you want the roll to stop
@@ -1552,6 +1644,255 @@ My babies!!! - MG
 */
 void monster_werepanther (void)
 {
+	if(!self.th_init)
+	{
+		self.th_init=monster_werepanther;
+		self.init_org=self.origin;
+	}
 	monster_werejaguar();
 }
 
+/*QUAKED monster_weresnowleopard (1 0.3 0) (-16 -16 0) (16 16 56) AMBUSH STUCK JUMP x DORMANT
+WereCat with snow leopard skin
+"health" - default 475
+"experience_value" - default 350
+
+If they're targeted by a trigger and used, they'll attack the activator of the target
+If they can't see the activator, they'll roll left or right (in the direction of the activator)
+Their roll is 128 units long, so place the mezzoman 128 units away from where you want the roll to stop
+
+My babies!!! - MG
+*/
+void monster_weresnowleopard (void)
+{
+	if(!self.th_init)
+	{
+		self.th_init=monster_weresnowleopard;
+		self.init_org=self.origin;
+	}
+	monster_werejaguar();
+}
+
+/*QUAKED monster_weretiger (1 0.3 0) (-16 -16 0) (16 16 56) AMBUSH STUCK JUMP x DORMANT
+WereCat with Siberian Tiger skin
+"health" - default 650
+"experience_value" - default 400
+
+Toughest and biggest catman
+If they're targeted by a trigger and used, they'll attack the activator of the target
+If they can't see the activator, they'll roll left or right (in the direction of the activator)
+Their roll is 128 units long, so place the mezzoman 128 units away from where you want the roll to stop
+
+My babies!!! - MG
+*/
+void monster_weretiger (void)
+{
+	if(!self.th_init)
+	{
+		self.th_init=monster_weretiger;
+		self.init_org=self.origin;
+	}
+	monster_werejaguar();
+}
+
+/*
+ * $Log: /H2 Mission Pack/HCode/mezzoman.hc $
+ * 
+ * 24    3/09/98 3:05p Mgummelt
+ * 
+ * 23    3/04/98 4:35p Mgummelt
+ * 
+ * 22    3/03/98 7:31p Mgummelt
+ * 
+ * 21    3/03/98 4:36p Jmonroe
+ * changed over to precache 4 to build my pak
+ * 
+ * 20    3/03/98 12:02p Mgummelt
+ * 
+ * 19    3/02/98 6:10p Mgummelt
+ * 
+ * 18    3/02/98 11:51a Mgummelt
+ * 
+ * 17    2/27/98 11:52p Mgummelt
+ * 
+ * 16    2/27/98 2:46p Mgummelt
+ * 
+ * 15    2/26/98 3:20p Mgummelt
+ * 
+ * 14    2/24/98 6:39p Mgummelt
+ * 
+ * 13    2/20/98 4:07p Mgummelt
+ * 
+ * 12    2/20/98 3:55p Mgummelt
+ * 
+ * 11    2/20/98 2:12p Mgummelt
+ * 
+ * 10    2/20/98 1:47p Mgummelt
+ * 
+ * 9     2/20/98 12:10p Mgummelt
+ * 
+ * 8     2/08/98 6:43p Mgummelt
+ * 
+ * 7     2/08/98 3:09p Mgummelt
+ * 
+ * 6     2/05/98 12:30p Mgummelt
+ * 
+ * 5     2/04/98 4:58p Mgummelt
+ * spawnflags on monsters cleared out
+ * 
+ * 4     2/02/98 10:26a Mgummelt
+ * 
+ * 3     1/27/98 4:18p Mgummelt
+ * 
+ * 76    10/28/97 1:01p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 74    9/25/97 12:16p Mgummelt
+ * 
+ * 73    9/23/97 11:43a Mgummelt
+ * 
+ * 72    9/04/97 3:50p Mgummelt
+ * 
+ * 71    9/01/97 1:35a Mgummelt
+ * 
+ * 70    8/31/97 2:36p Mgummelt
+ * 
+ * 69    8/31/97 11:03a Mgummelt
+ * 
+ * 68    8/30/97 6:58p Mgummelt
+ * 
+ * 67    8/30/97 3:05p Mgummelt
+ * 
+ * 66    8/29/97 4:17p Mgummelt
+ * Long night
+ * 
+ * 65    8/28/97 2:26p Mgummelt
+ * 
+ * 64    8/27/97 7:08p Mgummelt
+ * 
+ * 63    8/27/97 1:15p Mgummelt
+ * 
+ * 62    8/26/97 6:13p Mgummelt
+ * 
+ * 61    8/26/97 7:38a Mgummelt
+ * 
+ * 60    8/22/97 2:29p Mgummelt
+ * 
+ * 59    8/20/97 2:03p Mgummelt
+ * 
+ * 58    8/15/97 11:18p Mgummelt
+ * 
+ * 57    8/15/97 3:02p Bgokey
+ * 
+ * 56    8/15/97 2:55a Mgummelt
+ * 
+ * 55    8/14/97 5:20p Mgummelt
+ * 
+ * 54    8/13/97 5:53p Mgummelt
+ * 
+ * 53    8/08/97 6:38p Mgummelt
+ * 
+ * 52    7/25/97 3:32p Mgummelt
+ * 
+ * 51    7/24/97 4:06p Rlove
+ * 
+ * 50    7/24/97 3:53p Rlove
+ * 
+ * 49    7/24/97 3:26a Mgummelt
+ * 
+ * 48    7/21/97 4:04p Mgummelt
+ * 
+ * 47    7/21/97 4:02p Mgummelt
+ * 
+ * 46    7/17/97 6:53p Mgummelt
+ * 
+ * 45    7/17/97 2:56p Rlove
+ * 
+ * 44    7/15/97 8:31p Mgummelt
+ * 
+ * 43    7/14/97 9:30p Mgummelt
+ * 
+ * 42    7/10/97 7:21p Mgummelt
+ * 
+ * 41    7/09/97 6:31p Mgummelt
+ * 
+ * 40    7/07/97 5:51p Mgummelt
+ * 
+ * 39    7/03/97 8:47a Rlove
+ * 
+ * 38    7/01/97 3:30p Mgummelt
+ * 
+ * 37    7/01/97 2:21p Mgummelt
+ * 
+ * 36    6/30/97 5:38p Mgummelt
+ * 
+ * 35    6/23/97 6:56p Mgummelt
+ * 
+ * 34    6/23/97 4:50p Mgummelt
+ * 
+ * 33    6/19/97 5:15p Mgummelt
+ * 
+ * 32    6/18/97 7:07p Mgummelt
+ * 
+ * 31    6/18/97 5:30p Mgummelt
+ * 
+ * 30    6/18/97 4:00p Mgummelt
+ * 
+ * 29    6/17/97 1:46p Mgummelt
+ * 
+ * 28    6/16/97 9:04p Mgummelt
+ * 
+ * 27    6/16/97 6:45p Mgummelt
+ * 
+ * 26    6/14/97 5:51p Mgummelt
+ * 
+ * 25    6/14/97 2:22p Mgummelt
+ * 
+ * 24    6/13/97 11:45p Mgummelt
+ * 
+ * 22    6/13/97 8:31p Mgummelt
+ * 
+ * 21    6/13/97 6:36p Mgummelt
+ * 
+ * 20    6/12/97 8:54p Mgummelt
+ * 
+ * 19    6/11/97 9:36p Mgummelt
+ * 
+ * 18    6/11/97 7:18p Mgummelt
+ * 
+ * 17    6/11/97 12:51p Mgummelt
+ * 
+ * 16    6/10/97 9:27p Mgummelt
+ * 
+ * 15    6/10/97 12:09a Mgummelt
+ * 
+ * 14    6/09/97 10:22p Mgummelt
+ * 
+ * 13    6/09/97 3:08p Mgummelt
+ * 
+ * 12    6/09/97 2:41p Mgummelt
+ * 
+ * 11    6/07/97 8:59p Mgummelt
+ * 
+ * 10    6/06/97 9:29p Mgummelt
+ * 
+ * 9     6/06/97 9:17p Mgummelt
+ * 
+ * 8     6/04/97 8:16p Mgummelt
+ * 
+ * 7     5/23/97 3:43p Mgummelt
+ * 
+ * 6     5/22/97 3:30p Mgummelt
+ * 
+ * 5     5/20/97 10:58a Mgummelt
+ * 
+ * 4     5/16/97 2:12p Mgummelt
+ * 
+ * 3     5/08/97 9:47p Mgummelt
+ * 
+ * 2     3/21/97 3:49p Rlove
+ * Added mummy and mezzoman
+ * 
+ * 1     3/21/97 3:16p Rlove
+ */

@@ -21,6 +21,8 @@ vector ofs;
 
 void smolder (vector org)
 {
+//	starteffect(CE_SMOLDER,org);
+	return;//Magical Network-Friendly Code!
 	newmis=spawn();
 	setorigin(newmis,org);
 	newmis.effects=EF_NODRAW;
@@ -29,6 +31,7 @@ void smolder (vector org)
 	thinktime newmis : 0;
 }
 
+/*
 void shock_think()
 {
 	if (self.skin ==0)
@@ -54,6 +57,8 @@ void spawnshockball (vector org)
 	thinktime newmis : 0;
 	newmis.scale=2.5;
 }
+*/
+
 /*
 =================
 LightningDamage
@@ -62,8 +67,8 @@ LightningDamage
 
 void (vector endpos) ThroughWaterZap =
 {
-entity waterloser, attacker;
-float damg;
+	entity waterloser, attacker;
+	float damg;
     waterloser = spawn();        
     setorigin (waterloser, endpos);
 	if(self.classname=="mjolnir")
@@ -72,12 +77,14 @@ float damg;
 		damg=666*2;
 	attacker=self;
 	if(self.classname!="player")
+	{
 		if(self.owner.classname=="player")
 			attacker=self.owner;
 		else if(self.controller.classname=="player")
 			attacker=self.controller;
-     T_RadiusDamageWater (waterloser, self, damg,self);
-		remove (waterloser);
+	}
+	T_RadiusDamageWater (waterloser, attacker, damg,self);
+	remove (waterloser);
 };
 
 void (vector startpos) ThroughWater =
@@ -90,21 +97,25 @@ float mover;
         mover = mover - 10;
         endpos = startpos + v_forward * mover;
         if (pointcontents(endpos) == CONTENT_WATER || pointcontents(endpos) == CONTENT_SLIME)
-                ThroughWaterZap(endpos);
+			ThroughWaterZap(endpos);
         else if (pointcontents(endpos) == CONTENT_SOLID)
-                return;
+			return;
     }
 };
 
 void do_lightning_dam (entity from, float damage, string type)
 {
 vector loser_org;
+	if((trace_ent.classname=="buddha_shield"||trace_ent.classname=="monster_buddha")&&from.classname=="monster_buddha"&&type=="lightning")
+		return;
+	
 	if((trace_ent.classname=="monster_eidolon"||trace_ent.classname=="obj_chaos_orb")&&type=="lightning")
 		return;
 
 	particle (trace_endpos, '0 0 100', 225, damage*4);
 	if(type=="lightning")
-		spawnshockball((trace_ent.absmax+trace_ent.absmin)*0.5);
+//		spawnshockball((trace_ent.absmax+trace_ent.absmin)*0.5);
+		starteffect(CE_LSHOCK,(trace_ent.absmax+trace_ent.absmin)*0.5);
 	loser_org=trace_ent.origin;
     T_Damage (trace_ent, from, from, damage);
 	if(trace_ent.health<=0)
@@ -132,9 +143,9 @@ float	inertia;//absorb;
 	traceline (p1, p2, FALSE, self);
 
         if(type=="lightning"&&(pointcontents(trace_endpos) == CONTENT_WATER || pointcontents(trace_endpos) == CONTENT_SLIME))
-                ThroughWaterZap(trace_endpos);
+			ThroughWaterZap(trace_endpos);
         else if(type=="lightning"&&(trace_ent.watertype == CONTENT_WATER || trace_ent.watertype == CONTENT_SLIME))
-                T_RadiusDamageWater (self, self, 666*2,self);
+			T_RadiusDamageWater (self, self, 666*2,self);
 		else if(self.classname=="mjolnir"&&trace_ent==self.controller)
 			bprint("");
         else if (trace_ent.takedamage)
@@ -168,11 +179,11 @@ float	inertia;//absorb;
 			do_lightning_dam(from,damage,type);
 };
 
-void do_lightning (entity lowner,float tag, float lflags, float duration, vector spot1, vector spot2, float ldamg)
+void do_lightning (entity lowner,float tag, float lflags, float duration, vector spot1, vector spot2, float ldamg,float te_type)
 {
 vector damage_dir;
 	WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
-	WriteByte (MSG_BROADCAST, TE_STREAM_LIGHTNING);
+	WriteByte (MSG_BROADCAST, te_type);
 	WriteEntity (MSG_BROADCAST, lowner);
 	WriteByte (MSG_BROADCAST, tag+lflags);
 	WriteByte (MSG_BROADCAST, duration);
@@ -227,7 +238,7 @@ float number_strikes;
 		traceline(org,dir,TRUE,self);
 		tospot=org;
 		org=trace_endpos;
-		do_lightning (self,number_strikes,0,4,org,tospot,damg);
+		do_lightning (self,number_strikes,0,4,org,tospot,damg,TE_STREAM_LIGHTNING);
 		number_strikes+=1;
 	}
 };
@@ -304,7 +315,10 @@ float dist, num_branches;
 		if(self.level>=8)
 			self.level=0;
 
-		do_lightning (self,self.level,STREAM_ATTACHED,4,org,tospot,10000);
+		if (self.lockentity.classname == "monster_buddha")
+			do_lightning (self.lockentity,self.level,STREAM_ATTACHED,4,org,tospot,50,TE_STREAM_LIGHTNING);
+		else
+			do_lightning (self,self.level,STREAM_ATTACHED,4,org,tospot,10000,TE_STREAM_LIGHTNING);
 
 		lightn_dir=normalize(tospot-org);
 		org=org + lightn_dir*random(num_branches+dist/10,num_branches+dist/5);//Include trace_fraction?

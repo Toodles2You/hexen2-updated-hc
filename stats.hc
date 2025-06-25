@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/stats.hc 24    9/10/97 11:40p Mgummelt $
+ * $Header: /H2 Mission Pack/HCode/stats.hc 10    3/17/98 11:02a Mgummelt $
  */
 
 // ExperienceValues for each level indicate the minimum at which
@@ -7,7 +7,7 @@
 // of experience needed for each level past 10
 
 
-float ExperienceValues[44] =
+float ExperienceValues[55] =
 {
 	// Paladin
 	 945,			// Level 2
@@ -59,13 +59,26 @@ float ExperienceValues[44] =
 	86000,			// Level 9
 	110000,			// Level 10
 	150000,			// Level 11
-	150000			// Required amount for each level afterwards
+	150000,			// Required amount for each level afterwards
+
+	// Succubus
+	 871,			// Level 2
+	2060,			// Level 3
+	4822,			// Level 4
+	9319,			// Level 5
+	19278,			// Level 6
+	36626,			// Level 7
+	66804,			// Level 8
+	110494,			// Level 9
+	141334,			// Level 10
+	192700,			// Level 11
+	192700			// Required amount for each level afterwards
 };
 
 //  min health, max health,
 //  min health per level up to level 10,  min health per level up to level 10, 
 //  health per level past level 10
-float hitpoint_table[20] =
+float hitpoint_table[25] =
 {
 	70,		85,				// Paladin
 	8,		13,      4,
@@ -77,51 +90,58 @@ float hitpoint_table[20] =
 	5,		10,      3,
 
 	65,		75,				// Assassin
-	5,		10,      3
+	5,		10,      3,
 
+	65,		75,				// Succubus
+	5,		10,      3
 };
 
-float mana_table[20] =
+float mana_table[25] =
 {
 //    Startup    Per Level     Past
-//  min    max    min  max      10th Level
-	84,		94,		6,   9, 	 1,		// Paladin
-	88,		98,		7,  10, 	 2, 	// Crusader
-    96,	   106,	   10,  12, 	 4,     // Necromancer
-	92,	   102,		9,  11, 	 3		// Assassin
+//  min    max    min		max     10th Level
+	84,		94,		6,		9, 		1,		// Paladin
+	88,		98,		7,		10, 	2, 	// Crusader
+    96,	   106,		10,		12, 	4,     // Necromancer
+	92,	   102,		9,		11, 	3,		// Assassin
+	90,	   100,		8,		11, 	3		// Succubus
 };
 
 
-float strength_table[8] =
+float strength_table[10] =
 {
 	15,		18,		// Paladin
 	12,		15,		// Crusader
 	6,		10,		// Necromancer
-	10,		13		// Assassin
+	10,		13,		// Assassin
+	11,		14		// Succubus
 };
 
-float intelligence_table[8] =
+float intelligence_table[10] =
 {
 	6,		10,		// Paladin
 	10,		13,		// Crusader
 	15,		18,		// Necromancer
-	6,		10		// Assassin
+	6,		10,		// Assassin
+	9,		13		// Succubus
 };
 
-float wisdom_table[8] =
+float wisdom_table[10] =
 {
 	6,		10,		// Paladin
 	15,		18,		// Crusader
 	10,		13,		// Necromancer
-	12,		15		// Assassin
+	12,		15,		// Assassin
+	11,		14		// Succubus
 };
 
-float dexterity_table[8] =
+float dexterity_table[10] =
 {
 	10,		13,		// Paladin
 	6,		10,		// Crusader
 	8,		12,		// Necromancer
-	15,		18		// Assassin
+	15,		18,		// Assassin
+	9,		13		// Succubus
 };
 
 /*
@@ -129,6 +149,7 @@ float CLASS_PALADIN					= 1;
 float CLASS_CRUSADER				= 2;
 float CLASS_NECROMANCER				= 3;
 float CLASS_ASSASSIN				= 4;
+float CLASS_SUCCUBUS				= 5;
 */
 
 // Make sure we get a real distribution beteen
@@ -153,7 +174,7 @@ void stats_NewPlayer(entity e)
 	// Stats already set?
 	if (e.strength) return;
 
-	if (e.playerclass < CLASS_PALADIN || e.playerclass > CLASS_ASSASSIN)
+	if (e.playerclass < CLASS_PALADIN || e.playerclass > CLASS_SUCCUBUS)
 	{
 		sprint(e,"Invalid player class ");
 		sprint(e,ftos(e.playerclass));
@@ -226,6 +247,8 @@ void PlayerAdvanceLevel(float NewLevel)
 	float OldLevel,Diff;
 	float index,HealthInc,ManaInc;
 
+	sound (self, CHAN_VOICE, "misc/comm.wav", 1, ATTN_NONE);
+
 	OldLevel = self.level;
 	self.level = NewLevel;
 	Diff = self.level - OldLevel;
@@ -236,29 +259,31 @@ void PlayerAdvanceLevel(float NewLevel)
 	sprint(self,"!\n");
 
 	if(!self.newclass)
-		if (self.playerclass == CLASS_PALADIN)
+	{
+		switch (self.playerclass)
 		{
-		   sprint(self,"Paladin gained a level\n");
-		}
-		else if (self.playerclass == CLASS_CRUSADER)
-		{
-		   sprint(self,"Crusader gained a level\n");
-
+		case CLASS_PALADIN:
+		   centerprint(self, "Paladin gained a level\n");
+		break;
+		case CLASS_CRUSADER:
+			centerprint(self,"Crusader gained a level\n");
 			// Special ability #1, full mana at level advancement
 			self.bluemana = self.greenmana = self.max_mana;
-
+		break;
+		case CLASS_NECROMANCER:
+		   centerprint(self,"Necromancer gained a level\n");
+		break;
+		case CLASS_ASSASSIN:
+		   centerprint(self,"Assassin gained a level\n");
+		break;
+		case CLASS_SUCCUBUS:
+		   centerprint(self,"Demoness gained a level\n");
+		break;
 		}
-		else if (self.playerclass == CLASS_NECROMANCER)
-		{
-		   sprint(self,"Necromancer gained a level\n");
-		}
-		else if (self.playerclass == CLASS_ASSASSIN)
-		{
-		   sprint(self,"Assassin gained a level\n");
-		}
+	}
 
 	if (self.playerclass < CLASS_PALADIN ||
-		self.playerclass > CLASS_ASSASSIN)
+		self.playerclass > CLASS_SUCCUBUS)
 		return;
 
 	index = (self.playerclass - 1) * 5;
@@ -293,7 +318,15 @@ void PlayerAdvanceLevel(float NewLevel)
 		self.greenmana += ManaInc;
 		self.bluemana += ManaInc;
 		self.max_mana += ManaInc;
+		
+		sprint(self, "Stats: MP +");
+		s2 = ftos(ManaInc);
+		sprint(self, s2);
 
+		sprint(self, "  HP +");
+		s2 = ftos(HealthInc);
+		sprint(self, s2);
+		sprint(self, "\n");
 	}
 
 	if (self.level > 2)
@@ -311,7 +344,7 @@ float FindLevel(entity WhichPlayer)
 	float Amount,Position,Level;
 
 	if (WhichPlayer.playerclass < CLASS_PALADIN ||
-		WhichPlayer.playerclass > CLASS_ASSASSIN)
+		WhichPlayer.playerclass > CLASS_SUCCUBUS)
 		return WhichPlayer.level;
 
 	Chart = (WhichPlayer.playerclass - 1) * (MAX_LEVELS+1);
@@ -442,7 +475,7 @@ void stats_NewClass(entity e)
 entity oself;
 float index,newlevel;
 
-	if (e.playerclass < CLASS_PALADIN || e.playerclass > CLASS_ASSASSIN)
+	if (e.playerclass < CLASS_PALADIN || e.playerclass > CLASS_SUCCUBUS)
 	{
 		sprint(e,"Invalid player class ");
 		sprint(e,ftos(e.playerclass));
@@ -495,15 +528,37 @@ down one level.
 
 void drop_level (entity loser,float number)
 {
-float pos;
+float pos,lev_pos,new_exp,mana_dec,health_dec,dec_pos;
 	if(loser.classname!="player")
 		return;
 
+	if(loser.level-number<1)
+	{//would drop below level 1, set to level 1
+		loser.experience=0;
+		dec_pos = (loser.playerclass - 1) * 5;
+		loser.max_health= hitpoint_table[dec_pos];
+		loser.max_mana = mana_table[dec_pos];
+		if(loser.health>loser.max_health)
+			loser.health=loser.max_health;
+		if(loser.bluemana>loser.max_mana)
+			loser.bluemana=loser.max_mana;
+		if(loser.greenmana>loser.max_mana)
+			loser.greenmana=loser.max_mana;
+		return;
+	}
+
+	pos = (loser.playerclass - 1) * (MAX_LEVELS+1);
 	if(loser.level-number>1)
 	{
 		loser.level-=number;
-		pos = (loser.playerclass - 1) * (MAX_LEVELS+1);
-		loser.experience = ExperienceValues[pos+loser.level - 2];
+		lev_pos+=loser.level - 2;
+		if(lev_pos>9)//last number in that char's 
+		{
+			new_exp=ExperienceValues[pos+10];
+			loser.experience=new_exp+new_exp*(lev_pos - 9);
+		}
+		else
+			loser.experience = ExperienceValues[pos+lev_pos];
 	}
 	else
 	{
@@ -516,5 +571,101 @@ float pos;
 
 	if (loser.level <=5)
 		loser.flags(-)FL_SPECIAL_ABILITY2;
+
+	dec_pos = (loser.playerclass - 1) * 5;
+	health_dec = hitpoint_table[dec_pos+4];
+	mana_dec = mana_table[dec_pos+4];
+
+	loser.max_health -= health_dec *number;
+	if(loser.health>loser.max_health)
+		loser.health=loser.max_health;
+
+	loser.max_mana -= mana_dec *number;
+	if(loser.bluemana>loser.max_mana)
+		loser.bluemana=loser.max_mana;
+	if(loser.greenmana>loser.max_mana)
+		loser.greenmana=loser.max_mana;
 }
 
+
+
+/*
+ * $Log: /H2 Mission Pack/HCode/stats.hc $
+ * 
+ * 10    3/17/98 11:02a Mgummelt
+ * 
+ * 9     3/16/98 6:21p Jweier
+ * 
+ * 8     3/13/98 3:02a Mgummelt
+ * 
+ * 7     3/12/98 11:06p Jmonroe
+ * change ifs to switch
+ * 
+ * 6     2/24/98 6:39p Mgummelt
+ * 
+ * 5     2/13/98 11:16a Jmonroe
+ * changed succubus to demoness
+ * 
+ * 4     1/21/98 12:12p Jweier
+ * made level up more apparent
+ * 
+ * 27    10/28/97 1:01p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 24    9/10/97 11:40p Mgummelt
+ * 
+ * 23    9/10/97 7:51p Mgummelt
+ * 
+ * 22    9/10/97 7:08p Mgummelt
+ * 
+ * 21    9/03/97 7:49p Mgummelt
+ * 
+ * 20    8/15/97 3:59p Rlove
+ * 
+ * 19    8/11/97 4:35p Rlove
+ * 
+ * 18    8/09/97 10:51a Rlove
+ * 
+ * 17    7/26/97 8:39a Mgummelt
+ * 
+ * 16    7/25/97 11:45a Mgummelt
+ * 
+ * 15    7/25/97 11:12a Mgummelt
+ * 
+ * 14    7/25/97 11:10a Mgummelt
+ * 
+ * 13    7/14/97 2:29p Rlove
+ * 
+ * 12    7/08/97 5:17p Rlove
+ * 
+ * 11    7/03/97 10:07a Rlove
+ * 
+ * 10    6/30/97 3:33p Rlove
+ * 
+ * 9     6/30/97 9:41a Rlove
+ * 
+ * 8     6/20/97 9:25a Rlove
+ * 
+ * 7     6/20/97 9:12a Rlove
+ * New mana system added
+ * 
+ * 6     6/06/97 2:52p Rlove
+ * Artifact of Super Health now functions properly
+ * 
+ * 5     5/15/97 1:15p Rjohnson
+ * Added the appriate experience tables and hitpoint advancement for level
+ * gains
+ * 
+ * 4     5/15/97 11:43a Rjohnson
+ * Stats updates
+ * 
+ * 3     5/14/97 4:12p Rjohnson
+ * Minor fix from C-side conversion
+ * 
+ * 2     5/14/97 3:36p Rjohnson
+ * Inital stats implementation
+ * 
+ * 1     5/13/97 2:23p Rjohnson
+ * Initial Version
+ */

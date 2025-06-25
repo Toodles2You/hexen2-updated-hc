@@ -3,7 +3,7 @@
 //**
 //** strings.hc
 //**
-//** $Header: /H3/game/hcode/strings.hc 18    9/02/97 2:01a Rlove $
+//** $Header: /H2 Mission Pack/HCode/strings.hc 2     2/25/98 6:10p Mgummelt $
 //**
 //**************************************************************************
 
@@ -32,6 +32,11 @@ string STR_MAGICMISSILE;
 string STR_BONESHARD;
 string STR_SET1;
 string STR_SET2;
+
+string STR_ACIDORB;
+string STR_FLAMEORB;
+string STR_LIGHTNING1;
+string STR_LIGHTNING2;
 
 string STR_NOCARRYWEAPON;
 string STR_NOTENOUGHMANA;
@@ -102,6 +107,11 @@ void StringsInit(void)
 	STR_BONESHARD			= "Bone Shard";
 	STR_SET1				= "Scarab Staff Piece 1";
 	STR_SET2				= "Scarab Staff Piece 2";
+
+	STR_ACIDORB				= "Acid Rune";
+	STR_FLAMEORB			= "Firestorm";
+	STR_LIGHTNING1			= "Tempest Staff Piece 1";
+	STR_LIGHTNING2			= "Tempest Staff Piece 2";
 
 	STR_NOCARRYWEAPON		= "You do not carry that weapon.\n";
 	STR_NOTENOUGHMANA		= "Not enough mana for that weapon.\n";

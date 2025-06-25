@@ -3,7 +3,7 @@
 //**
 //** global.hc
 //**
-//** $Header: /H3/game/hcode/global.hc 19    9/11/97 7:13p Rjohnson $
+//** $Header: /H3MP/hcode/global.hc 23    10/29/97 5:39p Jheitzman $
 //**
 //**************************************************************************
 
@@ -29,6 +29,7 @@ float deathmatch;
 float randomclass;
 float coop;
 float teamplay;
+float cl_playerclass;
 
 // Propagated from level to level, used to keep track of completed
 // episodes.
@@ -77,10 +78,12 @@ float cycle_wrapped;
 
 float crouch_cnt;
 
+/*
 float modelindex_assassin;
 float modelindex_crusader;
 float modelindex_paladin;
 float modelindex_necromancer;
+*/
 float modelindex_sheep;
 
 float num_players;

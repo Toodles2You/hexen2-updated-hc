@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/hydra.hc 60    9/11/97 9:05a Mgummelt $
+ * $Header: /H2 Mission Pack/HCode/hydra.hc 7     3/09/98 3:05p Mgummelt $
  */
 
 /*
@@ -333,6 +333,7 @@ void hydra_float(void)
 	CheckMonsterAttack(MA_MISSILE,8.0);
 }
 
+/*
 void hydra_reverse(void)
 {
 	float retval;
@@ -342,19 +343,11 @@ void hydra_reverse(void)
 	dist = 4.0;  // Movement distance this turn
 
 	retval = walkmove(self.angles_y + 180, dist, FALSE);
-	/*if (!retval)
-	{
-		self.ideal_yaw = FindDir();
-		self.monster_duration = 0;//random(40,70);
-		self.monster_stage = HYDRA_STAGE_STRAIGHT;
-		ChangeYaw();//hydra_turn(200);
-		return;
-	}*/
 	
 	//self.monster_stage = HYDRA_STAGE_FLOAT;
 	
 }
-
+*/
 void hydra_move(float thrust) 
 {
 	check_pos_enemy();
@@ -749,12 +742,14 @@ void do_hydra_die(void)
 		hydra_SwimDieFrames();
 }
 
+/*
 void hydra_retreat()
 {
 	self.monster_stage = HYDRA_STAGE_REVERSE;
 	self.think = self.th_run;
 	thinktime self : 0.1;
 }
+*/
 	
 void hydra_pain(entity attacker, float damage) 
 {
@@ -771,8 +766,11 @@ void init_hydra(void)
 
 	self.monster_stage = HYDRA_STAGE_WAIT;
 
-	precache_model ("models/hydra.mdl");
-	precache_model ("models/spit.mdl");
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	{
+		precache_model ("models/hydra.mdl");
+		precache_model ("models/spit.mdl");
+	}
 
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_SWIM;
@@ -786,7 +784,10 @@ void init_hydra(void)
 	setsize (self, '-30 -30 -24', '30 30 24');
 	self.hull = HULL_SCORPION;
 //self.hull = HULL_HYDRA;
-	self.health = 125;
+	if(!self.health)
+		self.health = 125;
+	if(!self.max_health)
+		self.max_health=self.health;
 	self.experience_value = 50;
 	self.mintel = 4;
 
@@ -813,30 +814,189 @@ void init_hydra(void)
 
 	total_monsters += 1;
 
+	self.init_exp_val = self.experience_value;
+
 	thinktime self : random(0.5);
 	self.think = self.th_stand;
 }
 
 
-/*QUAKED monster_hydra (1 0.3 0) (-40 -40 -42) (40 40 42) STAND HOVER JUMP PLAY_DEAD DORMANT
+/*QUAKED monster_hydra (1 0.3 0) (-40 -40 -42) (40 40 42) STAND HOVER JUMP x DORMANT
 New item for QuakeEd
 
 -------------------------FIELDS-------------------------
-NOTE:  Normal QuakEd monster spawnflags don't apply here (no_jump, play_dead, no_drop)
+NOTE:  Normal QuakEd monster spawnflags don't apply here (no_jump, x, no_drop)
 --------------------------------------------------------
 
 */
 void monster_hydra(void)
 {
+	if(!self.th_init)
+	{
+		self.th_init=monster_hydra;
+		self.init_org=self.origin;
+	}
 	init_hydra();
 
-	precache_sound("hydra/pain.wav");
-	precache_sound("hydra/die.wav");
-	precache_sound("hydra/open.wav");
-	precache_sound("hydra/turn-s.wav");
-	precache_sound("hydra/turn-b.wav");
-	precache_sound("hydra/swim.wav");
-	precache_sound("hydra/tent.wav");
-	precache_sound("hydra/spit.wav");
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	{
+		precache_sound("hydra/pain.wav");
+		precache_sound("hydra/die.wav");
+		precache_sound("hydra/open.wav");
+		precache_sound("hydra/turn-s.wav");
+		precache_sound("hydra/turn-b.wav");
+		precache_sound("hydra/swim.wav");
+		precache_sound("hydra/tent.wav");
+		precache_sound("hydra/spit.wav");
+	}
 }
 
+
+/*
+ * $Log: /H2 Mission Pack/HCode/hydra.hc $
+ * 
+ * 7     3/09/98 3:05p Mgummelt
+ * 
+ * 6     3/03/98 7:31p Mgummelt
+ * 
+ * 5     2/12/98 5:55p Jmonroe
+ * remove unreferenced funcs
+ * 
+ * 4     2/05/98 12:30p Mgummelt
+ * 
+ * 3     2/04/98 4:58p Mgummelt
+ * spawnflags on monsters cleared out
+ * 
+ * 62    10/28/97 1:01p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 60    9/11/97 9:05a Mgummelt
+ * 
+ * 59    9/03/97 2:36a Mgummelt
+ * 
+ * 58    9/01/97 12:50a Jweier
+ * 
+ * 57    9/01/97 12:20a Jweier
+ * 
+ * 56    8/31/97 8:52a Mgummelt
+ * 
+ * 55    8/29/97 11:14p Mgummelt
+ * 
+ * 54    8/29/97 4:17p Mgummelt
+ * Long night
+ * 
+ * 53    8/28/97 2:01a Mgummelt
+ * 
+ * 52    8/27/97 6:53p Jweier
+ *  
+ * 50    8/25/97 4:06p Mgummelt
+ * 
+ * 49    8/24/97 4:02p Jweier
+ * 
+ * 48    8/21/97 2:16a Jweier
+ * 
+ * 47    8/21/97 2:04a Jweier
+ * 
+ * 45    8/20/97 11:56p Jweier
+ * 
+ * 44    8/19/97 8:56a Mgummelt
+ * 
+ * 43    8/18/97 5:21p Bgokey
+ * 
+ * 41    8/15/97 4:02p Rjohnson
+ * Precache update
+ * 
+ * 40    8/15/97 12:24p Bgokey
+ * 
+ * 39    8/15/97 11:34a Bgokey
+ * 
+ * 38    8/14/97 11:11p Bgokey
+ * 
+ * 36    8/14/97 7:37p Bgokey
+ * 
+ * 32    8/14/97 12:11p Mgummelt
+ * 
+ * 31    7/21/97 4:03p Mgummelt
+ * 
+ * 30    7/21/97 4:02p Mgummelt
+ * 
+ * 29    7/20/97 1:24a Rjohnson
+ * Fix for a missing parameter
+ * 
+ * 28    7/15/97 1:25p Rjohnson
+ * Updates
+ * 
+ * 27    7/07/97 5:09p Rlove
+ * 
+ * 26    7/03/97 8:47a Rlove
+ * 
+ * 25    6/19/97 10:18p Rjohnson
+ * Fix for makesolidcorpse()
+ * 
+ * 24    6/19/97 3:08p Rjohnson
+ * Code space optimizations
+ * 
+ * 23    5/30/97 11:41a Rjohnson
+ * Removed the message field of the starteffect
+ * 
+ * 22    5/23/97 3:43p Mgummelt
+ * 
+ * 21    5/22/97 3:29p Mgummelt
+ * 
+ * 20    5/20/97 11:31a Rjohnson
+ * Revised Effects
+ * 
+ * 19    5/19/97 2:54p Rjohnson
+ * New client effects
+ * 
+ * 18    5/16/97 2:12p Mgummelt
+ * 
+ * 17    5/07/97 3:40p Mgummelt
+ * 
+ * 16    5/07/97 11:12a Rjohnson
+ * Added a new field to walkmove and movestep to allow for setting the
+ * traceline info
+ * 
+ * 15    5/07/97 10:39a Rjohnson
+ * Minor fixes
+ * 
+ * 14    5/06/97 1:29p Mgummelt
+ * 
+ * 13    4/21/97 8:47p Mgummelt
+ * 
+ * 12    4/21/97 6:15p Mgummelt
+ * 
+ * 11    4/17/97 2:50p Mgummelt
+ * 
+ * 10    4/07/97 2:56p Mgummelt
+ * 
+ * 9     4/07/97 1:39p Rjohnson
+ * Added sounds to the imp, fangel, and hydra
+ * 
+ * 8     3/21/97 4:43p Rjohnson
+ * Updates
+ * 
+ * 7     3/13/97 9:57a Rlove
+ * Changed constant DAMAGE_AIM  to DAMAGE_YES and the old DAMAGE_YES to
+ * DAMAGE_NO_GRENADE
+ * 
+ * 6     3/12/97 10:57p Rjohnson
+ * Changed the particle2 parameters to make it less taxing on the network
+ * and more versitile
+ * 
+ * 5     1/28/97 10:29a Rjohnson
+ * Added generic experience value
+ * 
+ * 4     1/09/97 1:47p Rjohnson
+ * Additional refining
+ * 
+ * 3     1/02/97 11:20a Rjohnson
+ * Christmas changes - made him attack and move around
+ * 
+ * 2     12/18/96 9:51a Rjohnson
+ * Small Update
+ * 
+ * 1     12/17/96 10:38a Rjohnson
+ * Initial Version
+ */

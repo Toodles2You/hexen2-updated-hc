@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/constant.hc 138   10/10/97 9:13a Rlove $
+ * $Header: /H2 Mission Pack/HCode/constant.hc 52    3/23/98 5:48p Mgummelt $
  */
 
 //
@@ -10,7 +10,7 @@ float FALSE					= 0;
 float TRUE					= 1;
 
 float HX_FRAME_TIME			= 0.05;
-float HX_FPS				= 20;
+//float HX_FPS				= 20;
 
 // edict.flags
 float FL_FLY					= 1;
@@ -29,9 +29,10 @@ float FL_JUMPRELEASED			= 4096;		// for jump debouncing
 float FL_FLASHLIGHT				= 8192;		// quake 2 thingy
 float FL_ARTIFACTUSED			= 16384;	// an artifact was just used
 float FL_MOVECHAIN_ANGLE		= 32768;    // when in a move chain, will update the angle
-float FL_FIRERESIST				= 65536;	// resistant to fire and heat and lava
-float FL_FIREHEAL				= 131072;	// healed by fire, heat, and lava
-float FL_COLDHEAL				= 524288;	// healed by freezing
+float FL_HUNTFACE				= 65536;	//Makes monster go for enemy view_ofs thwn moving
+float FL_NOZ					= 131072;	//Monster will not automove on Z if flying or swimming
+float FL_SET_TRACE				= 262144;
+float FL_MISMATCHEDBOUNDS		= 524288;
 float FL_ARCHIVE_OVERRIDE		= 1048576;	// quake 2 thingy
 float FL_CLASS_DEPENDENT		= 2097152;  // model will appear different to each player
 float FL_SPECIAL_ABILITY1		= 4194304;  // has 1st special ability
@@ -47,10 +48,19 @@ float FL_ALIVE					= 8;		//Dead or alive.
 float FL_FAKE_WATER				= 16;		//Fake water
 float FL_SUMMONED				= 32;		//Summoned monster, stops it from precaching
 float FL_LEDGEHOLD				= 64;		//Can realistically pull yourself up over ledges, etc.
+float FL2_FADE_UP				= 128;		//Succ.
+float FL2_RESPAWN				= 256;		//Monster that respawns
 float FL_TORNATO_SAFE			= 512;
+float FL2_DEADMEAT				= 1024;		//Tagged for death
 float FL_CHAINED				= 2048;		//Held by chains
 float FL2_CROUCHED				= 4096;
 float FL2_CROUCH_TOGGLE			= 8192;
+float FL2_FIRERESIST			= 16384;	// resistant to fire and heat and lava
+float FL2_FIREHEAL				= 32768;	// healed by fire, heat, and lava
+float FL2_COLDHEAL				= 65536;	// healed by freezing
+float FL2_TEST_TRACE			= 131072;	// healed by freezing
+float FL2_POISONED				= 262144;	// healed by freezing
+float FL2_ONFIRE				= 4194304;  // on fire
 
 // edict.drawflags
 float MLS_MASKIN			= 7;	// MLS: Model Light Style
@@ -97,22 +107,33 @@ float	MOVETYPE_PUSHPULL			= 13;		// pushable/pullable object
 float	MOVETYPE_SWIM				= 14;		// object won't move out of water
 
 // particle types
-float PARTICLETYPE_STATIC		= 0;
+//float PARTICLETYPE_STATIC		= 0;
 float PARTICLETYPE_GRAV			= 1;
 float PARTICLETYPE_FASTGRAV		= 2;
 float PARTICLETYPE_SLOWGRAV		= 3;
-float PARTICLETYPE_FIRE			= 4;
-float PARTICLETYPE_EXPLODE		= 5;
+//float PARTICLETYPE_FIRE			= 4;
+//float PARTICLETYPE_EXPLODE		= 5;
 float PARTICLETYPE_EXPLODE2		= 6;
-float PARTICLETYPE_BLOB			= 7;
-float PARTICLETYPE_BLOB2		= 8;
-float PARTICLETYPE_RAIN			= 9;
+//float PARTICLETYPE_BLOB			= 7;
+//float PARTICLETYPE_BLOB2		= 8;
+//float PARTICLETYPE_RAIN			= 9;
 float PARTICLETYPE_C_EXPLODE	= 10;
-float PARTICLETYPE_C_EXPLODE2	= 11;
-float PARTICLETYPE_SPIT			= 12;
+//float PARTICLETYPE_C_EXPLODE2	= 11;
+//float PARTICLETYPE_SPIT			= 12;
 float PARTICLETYPE_FIREBALL		= 13;
-float PARTICLETYPE_ICE			= 14;
+//float PARTICLETYPE_ICE			= 14;
 float PARTICLETYPE_SPELL		= 15;
+//float PARTICLETYPE_TEST			= 16;
+//float PARTICLETYPE_QUAKE		= 17;
+//float PARTICLETYPE_RIDERDEATH	= 18;
+//float PARTICLETYPE_VORPAL		= 19;
+//float PARTICLETYPE_SETSTAFF		= 20;
+//float PARTICLETYPE_MAGICMISSILE	= 21;
+//float PARTICLETYPE_BONESHARD	= 22;
+//float PARTICLETYPE_SCARAB		= 23;
+//float PARTICLETYPE_ACIDBALL		= 24;
+float PARTICLETYPE_DARKEN		= 25;	//Particle will darken to darkest color of that shade, valid only for colors <= 232
+float PARTICLETYPE_REDFIRE		= 28;	//Particle will darken to darkest color of that shade, valid only for colors <= 232
 
 // Hexen hull constants
 float HULL_IMPLICIT			= 0;	//Choose the hull based on bounding box- like in Quake
@@ -121,14 +142,8 @@ float HULL_PLAYER			= 2;	//'-16 -16 0', '16 16 56'
 float HULL_SCORPION			= 3;	//'-24 -24 -20', '24 24 20'
 float HULL_CROUCH			= 4;	//'-16 -16 0', '16 16 28'
 //Next 2 clip though world?
-float HULL_HYDRA			= 5;	//'-28 -28 -24', '28 28 24'
-float HULL_GOLEM			= 6;	//???,???
-
-// Keep around old constants until all references are removed
-float HULL_OLD				= 0;
-float HULL_SMALL			= 1;
-float HULL_NORMAL			= 2;
-float HULL_BIG				= 3;
+float HULL_HYDRA			= 5;	//'-40 -40 -42', '40 40 42' - replace me in MP with a '-8 -8 -8' '8 8 8' hull for pentacles
+float HULL_GOLEM			= 6;	//'-48 -48 -50', '48 48 50' - maybe change to '-23 -23 -40', '23 23 40' for yakman
 
 // edict.solid values
 float	SOLID_NOT					= 0;		// no interaction with other objects
@@ -223,6 +238,7 @@ float CLASS_PALADIN					= 1;
 float CLASS_CRUSADER				= 2;
 float CLASS_NECROMANCER				= 3;
 float CLASS_ASSASSIN				= 4;
+float CLASS_SUCCUBUS				= 5;
 
 
 // Monster Classes
@@ -251,16 +267,17 @@ float IT_WEAPON1					= 4096;
 float IT_WEAPON2					= 1;
 float IT_WEAPON3					= 2;
 float IT_WEAPON4					= 4;
-float IT_TESTWEAP					= 8;
+//float IT_TESTWEAP					= 8;
 float IT_WEAPON4_1					= 16;		// First half of weapon
 float IT_WEAPON4_2					= 32;		// Second half of weapon
 
 
 // paladin weapons
-float IT_GAUNTLETS           = 4096;
+//float IT_GAUNTLETS           = 4096;
 
 
 // items
+/*
 float	IT_AXE						= 4096;
 float	IT_SHOTGUN					= 1;
 float	IT_SUPER_SHOTGUN			= 2;
@@ -270,28 +287,28 @@ float	IT_GRENADE_LAUNCHER			= 16;
 float	IT_ROCKET_LAUNCHER			= 32;
 float	IT_LIGHTNING				= 64;
 float	IT_EXTRA_WEAPON				= 128;
+*/
 
-
-float	IT_ARMOR1					= 8192;
-float	IT_ARMOR2					= 16384;
-float	IT_ARMOR3					= 32768;
-float	IT_SUPERHEALTH				= 65536;
+//float	IT_ARMOR1					= 8192;
+//float	IT_ARMOR2					= 16384;
+//float	IT_ARMOR3					= 32768;
+//float	IT_SUPERHEALTH				= 65536;
 
 
 float	IT_INVISIBILITY			= 524288;
-float	IT_INVULNERABILITY		= 1048576;
-float	IT_SUIT						= 2097152;
-float	IT_QUAD						= 4194304;
+//float	IT_INVULNERABILITY		= 1048576;
+//float	IT_SUIT						= 2097152;
+//float	IT_QUAD						= 4194304;
 
 // rings - amount of time they work
-float FLIGHT_TIME					= 30;
-float WATER_TIME					= 30;
-float ABSORPTION_TIME				= 30;
-float REGEN_TIME					= 30;
-float TURNING_TIME					= 30;
+//float FLIGHT_TIME					= 30;
+//float WATER_TIME					= 30;
+//float ABSORPTION_TIME				= 30;
+//float REGEN_TIME					= 30;
+//float TURNING_TIME					= 30;
 
 // artifacts - amount of time they work
-float HASTE_TIME				= 15;
+//float HASTE_TIME				= 15;
 float TOME_TIME					= 30;
 
 float RESPAWN_TIME				= 30;
@@ -314,9 +331,9 @@ float BLAST_RADIUS				= 200;
 float BLASTDAMAGE				= 2; 
 
 // Damage values for attacks from monsters
-float DMG_ARCHER_PUNCH			= 4;
+//float DMG_ARCHER_PUNCH			= 4;
 float DMG_MUMMY_PUNCH			= 8;
-float DMG_MUMMY_BITE 			= 2;
+//float DMG_MUMMY_BITE 			= 2;
 
 
 //Thing Types
@@ -340,6 +357,10 @@ float THINGTYPE_GLASS 			= 17;
 float THINGTYPE_ICE 			= 18;
 float THINGTYPE_CLEARGLASS 		= 19;
 float THINGTYPE_REDGLASS 		= 20;
+float THINGTYPE_ACID	 		= 21;
+float THINGTYPE_METEOR	 		= 22;
+float THINGTYPE_GREENFLESH 		= 23;
+float THINGTYPE_BONE	 		= 24;
 
 
 // point content values
@@ -356,19 +377,18 @@ float	STATE_UP					= 2;
 float	STATE_DOWN					= 3;
 float	STATE_MOVING				= 4;
 
-vector	VEC_ORIGIN				= '0 0 0';
-vector	VEC_HULL_MIN			= '-16 -16 -24';
-vector	VEC_HULL_MAX			= '16 16 32';
-//Temp- because player models origins are at feet,
-//Above values raise them 12 above the floor!
-//But what about monsters using this Hull size??
-//vector	VEC_HULL_MIN			= '-16 -16 0';
-//vector	VEC_HULL_MAX			= '16 16 56';
+vector	VEC_ORIGIN				= '0.000000000000000000 0.0000000000000000000 0.0000000000000000000000';
+//vector	VEC_HULL_MIN			= '-16 -16 -24';
+//vector	VEC_HULL_MAX			= '16 16 32';
 
-vector	VEC_HULL2_MIN			= '-32 -32 -24';
-vector	VEC_HULL2_MAX			= '32 32 64';
+//vector	VEC_HULL2_MIN			= '-32 -32 -24';
+//vector	VEC_HULL2_MAX			= '32 32 64';
 
 // protocol bytes
+float SVC_SETVIEWPORT = 5;			// Net.Protocol 0x05- for camera
+float SVC_SETVIEWANGLES = 10;		// Net.Protocol 0x0A- for camera
+float SVC_SETANGLESINTER = 50;		// Interpolating camera angles
+
 float	SVC_TEMPENTITY				= 23;
 float	SVC_KILLEDMONSTER			= 27;
 float	SVC_FOUNDSECRET				= 28;
@@ -379,6 +399,7 @@ float	SVC_SELLSCREEN				= 33;
 float	SVC_SET_VIEW_FLAGS			= 40;
 float	SVC_CLEAR_VIEW_FLAGS		= 41;
 float	SVC_SET_VIEW_TINT			= 46;
+float	SVC_UPDATE_KINGOFHILL		= 51;
 
 // Client Effects
 float	CE_RAIN						= 1;
@@ -422,6 +443,34 @@ float   CE_TELEPORTERPUFFS			= 38;
 float   CE_TELEPORTERBODY			= 39;
 float	CE_BONESHARD				= 40;
 float	CE_BONESHRAPNEL				= 41;
+float	CE_FLAMESTREAM				= 42;
+float	CE_SNOW						= 43;
+float	CE_GRAVITYWELL				= 44;
+float	CE_BLDRN_EXPL				= 45;
+float	CE_ACID_MUZZFL				= 46;
+float	CE_ACID_HIT					= 47;
+float	CE_FIREWALL_SMALL			= 48;
+float	CE_FIREWALL_MEDIUM			= 49;
+float	CE_FIREWALL_LARGE			= 50;
+float	CE_LBALL_EXPL				= 51;
+float	CE_ACID_SPLAT				= 52;
+float	CE_ACID_EXPL				= 53;
+float	CE_FBOOM					= 54;
+float	CE_CHUNK					= 55;
+float	CE_BOMB						= 56;
+float	CE_BRN_BOUNCE				= 57;
+float	CE_LSHOCK					= 58;
+float	CE_FLAMEWALL				= 59;
+float	CE_FLAMEWALL2				= 60;
+float	CE_FLOOR_EXPLOSION3			= 61;
+float	CE_ONFIRE					= 62;
+
+float	SFL_FLUFFY					= 1;// All largish flakes
+float	SFL_MIXED					= 2;// Mixed flakes
+float	SFL_HALF_BRIGHT				= 4;// All flakes start darker
+float	SFL_NO_MELT					= 8;// Flakes don't melt when his surface, just go away
+float	SFL_IN_BOUNDS				= 16;// Flakes cannot leave the bounds of their box
+float	SFL_NO_TRANS				= 32;// All flakes start non-translucent
 
 // Temporary entities
 float	TE_SPIKE					= 0;
@@ -436,6 +485,7 @@ float	TE_KNIGHTSPIKE				= 8;
 float	TE_LIGHTNING3				= 9;
 float	TE_LAVASPLASH				= 10;
 float	TE_TELEPORT					= 11;
+float	TE_STREAM_LIGHTNING_SMALL	= 24;
 float	TE_STREAM_CHAIN				= 25;
 float	TE_STREAM_SUNSTAFF1			= 26;
 float	TE_STREAM_SUNSTAFF2			= 27;
@@ -463,12 +513,13 @@ float	ATTN_NONE					= 0;
 float	ATTN_NORM					= 1;
 float	ATTN_IDLE					= 2;
 float	ATTN_STATIC					= 3;
+float	ATTN_LOOP					= 4;
 
 // update types
-float	UPDATE_GENERAL				= 0;
-float	UPDATE_STATIC				= 1;
-float	UPDATE_BINARY				= 2;
-float	UPDATE_TEMP					= 3;
+//float	UPDATE_GENERAL				= 0;
+//float	UPDATE_STATIC				= 1;
+//float	UPDATE_BINARY				= 2;
+//float	UPDATE_TEMP					= 3;
 
 // entity effects
 float	EF_BRIGHTFIELD				= 1;
@@ -480,16 +531,18 @@ float	EF_DARKLIGHT				= 16;
 float	EF_DARKFIELD				= 32;
 float	EF_LIGHT					= 64;
 float	EF_NODRAW					= 128;
+float   EF_TEX_STOPF				= 256;
+float	EF_TEX_STOPL				= 528;
 
 // messages
 float	MSG_BROADCAST				= 0;		// unreliable to all
 float	MSG_ONE						= 1;		// reliable to one (msg_entity)
 float	MSG_ALL						= 2;		// reliable to all
-float	MSG_INIT						= 3;		// write to the init string
+//float	MSG_INIT						= 3;		// write to the init string
 
-float STEP_HEIGHT					= 18;		// Max step height
+//float STEP_HEIGHT					= 18;		// Max step height
 
-// monster AI states
+// monster AI states 
 float AI_DECIDE						=    0;		// An action was just finished - time to decide what to do
 float AI_STAND						=    1;		// Standing guard
 float AI_WALK						=    2;		// Walking
@@ -516,12 +569,12 @@ float MAX_LEVELS = 10;
 
 
 // server flags
-float	SFL_EPISODE_1		= 1;
-float	SFL_EPISODE_2		= 2;
-float	SFL_EPISODE_3		= 4;
-float	SFL_EPISODE_4		= 8;
+//float	SFL_EPISODE_1		= 1;
+//float	SFL_EPISODE_2		= 2;
+//float	SFL_EPISODE_3		= 4;
+//float	SFL_EPISODE_4		= 8;
 float	SFL_NEW_UNIT		= 16;
-float	SFL_NEW_EPISODE		= 32;
+//float	SFL_NEW_EPISODE		= 32;
 // = 64;
 // = 128;
 float	SFL_CROSS_TRIGGER_1 = 256;
@@ -534,7 +587,7 @@ float	SFL_CROSS_TRIGGER_7	= 16384;
 float	SFL_CROSS_TRIGGER_8	= 32768;
 
 float	SFL_CROSS_TRIGGERS	= 65280;
-float attck_cnt;
+//float attck_cnt;
 
 float WF_NORMAL_ADVANCE = 0;		// States when using advanceweaponframe
 float WF_CYCLE_STARTED = 1;
@@ -555,21 +608,34 @@ float SPIDER	= 16;
 float ONDEATH	= 32;
 float QUIET		= 64;
 float TRIGGERONLY  = 128;
+//Spawnflags for MP monster spawners
+float ICE_ARCHER = 1;
+float ICE_IMP	= 2;
+float SNOWLEOPARD	= 4;
+float WERETIGER	= 8;
+float YAKMAN	= 16;
 
 //spawnflag for all monsters
+float AMBUSH = 1;
 float JUMP	= 4;	    //Gives monster the ability to jump
-float PLAY_DEAD	= 8;	//Makes a monster play dead at start
+//float PLAY_DEAD	= 8;	//Makes a monster play dead at start
 float NO_DROP	= 32;	//Keeps them from dropping to the ground at spawntime
+float SF_FROZEN	= 64;	//Start frozen
+
+float SLOPE = 16;		//Trains- follow angle for vec between path_corners
 
 //spawnflag for items, weapons, artifacts
 float FLOATING	=	1;	//Keeps them from dropping to the ground at spawntime
 
 //Spawnflags for barrels
-float BARREL_DOWNHILL		= 1;
+//float BARREL_DOWNHILL		= 1;
 float BARREL_NO_DROP		= 2;
 float ON_SIDE				= 4;
 float BARREL_SINK			= 8;		
-float BARREL_UNBREAKABLE	= 16;
+float DROP_USE				= 16;//Barrel won't drop unless used
+float BARREL_RESPAWN				= 32;//Upon death, barrel will respawn at it's initial origin
+//Barrel types
+//float BARREL_UNBREAKABLE	= 16;
 float BARREL_NORMAL			= 32;
 float BARREL_EXPLODING		= 64;
 float BARREL_INDESTRUCTIBLE = 128;		
@@ -587,9 +653,6 @@ float RING_FLIGHT_MAX = 60;			// Number of seconds you can fly
 float RING_WATER_MAX = 60;			// Number of seconds you can stay under water
 float RING_TURNING_MAX = 60;		// Number of seconds you can turn missiles
 
-float SVC_SETVIEWPORT = 5;			// Net.Protocol 0x05- for camera
-float SVC_SETVIEWANGLES = 10;		// Net.Protocol 0x0A- for camera
-
 //act_states - for player anim
 float ACT_STAND			= 0;
 float ACT_RUN			= 1;
@@ -601,3 +664,6 @@ float ACT_CROUCH_STAND	= 6;
 float ACT_CROUCH_MOVE	= 7;
 float ACT_DEAD			= 8;
 float ACT_DECAP			= 9;
+
+float MISSIONPACK		= 1;	//Spawnflag for world, telling us it's a Mission Pack map- used so certain code is used only for new levels
+float SHEEPHUNT			= 2;	//Spawnflag for world, enables special sheep hunter code...

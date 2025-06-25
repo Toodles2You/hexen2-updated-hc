@@ -1,10 +1,11 @@
 /*
- * $Header: /H3/game/hcode/Buttons.hc 55    8/13/97 5:46p Mgummelt $
+ * $Header: /H2 Mission Pack/HCode/Buttons.hc 3     3/02/98 11:51a Mgummelt $
  */
 // button and multiple button
 
 float SPAWNFLAG_BUTTON_ACTIVATE = 1;
 float FIRE_MULTIPLE				= 4;
+float BUTTON_TOGGLE				= 8;
 
 void() button_wait;
 void() button_return;
@@ -60,7 +61,12 @@ void() button_fire =
 		return;	
 	}
 
-	if (self.state == STATE_UP)
+	if(self.spawnflags&BUTTON_TOGGLE&&self.state==STATE_TOP)
+	{//Toggle button, done moving
+		button_return();
+		return;
+	}
+	else if (self.state == STATE_UP)
 		return;
 
 	self.check_ok = TRUE;
@@ -98,11 +104,12 @@ void() button_killed =
 	button_fire ();
 };
 
-/*QUAKED func_button (0 .5 .8) ? deactivated FIREONLY FIRE_MULTIPLE x x x
+/*QUAKED func_button (0 .5 .8) ? deactivated FIREONLY FIRE_MULTIPLE TOGGLE x x
 When a button is touched, it moves some distance in the direction of it's angle, triggers all of it's targets, waits some time, then returns to it's original position where it can be triggered again,
 unless it's a pressure plate, in which case it will not return to it's position until it's not being touched anymore.
 FIREONLY - has to be killed, touching won't do it.
 FIRE_MULTIPLE - can be shot over and over (give it a high health)
+TOGGLE - Button will wait at up and down positions for activations, assumes a wait of -1
 -----------------------FIELDS-------------------------
 "angle"		determines the opening direction
 "target"	all entities with a matching targetname will be used
@@ -122,7 +129,6 @@ deactivated - button must be activated before it will work
 */
 void() func_button =
 {
-//	local float		gtemp, ftemp;
 
 	if (self.soundtype == 0)
 	{
@@ -175,6 +181,8 @@ void() func_button =
 
 	if (!self.speed)
 		self.speed = 40;
+	if(self.spawnflags&BUTTON_TOGGLE)
+		self.wait=-1;
 	if (!self.wait)
 		self.wait = 1;
 	if (!self.lip)
@@ -269,13 +277,13 @@ entity found;
 				if(found_bottom_y>self.absmin_y&&found_bottom_y<self.absmax_y)
 					if(found_bottom_z>=self.absmax_z - 3&&found_bottom_z<=self.absmax_z+7)
 						return TRUE;
-					else
+/*					else
 						dprint("Not right height\n");
 				else
 					dprint("Not right y\n");
 			else
 				dprint("Not right x\n");
-		found=found.chain;
+*/		found=found.chain;
 	}
 	return FALSE;
 }
@@ -477,3 +485,134 @@ void func_pressure (void)
 	self.pos2 = self.pos1 + self.movedir*(fabs(self.movedir*self.size) - self.lip);
 }
 
+/*
+ * $Log: /H2 Mission Pack/HCode/Buttons.hc $
+ * 
+ * 3     3/02/98 11:51a Mgummelt
+ * 
+ * 57    10/28/97 1:00p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 55    8/13/97 5:46p Mgummelt
+ * 
+ * 54    7/23/97 7:04p Mgummelt
+ * 
+ * 53    7/21/97 4:03p Mgummelt
+ * 
+ * 52    7/21/97 4:02p Mgummelt
+ * 
+ * 51    7/17/97 2:17p Mgummelt
+ * 
+ * 50    7/14/97 4:42p Mgummelt
+ * 
+ * 49    7/14/97 2:39p Rlove
+ * 
+ * 48    7/11/97 4:37p Mgummelt
+ * 
+ * 47    7/10/97 7:02p Mgummelt
+ * 
+ * 46    7/09/97 3:54p Rjohnson
+ * Fix for messages
+ * 
+ * 45    7/09/97 12:03p Rjohnson
+ * Added msg2 to the global text file
+ * 
+ * 44    7/03/97 12:47p Mgummelt
+ * 
+ * 43    6/25/97 9:23p Mgummelt
+ * 
+ * 42    6/18/97 4:00p Mgummelt
+ * 
+ * 41    6/15/97 5:10p Mgummelt
+ * 
+ * 40    6/11/97 4:06p Mgummelt
+ * 
+ * 39    6/06/97 4:08p Mgummelt
+ * 
+ * 38    6/06/97 10:58a Rjohnson
+ * Fix for lights
+ * 
+ * 37    6/05/97 8:16p Mgummelt
+ * 
+ * 36    6/04/97 1:04p Jweier
+ * 
+ * 35    6/01/97 5:09a Mgummelt
+ * 
+ * 34    5/30/97 5:03p Rjohnson
+ * Added abslight to buttons
+ * 
+ * 33    5/27/97 6:42p Mgummelt
+ * 
+ * 32    5/23/97 5:03p Jweier
+ * 
+ * 31    5/22/97 3:30p Mgummelt
+ * 
+ * 30    5/20/97 6:21p Jweier
+ * 
+ * 29    5/20/97 6:15p Jweier
+ * 
+ * 28    5/15/97 6:31p Jweier
+ * 
+ * 27    5/15/97 6:27p Jweier
+ * 
+ * 26    5/11/97 7:30a Mgummelt
+ * 
+ * 25    5/09/97 5:54p Jweier
+ * 
+ * 24    5/07/97 4:11p Jweier
+ * 
+ * 23    5/02/97 8:06p Mgummelt
+ * 
+ * 22    5/02/97 6:17p Jweier
+ * 
+ * 21    5/01/97 6:50p Mgummelt
+ * 
+ * 20    5/01/97 5:46p Jweier
+ * 
+ * 19    4/30/97 6:36p Jweier
+ * 
+ * 18    4/30/97 6:34p Jweier
+ * 
+ * 17    4/30/97 5:36p Jweier
+ * 
+ * 16    4/26/97 12:56p Mgummelt
+ * 
+ * 15    4/26/97 12:52p Mgummelt
+ * 
+ * 14    4/26/97 12:51p Jweier
+ * 
+ * 13    4/15/97 7:08p Jweier
+ * activate/deactivate
+ * 
+ * 12    4/05/97 5:45p Mgummelt
+ * 
+ * 11    4/05/97 4:00p Mgummelt
+ * 
+ * 10    4/04/97 8:08p Mgummelt
+ * 
+ * 9     3/22/97 4:47p Jweier
+ * 
+ * 8     3/21/97 9:38a Rlove
+ * Created CHUNK.HC and MATH.HC, moved brush_die to chunk_death so others
+ * can use it.
+ * 
+ * 7     3/18/97 6:37p Jweier
+ * Button needs to be fixed to handle PUSH_TOUCH
+ * 
+ * 6     3/13/97 9:57a Rlove
+ * Changed constant DAMAGE_AIM  to DAMAGE_YES and the old DAMAGE_YES to
+ * DAMAGE_NO_GRENADE
+ * 
+ * 5     11/21/96 8:34a Rlove
+ * Corrected the button name to FUNC_BUTTON
+ * 
+ * 4     11/20/96 4:43p Rlove
+ * Corrected func_door naming problem
+ * 
+ * 3     11/18/96 3:29p Rlove
+ * Changed sounds variable to soundtype
+ * 
+ * 2     11/11/96 1:12p Rlove
+ * Added Source Safe stuff
+ */

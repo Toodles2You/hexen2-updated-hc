@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/SUBS.hc 37    8/28/97 4:17p Mgummelt $
+ * $Header: /H2 Mission Pack/HCode/SUBS.hc 21    3/14/98 6:37p Mgummelt $
  */
 float SPAWNFLAG_ACTIVATED	= 8;
 
@@ -7,7 +7,9 @@ float SPAWNFLAG_ACTIVATED	= 8;
 
 void SUB_Null() {}
 
-void SUB_Remove() { remove(self); }
+void SUB_Remove() {stopSound(self,0); remove(self); }
+
+void obj_barrel_explode (void);	//ref from barrel.hc
 
 /*
 void spawntestmarker(vector org, float life, float skincolor)
@@ -37,10 +39,18 @@ void SetMovedir()
 		self.movedir = '0 0 1';
 	else if(self.angles == '0 -2 0')
 		self.movedir = '0 0 -1';
-	else {
+	else 
+	{
 		makevectors(self.angles);
 		self.movedir = v_forward;
-		}
+		//Have to do this to correct for floating point optimizations
+		if(fabs(self.movedir_x)<0.001)
+			self.movedir_x=0;
+		if(fabs(self.movedir_y)<0.001)
+			self.movedir_y=0;
+		if(fabs(self.movedir_z)<0.001)
+			self.movedir_z=0;
+	}
 	
 	self.angles = '0 0 0';
 }
@@ -73,8 +83,8 @@ void InitTrigger()
 
 void(vector tdest, float tspeed, void() func) SUB_CalcMove =
 {
-	local vector vdestdelta;
-	local float  len, traveltime;
+vector vdestdelta;
+float  len, traveltime;
 
 	if(!tspeed)
 		objerror("No speed is defined!");
@@ -131,8 +141,13 @@ void(entity ent, vector tdest, float tspeed, void() func) SUB_CalcMoveEnt =
 void SUB_CalcMoveDone()
 {
 	setorigin(self, self.finaldest);
-	self.velocity = '0 0 0';
-	self.nextthink = -1;
+	if(self.wait!=0||self.enemy.classname!="path_corner")
+	{
+		self.velocity = '0 0 0';
+		self.nextthink = -1;
+	}
+	else
+		thinktime self : 99999999;
 	if(self.think1)
 		self.think1();
 }
@@ -146,8 +161,8 @@ void SUB_CalcMoveDone()
 
 void(vector destangle, float tspeed, void() func) SUB_CalcAngleMove =
 {
-	local vector destdelta;
-	local float  len, traveltime;
+vector destdelta;
+float  len, traveltime;
 
 	if(!tspeed)
 		objerror("SUB_CalcAngleMove: No speed defined!");
@@ -189,9 +204,15 @@ void(entity ent, vector destangle, float tspeed, void() func) SUB_CalcAngleMoveE
 
 void SUB_CalcAngleMoveDone()
 {
+//	dprint("Done rotating\n");
 	self.angles = self.finalangle;
-	self.avelocity = '0 0 0';
-	self.nextthink = -1;
+	if(self.wait!=0||self.enemy.classname!="path_corner")
+	{
+		self.avelocity = '0 0 0';
+		self.nextthink = -1;
+	}
+	else
+		thinktime self : 99999999;
 	if (self.think1)
 		self.think1();
 }
@@ -202,25 +223,39 @@ void SUB_CalcAngleMoveDone()
 
 void SUB_CalcMoveAndAngleDone(void)
 {
+//	dprint("Angle and move done\n");
 	setorigin(self, self.finaldest);
 	self.angles = self.finalangle;
-	self.velocity = self.avelocity = '0 0 0';
-	self.nextthink = -1;
-	if (self.think1)
+	if(self.wait!=0||self.enemy.classname!="path_corner")
+	{
+		self.velocity = self.avelocity = '0 0 0';
+		self.nextthink = -1;
+	}
+	else
+		thinktime self : 99999999;
+	if (self.think1!=SUB_Null)
+	{
+//		dprint("Going to next func\n");
 		self.think1();
+	}
+//	else
+//		dprint("No next func\n");
 }
 
 void()SUB_CalcAngleOnlyDone;
 
 void SUB_CalcMoveOnlyDone(void)
 {
+//	dprint("Move done\n");
 	setorigin(self, self.finaldest);
-	self.velocity = '0 0 0';
+	if(self.wait!=0||self.enemy.classname!="path_corner")
+		self.velocity = '0 0 0';
 	self.movetime=0;
-	if(self.angletime>0)
+	if(self.angletime>0.01)//1/5th of a frame
 	{
 		self.think=SUB_CalcAngleOnlyDone;
 		self.nextthink=self.ltime+self.angletime;
+//		dprintf("ETA - %s\n",self.nextthink - self.ltime);
 	}
 	else
 		SUB_CalcMoveAndAngleDone();
@@ -228,13 +263,18 @@ void SUB_CalcMoveOnlyDone(void)
 
 void SUB_CalcAngleOnlyDone(void)
 {
+//	dprint("Angle done\n");
 	self.angles = self.finalangle;
 	self.avelocity = '0 0 0';
 	self.angletime = 0;
-	if(self.movetime>0)
+	if(self.movetime>0.01)//1/5th of a frame
 	{
 		self.think=SUB_CalcMoveOnlyDone;
-		self.nextthink=self.ltime+self.movetime;
+		self.nextthink=self.ltime+self.movetime;//was 0.0000002384, and would not think
+//		dprintf("Movetime*1000000000 - %s\n",self.movetime*1000000000);
+//		dprintf("ETA - %s\n",(self.nextthink - self.ltime));
+//		dprintf("Ltime - %s\n",self.ltime);
+//		dprintf("Nextthink - %s\n",self.nextthink);
 	}
 	else
 		SUB_CalcMoveAndAngleDone();
@@ -317,17 +357,20 @@ float  len, alen;
 		self.movetime-=self.angletime;
 		self.think = SUB_CalcAngleOnlyDone;
 		self.nextthink=self.ltime+self.angletime;
+//		dprintf("1: ETA - %s\n",self.nextthink - self.ltime);
 	}
 	else if(self.movetime<self.angletime)
 	{
 		self.angletime-=self.movetime;
 		self.think = SUB_CalcMoveOnlyDone;
 		self.nextthink=self.ltime+self.movetime;
+//		dprintf("2: ETA - %s\n",self.nextthink - self.ltime);
 	}
 	else
 	{
 		self.think = SUB_CalcMoveAndAngleDone;
 		self.nextthink=self.ltime+self.movetime;
+//		dprintf("3: ETA - %s\n",self.nextthink - self.ltime);
 	}
 }
 
@@ -342,6 +385,8 @@ void(vector tdest, float tspeed, vector destangle, float aspeed,void() func,floa
 	self.finalangle = destangle;
 	self.anglespeed = aspeed;
 	self.think1 = func;
+//	if(self.think1==SUB_Null)
+//		dprint("No next func!\n");
 	SUB_CalcMoveAndAngle(synchronize);
 };
 
@@ -352,7 +397,10 @@ void(vector tdest, float tspeed, vector destangle, float aspeed,void() func,floa
 void DelayThink()
 {
 	activator = self.enemy;
+	if(self.level)
+		self.check_ok=self.owner.check_ok=TRUE;
 	SUB_UseTargets();
+	self.check_ok=self.owner.check_ok=FALSE;
 	remove(self);
 }
 
@@ -385,40 +433,77 @@ string s;
 	if(self.delay)
 	{
 		// create a temp object to fire at a later time
+//		dprint(activator.classname);
+//		dprint(" using something with a delay\n");
 		t = spawn();
-		t.classname = "DelayedUse";
+		t.netname = "DelayedUse";
+		t.classname = self.classname;
+		t.owner = self;
 		thinktime t : self.delay;
 		t.think = DelayThink;
 		t.enemy = activator;
 		t.message = self.message;
 		t.killtarget = self.killtarget;
 		t.target = self.target;
+		t.failtarget = self.failtarget;
+		t.close_target = self.close_target;
+		t.nexttarget = self.nexttarget;
+		t.style = self.style;
+		t.mangle = self.mangle;
+		t.frags = self.frags;
+		t.use=self.use;
+		t.inactive=self.inactive;
+		if(self.check_ok)
+			t.level=TRUE;
 		return;
 	}
 
 //
 // print the message
 //
-	if(activator.classname == "player" && self.message != 0)
+	if(activator.classname == "player"&& self.message != 0)
 	{
 		s = getstring(self.message);
 		centerprint (activator, s);
 		if(!self.noise)
 			sound (activator, CHAN_VOICE, "misc/comm.wav", 1, ATTN_NORM);
 	}
-
 //
 // kill the killtargets
 //
 	if(self.killtarget)
 	{
 		t = world;
-		do {
+		do
+		{
 			t = find(t, targetname, self.killtarget);
 			if(t!=world)
-				remove(t);
+			{
+				if(self.classname=="func_train")
+				{//Trains can't target things when they die, so use killtarget
+					if(t.th_die)
+					{
+						if(t.th_die==obj_barrel_explode)
+							t.think=t.use;
+						else
+							t.think=t.th_die;
+						thinktime t : .01;
+						t.targetname="";
+					}
+					else if(t.health)
+					{
+						t.think=chunk_death;
+						thinktime t : .01;
+						t.targetname="";
+					}
+					else
+						remove(t);
+				}
+				else
+					remove(t);
 			}
-			while(t!=world);
+		}
+		while(t!=world);
 	}
 
 //
@@ -435,14 +520,21 @@ string s;
 			if (!t)
 			{
 				if(self.nexttarget!=""&&self.target!=self.nexttarget)
-					self.target=self.nexttarget;
+					if(self.netname=="DelayedUse")
+						self.owner.target=self.nexttarget;
+					else
+						self.target=self.nexttarget;
 				return;
 			}
 			if(t.style>=32&&t.style!=self.style)
 			{
 				self.style=t.style;
 				if(self.classname=="breakable_brush")
+				{
 					lightstylestatic(self.style,0);
+					stopSound(self,CHAN_BODY);
+					//sound(self,CHAN_BODY, "misc/null.wav", 0.5, ATTN_STATIC);
+				}
 				else
 					lightstyle_change(t);
 			}
@@ -467,8 +559,22 @@ string s;
 			}
 			else if (self.use != SUB_Null&&!self.inactive)
 			{	//Else here because above trigger types should not use it's target
+//				if(self.classname=="obj_talkinghead"&&self.think!=talkhead_idle)
+//					dprint("Already talking, please wait!\n");
+//				else 
 				if (self.use)
-					self.use ();
+				{
+/*					if(self.classname=="trigger_changelevel")
+					{
+						dprint(stemp.classname);
+						dprint(" firing ");
+						dprint(self.classname);
+						dprint(" target: ");
+						dprint(self.targetname);
+						dprint("\n");
+					}
+*/					self.use ();
+				}
 			}
 			self = stemp;
 			other = otemp;
@@ -511,3 +617,117 @@ void (void() thinkst) SUB_CheckRefire =
 };
 */
 
+
+/*
+ * $Log: /H2 Mission Pack/HCode/SUBS.hc $
+ * 
+ * 21    3/14/98 6:37p Mgummelt
+ * 
+ * 20    3/13/98 3:27a Mgummelt
+ * Replaced all sounds that played a null.wav with stopSound commands
+ * 
+ * 19    3/03/98 9:59p Jmonroe
+ * removed talking head
+ * 
+ * 18    3/02/98 11:51a Mgummelt
+ * 
+ * 17    2/25/98 6:10p Mgummelt
+ * 
+ * 16    2/10/98 4:21p Mgummelt
+ * 
+ * 15    2/05/98 11:21p Mgummelt
+ * Making weaps network friendly
+ * 
+ * 14    2/05/98 12:30p Mgummelt
+ * 
+ * 13    2/04/98 4:58p Mgummelt
+ * spawnflags on monsters cleared out
+ * 
+ * 12    2/04/98 11:36a Mgummelt
+ * 
+ * 11    1/19/98 6:21p Mgummelt
+ * 
+ * 10    1/15/98 9:53a Jmonroe
+ * 
+ * 9     1/14/98 7:43p Mgummelt
+ * 
+ * 39    10/28/97 1:01p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 37    8/28/97 4:17p Mgummelt
+ * 
+ * 36    8/28/97 2:42p Mgummelt
+ * 
+ * 35    8/28/97 2:23a Mgummelt
+ * 
+ * 34    8/28/97 12:44a Mgummelt
+ * 
+ * 33    8/26/97 7:45a Rlove
+ * 
+ * 32    8/13/97 5:55p Mgummelt
+ * 
+ * 31    7/24/97 8:47p Mgummelt
+ * 
+ * 30    7/23/97 6:42p Mgummelt
+ * 
+ * 29    7/20/97 2:25p Bgokey
+ * 
+ * 28    7/19/97 9:56p Mgummelt
+ * 
+ * 27    7/17/97 12:25p Mgummelt
+ * 
+ * 26    7/10/97 7:02p Mgummelt
+ * 
+ * 25    7/09/97 1:42p Mgummelt
+ * 
+ * 24    7/08/97 3:23p Rjohnson
+ * Switched messages to using a string index
+ * 
+ * 23    7/07/97 2:50p Mgummelt
+ * 
+ * 22    7/03/97 12:48p Mgummelt
+ * 
+ * 21    7/03/97 9:47a Rlove
+ * Deactivate trigger now works on multiple_trigger
+ * 
+ * 20    6/30/97 3:22p Mgummelt
+ * 
+ * 19    6/28/97 6:33p Mgummelt
+ * 
+ * 18    6/25/97 3:00p Mgummelt
+ * 
+ * 17    6/23/97 4:50p Mgummelt
+ * 
+ * 16    6/18/97 4:00p Mgummelt
+ * 
+ * 15    6/15/97 5:10p Mgummelt
+ * 
+ * 14    6/10/97 9:27p Mgummelt
+ * 
+ * 13    6/05/97 8:16p Mgummelt
+ * 
+ * 12    6/02/97 7:58p Mgummelt
+ * 
+ * 11    5/28/97 2:26p Mgummelt
+ * 
+ * 10    5/27/97 8:22p Mgummelt
+ * 
+ * 9     5/24/97 2:48p Rlove
+ * Taking out old Id sounds
+ * 
+ * 8     5/22/97 2:50a Mgummelt
+ * 
+ * 7     5/16/97 11:27p Mgummelt
+ * 
+ * 6     5/15/97 2:47p Mgummelt
+ * 
+ * 5     5/12/97 11:12p Mgummelt
+ * 
+ * 4     5/08/97 5:48p Mgummelt
+ * 
+ * 3     3/29/97 11:56a Aleggett
+ * 
+ * 2     11/11/96 1:23p Rlove
+ * Added Source Safe stuff
+ */

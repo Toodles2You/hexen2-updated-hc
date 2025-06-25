@@ -1,12 +1,12 @@
 /*
- * $Header: /H3/game/hcode/PLATS.hc 61    9/16/97 4:17p Rjohnson $
+ * $Header: /H2 Mission Pack/HCode/PLATS.hc 29    2/18/98 6:02p Jmonroe $
  */
 
 void() newplat_center_touch;
 void() newplat_go_up;
 void() newplat_go_down;
 void() plat_center_touch;
-void() plat_outside_touch;
+//void() plat_outside_touch;
 void() plat_trigger_use;
 void() plat_go_up;
 void() plat_go_down;
@@ -31,11 +31,14 @@ void() train_wait;
 float TRAIN_GLOW = 1;
 float TRAIN_WAITTRIG = 2;
 float TRAIN_RETURN = 4;
+float ANGLEMATCH	= 32;
+float USE_ORIGIN	= 64;
+float ANGLE_WAIT	= 128;
 
 void() plat_spawn_inside_trigger =
 {
-	local entity	trigger;
-	local vector	tmin, tmax;
+entity	trigger;
+vector	tmin, tmax;
 
    //middle trigger
 
@@ -113,6 +116,7 @@ void() plat_center_touch =
 		self.nextthink = self.ltime + 1;	// delay going down
 };
 
+/*
 void() plat_outside_touch =
 {
 	if (other.classname != "player"&&other.movetype!=MOVETYPE_PUSHPULL)
@@ -120,12 +124,11 @@ void() plat_outside_touch =
 
 	if (other.health <= 0)
 		return;
-		
-//dprint ("plat_outside_touch\n");
 	self = self.enemy;
 	if (self.state == STATE_TOP)
 		plat_go_down ();
 };
+*/
 
 void() plat_trigger_use =
 {
@@ -408,6 +411,8 @@ void() func_train_find =
 };
 
 /*QUAKED func_train (0 .5 .8) ? GLOW TOGGLE RETURN TRANSLUCENT
+Hexen 2 Release V1.11 version Trains
+
 Trains are moving platforms that players can ride.
 The targets origin specifies the min point of the train at each corner.
 The train spawns at the first target it is pointing at.
@@ -453,9 +458,15 @@ As usual, any rotating brush needs an origin brush.
 
 if TRAIN_GLOW is checked, changes to a light globe sprite and lights up an area
 */
+void func_train_mp();
 void() func_train =
-{	
-	local entity targ;
+{
+entity targ;
+	if(world.spawnflags&MISSIONPACK)
+	{
+		func_train_mp();
+		return;
+	}
 
 	self.decap = 0;
 
@@ -487,7 +498,7 @@ void() func_train =
 	else
 	{
 		self.noise = self.noise1 = "misc/null.wav";
-		precache_sound ("misc/null.wav");
+//		precache_sound ("misc/null.wav");
 	}
 
 	if(self.wait==-2)
@@ -1114,4 +1125,182 @@ void func_rotating_movechain (void)
 		thinktime self : 3;//wait a few secs for board to start
 	}
 }
+
+/*
+ * $Log: /H2 Mission Pack/HCode/PLATS.hc $
+ * 
+ * 29    2/18/98 6:02p Jmonroe
+ * added cache4 functions, added puzzle piece cache_file4 cmds
+ * 
+ * 28    2/12/98 5:55p Jmonroe
+ * remove unreferenced funcs
+ * 
+ * 27    2/05/98 12:30p Mgummelt
+ * 
+ * 26    2/04/98 4:58p Mgummelt
+ * spawnflags on monsters cleared out
+ * 
+ * 25    2/03/98 9:47a Mgummelt
+ * 
+ * 24    2/02/98 5:14p Mgummelt
+ * 
+ * 23    2/02/98 5:07p Mgummelt
+ * 
+ * 22    1/28/98 3:10p Mgummelt
+ * 
+ * 21    1/19/98 6:21p Mgummelt
+ * 
+ * 20    1/16/98 2:11p Mgummelt
+ * 
+ * 19    1/14/98 7:43p Mgummelt
+ * 
+ * 18    1/14/98 2:35p Mgummelt
+ * 
+ * 17    1/13/98 3:35p Mgummelt
+ * 
+ * 63    10/28/97 1:01p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 61    9/16/97 4:17p Rjohnson
+ * Updates
+ * 
+ * 60    9/01/97 3:35a Jweier
+ * 
+ * 57    8/28/97 1:54p Rjohnson
+ * Puzzle piece update
+ * 
+ * 56    8/25/97 5:07p Jweier
+ * 
+ * 55    8/23/97 7:15p Rlove
+ * 
+ * 54    8/15/97 3:03p Bgokey
+ * 
+ * 53    7/21/97 3:03p Rlove
+ * 
+ * 52    7/14/97 6:24p Rlove
+ * 
+ * 51    7/14/97 12:44p Rlove
+ * 
+ * 50    7/07/97 5:06p Mgummelt
+ * 
+ * 49    7/03/97 4:12p Mgummelt
+ * 
+ * 48    7/03/97 12:48p Mgummelt
+ * 
+ * 47    7/03/97 11:26a Mgummelt
+ * 
+ * 46    6/18/97 4:00p Mgummelt
+ * 
+ * 45    6/18/97 10:46a Rjohnson
+ * Code cleanu
+ * 
+ * 44    6/14/97 2:22p Mgummelt
+ * 
+ * 43    6/13/97 3:28p Mgummelt
+ * 
+ * 42    6/12/97 12:44p Mgummelt
+ * 
+ * 41    6/11/97 10:26a Mgummelt
+ * 
+ * 40    6/03/97 5:25p Jweier
+ * 
+ * 39    5/27/97 8:22p Mgummelt
+ * 
+ * 38    5/22/97 11:32a Rjohnson
+ * Translucent trains don't block you
+ * 
+ * 37    5/19/97 4:24p Rjohnson
+ * Translucent train options
+ * 
+ * 36    5/16/97 11:27p Mgummelt
+ * 
+ * 35    5/15/97 2:44p Mgummelt
+ * 
+ * 34    5/15/97 12:30a Mgummelt
+ * 
+ * 33    5/12/97 11:12p Mgummelt
+ * 
+ * 32    5/10/97 1:54p Mgummelt
+ * 
+ * 31    5/09/97 4:57p Mgummelt
+ * 
+ * 30    5/08/97 5:47p Mgummelt
+ * 
+ * 29    5/06/97 4:27p Rjohnson
+ * Added absolute light level
+ * 
+ * 28    5/02/97 4:37p Jweier
+ * 
+ * 27    4/26/97 10:19a Jweier
+ * rotating trains
+ * 
+ * 26    4/04/97 4:30p Mgummelt
+ * 
+ * 25    3/27/97 6:28p Jweier
+ * 
+ * 24    3/27/97 6:12p Jweier
+ * 
+ * 23    3/27/97 1:59p Jweier
+ * 
+ * 22    3/25/97 6:01p Jweier
+ * 
+ * 21    3/25/97 5:43p Jweier
+ * 
+ * 20    3/25/97 11:02a Jweier
+ * added CRUSH_START_OPEN
+ * 
+ * 19    3/20/97 7:51p Jweier
+ * fixed train problem
+ * 
+ * 18    3/20/97 6:22p Jweier
+ * 
+ * 17    3/20/97 5:07p Jweier
+ * light trains are off until triggered on, and go off when they stop
+ * 
+ * 16    3/15/97 12:16p Jweier
+ * If RETURN is checked, trains will run their whole route before
+ * stopping.
+ * 
+ * 15    3/07/97 6:45p Jweier
+ * 
+ * 14    3/07/97 6:39p Jweier
+ * func_trains can now be toggled, and made to wait at each target to be
+ * triggered again 
+ * 
+ * 13    2/28/97 5:37p Rlove
+ * A little clean up
+ * 
+ * 12    2/28/97 5:17p Rlove
+ * New Plats now crush you and are triggerable
+ * 
+ * 11    2/28/97 11:26a Jweier
+ * func_crushers have damage fields now
+ * 
+ * 10    2/28/97 11:21a Jweier
+ * func_crusher implemented - let the smooshing begin!
+ * 
+ * 9     2/28/97 10:59a Jweier
+ * Added more func_crusher options
+ * 
+ * 8     2/27/97 6:12p Jweier
+ * Added basic crusher entity
+ * 
+ * 6     2/21/97 5:55p Jweier
+ * Added light train ability
+ *
+ * 5     1/27/97 4:23p Rlove
+ * Rebuilt plats so they make sense
+ * 
+ * 4     12/16/96 12:42p Rlove
+ * New gauntlets, artifacts, and inventory
+ * 
+ * 1     12/13/96 3:47p Rlove
+ * 
+ * 3     11/18/96 3:29p Rlove
+ * Changed sounds variable to soundtype
+ * 
+ * 2     11/11/96 1:19p Rlove
+ * Added Source Safe stuff
+ */
 

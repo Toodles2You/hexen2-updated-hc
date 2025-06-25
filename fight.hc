@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/FIGHT.hc 28    9/09/97 3:59p Mgummelt $
+ * $Header: /H2 Mission Pack/HCode/FIGHT.hc 5     3/09/98 3:05p Mgummelt $
  */
 
 
@@ -11,7 +11,7 @@
 
 
 float anglemod(float v);
-void  ChooseTurn(vector dest);
+//void  ChooseTurn(vector dest);
 void  ai_face();
 float CheckMonsterAttack(float AttackType, float ChanceModifier);
 
@@ -38,9 +38,9 @@ float MAX_SHORT_MISSILE = 8;
 
 float CheckAttack()
 {
-	local vector	spot1, spot2;	
-	local entity	targ;
-	local float		chance;
+vector	spot1, spot2;	
+entity	targ;
+float		chance;
 
 	targ = self.enemy;
 	
@@ -69,6 +69,7 @@ float CheckAttack()
 			return TRUE;
 		}
 	}
+
 //FIXME: check for darkness, maybe won't fire, maybe aim will be off
 	
 // missile attack
@@ -106,7 +107,10 @@ float CheckAttack()
 	if (random () < chance)
 	{
 		self.th_missile ();
-		SUB_AttackFinished (random(0,2));
+		if(skill>=4)
+			self.attack_finished=0;
+		else
+			SUB_AttackFinished (random(0,2));
 		return TRUE;
 	}
 
@@ -141,6 +145,7 @@ void ai_charge(float d)
 	movetogoal(d);		// done in C code...
 }
 
+/*
 void ai_charge_side()
 {
 	local	vector	dtemp;
@@ -158,7 +163,7 @@ void ai_charge_side()
 	
 	walkmove(heading, 20, FALSE);
 }
-
+*/
 
 /*
  * ai_melee()
@@ -200,7 +205,7 @@ float 	ldmg;
 /*
  * ai_melee_side()
  */
-
+/*
 void ai_melee_side()
 {
 	local vector	delta;
@@ -220,4 +225,79 @@ void ai_melee_side()
 	ldmg = random(9);
 	T_Damage (self.enemy, self, self, ldmg);
 }
+*/
 
+
+/*
+ * $Log: /H2 Mission Pack/HCode/FIGHT.hc $
+ * 
+ * 5     3/09/98 3:05p Mgummelt
+ * 
+ * 4     2/12/98 5:55p Jmonroe
+ * remove unreferenced funcs
+ * 
+ * 3     1/12/98 2:41p Mgummelt
+ * 
+ * 30    10/28/97 1:00p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 28    9/09/97 3:59p Mgummelt
+ * 
+ * 27    9/03/97 9:14p Mgummelt
+ * Fixing targetting AI
+ * 
+ * 26    9/02/97 8:56p Mgummelt
+ * 
+ * 25    9/01/97 1:35a Mgummelt
+ * 
+ * 24    8/26/97 8:31a Mgummelt
+ * 
+ * 23    8/13/97 11:53p Mgummelt
+ * 
+ * 22    8/11/97 6:09p Mgummelt
+ * 
+ * 21    8/06/97 10:18p Mgummelt
+ * 
+ * 20    8/04/97 8:07p Mgummelt
+ * 
+ * 19    8/04/97 8:03p Mgummelt
+ * 
+ * 18    7/03/97 6:13p Mgummelt
+ * 
+ * 17    7/02/97 8:46p Mgummelt
+ * 
+ * 16    6/18/97 6:28p Mgummelt
+ * 
+ * 15    6/18/97 4:00p Mgummelt
+ * 
+ * 14    6/14/97 2:21p Mgummelt
+ * 
+ * 13    6/10/97 9:27p Mgummelt
+ * 
+ * 12    6/09/97 3:08p Mgummelt
+ * 
+ * 11    5/19/97 11:36p Mgummelt
+ * 
+ * 10    5/07/97 11:12a Rjohnson
+ * Added a new field to walkmove and movestep to allow for setting the
+ * traceline info
+ * 
+ * 9     5/06/97 1:29p Mgummelt
+ * 
+ * 8     5/05/97 5:40p Rlove
+ * 
+ * 6     3/29/97 1:16p Aleggett
+ * 
+ * 5     2/26/97 3:14p Rlove
+ * Changes to basic monster ai
+ * 
+ * 4     2/25/97 10:43a Rlove
+ * Remove some old shambler, ogre, and soldier code
+ * 
+ * 3     1/15/97 12:02p Rjohnson
+ * Removed all of quake's monsters
+ * 
+ * 2     11/11/96 1:12p Rlove
+ * Added Source Safe stuff
+ */

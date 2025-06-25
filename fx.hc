@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/fx.hc 57    9/29/97 4:36p Rlove $
+ * $Header: /H2 Mission Pack/HCode/fx.hc 7     3/13/98 1:51p Mgummelt $
  */
 
 float WHITE_PUFF	= 0;
@@ -45,7 +45,12 @@ void CreateRedCloud (vector org,vector vel,float framelength)
 {
 	starteffect(CE_REDCLOUD, org,vel, framelength);
 }
-
+/*
+void CreateFlameStream (vector org,vector vel,float framenumber)
+{
+	starteffect(CE_FLAMESTREAM, org,vel, framenumber);
+}
+*/
 // ============= FLASHES ================================
 
 void CreateLittleWhiteFlash (vector spot)
@@ -129,6 +134,7 @@ void splash_run (void)
 	}
 }
 
+/*
 void CreateWaterSplash (vector spot)
 {
 	entity newent;
@@ -144,7 +150,7 @@ void CreateWaterSplash (vector spot)
 	newent.think = splash_run;
 
 }
-
+*/
 
 /*
 ================
@@ -156,7 +162,9 @@ void  SpawnPuff (vector org, vector vel, float damage,entity victim)
 	float part_color;
 	float rad;
 
-	if (victim.thingtype==THINGTYPE_FLESH && victim.classname!="mummy" && victim.netname != "spider")
+	if(victim.frozen>0)
+		part_color = 406+random(8);				// Ice particles
+	else if (victim.thingtype==THINGTYPE_FLESH && victim.classname!="mummy" && victim.netname != "spider")
 		part_color = 256 + 8 * 16 + random(9);				//Blood red
 	else if ((victim.thingtype==THINGTYPE_GREYSTONE) || (victim.thingtype==THINGTYPE_BROWNSTONE))
 		part_color = 256 + 20 + random(8);			// Gray
@@ -332,7 +340,7 @@ void (vector org) fx_flash =
 	setsize (newent, '-8 -8 -8', '8 8 8');
 
 };
-/*
+
 void () friction_change_touch =
 {
 	if (other == self.owner)
@@ -342,9 +350,9 @@ void () friction_change_touch =
 		other.friction=self.friction;
 
 };
-*/
-/*QUAK-ED fx_friction_change (0 1 1) ?
 
+/*QUAKED fx_friction_change (0 1 1) ?
+ONLY WORKS ON PLAYERS
 Set the friction within this area.
 
 -------------------------FIELDS-------------------------
@@ -353,9 +361,13 @@ Set the friction within this area.
              1       : normal friction
              >0 & <1 : slippery
              >1      : high friction
+
+default = 0
+
+Player's Friction will be reset when they leave the brush's bounds
 --------------------------------------------------------
 */
-/*
+
 void() fx_friction_change =
 {
 	self.movetype = MOVETYPE_NONE;
@@ -370,28 +382,68 @@ void() fx_friction_change =
 
 	self.touch = friction_change_touch;
 };
+
+
+void () gravity_change_touch =
+{
+	if (other == self.owner||other.gravity==self.gravity)
+		return;
+	dprintf("Changing gravity to %s\n",self.gravity);
+//	if (other.classname == "player")
+		other.gravity=other.standard_grav=self.gravity;
+
+};
+
+/*QUAKED fx_gravity_change (0 1 1) ?
+
+Set the gravity within this area.
+
+-------------------------FIELDS-------------------------
+'gravity' :  this is how quickly the player will fall
+
+             100       : 1 G
+             >0 & <100 : low grav
+             >100      : high grav
+--------------------------------------------------------
 */
 
+void() fx_gravity_change =
+{
+	self.gravity/=100;
+	self.movetype = MOVETYPE_NONE;
+	self.owner = self;
+	self.solid = SOLID_TRIGGER;
+	setorigin (self, self.origin);
+	setmodel (self, self.model);
+	self.modelindex = 0;
+	self.model = "";
+
+	setsize (self, self.mins , self.maxs);
+
+	self.touch = gravity_change_touch;
+};
+
+/*
 void() explosion_done =
 {
 	self.effects=EF_DIMLIGHT;
 };
+*/
 
+/*
 void() explosion_use =
 {
-/*
 	if (self.spawnflags & FLASH)
 	{
 		self.effects=EF_BRIGHTLIGHT;
 		self.think=p_explosion_done;
 		self.nextthink= time + 1;
 	}
-*/
 	sound (self, CHAN_BODY, self.noise1, 1, ATTN_NORM);
-
 	particleexplosion(self.origin,self.color,self.exploderadius,self.counter);
 
 };
+*/
 
 /*QUAK-ED fx_particle_explosion (0 1 1) ( -5 -5 -5) (5 5 5) FLASH
  Gives off a spray of particles like an explosion.
@@ -472,3 +524,146 @@ void() fx_particle_explosion =
 };
 */
 
+/*
+ * $Log: /H2 Mission Pack/HCode/fx.hc $
+ * 
+ * 7     3/13/98 1:51p Mgummelt
+ * Fixed friction_change entity to work,  made checkbottom use the hull
+ * mins/maxs for it's checks, not the bounding box's.
+ * 
+ * 6     2/12/98 5:55p Jmonroe
+ * remove unreferenced funcs
+ * 
+ * 5     1/26/98 6:18p Mgummelt
+ * 
+ * 59    10/28/97 1:01p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 57    9/29/97 4:36p Rlove
+ * 
+ * 56    9/29/97 3:00p Rlove
+ * 
+ * 55    9/25/97 2:31p Rlove
+ * 
+ * 54    9/01/97 12:48a Jweier
+ * 
+ * 53    8/31/97 8:52a Mgummelt
+ * 
+ * 52    8/23/97 7:15p Rlove
+ * 
+ * 51    8/22/97 4:28p Rlove
+ * 
+ * 50    8/22/97 11:10a Rlove
+ * Added red cloud
+ * 
+ * 49    8/19/97 2:28p Rlove
+ * 
+ * 48    8/19/97 2:20p Rlove
+ * 
+ * 47    8/17/97 3:06p Mgummelt
+ * 
+ * 46    8/05/97 12:04p Rlove
+ * 
+ * 45    7/30/97 3:33p Mgummelt
+ * 
+ * 44    7/28/97 7:50p Mgummelt
+ * 
+ * 43    7/28/97 1:51p Mgummelt
+ * 
+ * 42    7/26/97 1:11p Rlove
+ * New snake stuff
+ * 
+ * 41    7/25/97 6:34p Rlove
+ * 
+ * 40    7/25/97 3:32p Mgummelt
+ * 
+ * 39    7/24/97 4:06p Rlove
+ * 
+ * 38    7/24/97 3:53p Rlove
+ * 
+ * 37    7/22/97 8:10a Rlove
+ * Gave smoke puffs a life span
+ * 
+ * 36    7/21/97 4:03p Mgummelt
+ * 
+ * 35    7/21/97 4:02p Mgummelt
+ * 
+ * 34    7/21/97 3:03p Rlove
+ * 
+ * 33    7/21/97 11:45a Mgummelt
+ * 
+ * 32    7/17/97 4:54p Rlove
+ * 
+ * 31    7/17/97 1:53p Rlove
+ * 
+ * 30    7/15/97 12:28p Mgummelt
+ * 
+ * 29    7/07/97 5:54p Rlove
+ * Spiders bleed green now
+ * 
+ * 28    6/18/97 6:32p Mgummelt
+ * 
+ * 27    6/12/97 12:14p Rlove
+ * Added red and green sparks
+ * 
+ * 25    6/03/97 10:26a Rlove
+ * 
+ * 24    6/03/97 9:02a Rlove
+ * 
+ * 23    6/03/97 9:00a Rlove
+ * Added fx_smoke_generator entity
+ * 
+ * 22    5/30/97 12:01p Rlove
+ * New blue explosion
+ * 
+ * 21    5/30/97 11:41a Rjohnson
+ * Removed the message field of the starteffect
+ * 
+ * 20    5/28/97 10:45a Rlove
+ * Moved sprite effects to client side - smoke, explosions, and flashes.
+ * 
+ * 19    5/27/97 4:50p Rjohnson
+ * Added white smoke puff as a client effect
+ * 
+ * 18    5/27/97 7:58a Rlove
+ * New thingtypes of GreyStone,BrownStone, and Cloth.
+ * 
+ * 17    5/23/97 4:17p Rlove
+ * Getting rid of Quake sounds
+ * 
+ * 16    5/22/97 10:28a Rlove
+ * Added fire circle fx
+ * 
+ * 15    5/19/97 12:01p Rlove
+ * New sprites for axe
+ * 
+ * 14    5/19/97 11:29a Rlove
+ * 
+ * 13    5/19/97 8:58a Rlove
+ * Adding sprites and such to the axe.
+ * 
+ * 12    5/16/97 1:52p Rlove
+ * 
+ * 11    5/15/97 6:34p Rjohnson
+ * Code cleanup
+ * 
+ * 10    5/15/97 1:33p Rlove
+ * 
+ * 9     5/13/97 2:26p Rlove
+ * 
+ * 8     5/12/97 11:06a Rlove
+ * 
+ * 6     5/12/97 10:31a Rlove
+ * 
+ * 5     4/24/97 2:21p Mgummelt
+ * 
+ * 4     11/19/96 11:40a Rlove
+ * Particle explosion entity
+ * 
+ * 3     11/18/96 3:30p Rlove
+ * added fx_flash entity
+ * 
+ * 2     11/11/96 1:19p Rlove
+ * Added Source Safe stuff
+ */

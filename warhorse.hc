@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/warhorse.hc 38    9/04/97 5:06p Mgummelt $
+ * $Header: /H2 Mission Pack/HCode/warhorse.hc 3     3/03/98 7:33p Mgummelt $
  */
 
 /*
@@ -656,6 +656,7 @@ void rider_war(void)
 	self.monsterclass = CLASS_BOSS;
 	self.yaw_speed = 2;
 	self.experience_value = 2000;
+	self.init_exp_val = self.experience_value;
 	setmodel (self, "models/boss/warhorse.mdl");
 	self.skin = 0;
 
@@ -737,6 +738,7 @@ void rider_quake_think(void)
 
 /*QUAKED rider_quake (1 0 0) ?
 -------------------------FIELDS-------------------------
+rider_quake are just trains that shake and move like an earthquake.  rider_quake_center is the entity that triggers the rider_quakes (it searches in a radius of 500).  The rider_quake_center must be activated by another trigger.
 --------------------------------------------------------
 
 */
@@ -813,6 +815,7 @@ void rider_quake_center_use(void)
 
 /*QUAKED rider_quake_center (1 0 0) (-8 -8 -8) (8 8 8)
 -------------------------FIELDS-------------------------
+rider_quake are just trains that shake and move like an earthquake.  rider_quake_center is the entity that triggers the rider_quakes (it searches in a radius of 500).  The rider_quake_center must be activated by another trigger.
 --------------------------------------------------------
 
 */
@@ -825,3 +828,114 @@ void rider_quake_center(void)
 	self.think = SUB_Null;
 }
 
+/*
+ * $Log: /H2 Mission Pack/HCode/warhorse.hc $
+ * 
+ * 3     3/03/98 7:33p Mgummelt
+ * 
+ * 40    10/28/97 1:01p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 38    9/04/97 5:06p Mgummelt
+ * Fixing Meat chunk colors and wrong autoaiming in coop
+ * 
+ * 37    9/04/97 3:50p Mgummelt
+ * 
+ * 36    9/03/97 12:26a Mgummelt
+ * 
+ * 35    9/02/97 2:55a Mgummelt
+ * 
+ * 34    9/01/97 12:19a Jweier
+ * 
+ * 33    8/31/97 5:45p Mgummelt
+ * 
+ * 32    8/31/97 5:45p Jweier
+ * 
+ * 31    8/31/97 4:36p Mgummelt
+ * 
+ * 30    8/31/97 4:21p Mgummelt
+ * 
+ * 29    8/31/97 3:34p Jweier
+ * 
+ * 28    8/31/97 11:38a Mgummelt
+ * 
+ * 27    8/31/97 11:38a Mgummelt
+ * To which I say- shove where the sun don't shine- sideways!  Yeah!
+ * How's THAT for paper cut!!!!
+ * 
+ * 26    8/30/97 6:58p Mgummelt
+ * 
+ * 25    8/30/97 6:25p Jweier
+ * 
+ * 24    8/29/97 11:44p Jweier
+ * 
+ * 23    8/28/97 3:34p Rjohnson
+ * Increased health
+ * 
+ * 22    8/25/97 9:20a Rjohnson
+ * Removed code
+ * 
+ * 21    8/08/97 4:24p Rjohnson
+ * Fix for warhorse
+ * 
+ * 20    8/08/97 11:27a Rjohnson
+ * Added trot sounds
+ * 
+ * 19    8/06/97 4:31p Rjohnson
+ * Update for initialization
+ * 
+ * 18    8/06/97 11:10a Rjohnson
+ * Fix for quake points
+ * 
+ * 17    8/05/97 11:46a Rjohnson
+ * Fix
+ * 
+ * 16    8/05/97 11:10a Rjohnson
+ * Added abslight
+ * 
+ * 15    7/25/97 5:35p Rjohnson
+ * Updates
+ * 
+ * 14    7/22/97 11:10a Rjohnson
+ * Removed unused variables
+ * 
+ * 13    6/19/97 3:08p Rjohnson
+ * Code space optimizations
+ * 
+ * 12    6/12/97 10:57a Rjohnson
+ * Fixed a small thing
+ * 
+ * 11    6/10/97 3:36p Rjohnson
+ * Updates
+ * 
+ * 10    6/04/97 2:03p Rjohnson
+ * Rider updates
+ * 
+ * 9     5/22/97 12:01p Rjohnson
+ * Updates - added earthquake effect
+ * 
+ * 8     5/19/97 11:43a Rjohnson
+ * Updates
+ * 
+ * 7     5/13/97 10:36a Rjohnson
+ * New frame sequences
+ * 
+ * 6     5/12/97 3:58p Rjohnson
+ * More updates
+ * 
+ * 5     5/12/97 10:53a Rjohnson
+ * Updates
+ * 
+ * 4     5/09/97 10:48a Rjohnson
+ * Merged all war-rider code into one file, other updates
+ * 
+ * 3     5/07/97 3:46p Rjohnson
+ * Updates
+ * 
+ * 2     5/06/97 4:07p Rjohnson
+ * Updates
+ * 
+ * 1     4/28/97 10:59a Rjohnson
+ * Initial version
+ */

@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/chunk.hc 71    9/04/97 3:50p Mgummelt $
+ * $Header: /H2 Mission Pack/HCode/chunk.hc 18    3/01/98 3:12p Mgummelt $
  */
 void ThrowSolidHead (float dm);
 
@@ -58,17 +58,17 @@ void ChunkRemove (void)
 
 vector ChunkVelocity (void)
 {
-	local vector v;
+vector v;
 
 	v_x = 300 * crandom();
 	v_y = 300 * crandom();
 	v_z = random(100,400);
 
 	v = v * 0.7;
-
 	return v;
 }
 
+/*
 void ThrowSingleChunk (string chunkname,vector location,float life_time,float skinnum)
 {
 	entity chunk;
@@ -97,20 +97,37 @@ void ThrowSingleChunk (string chunkname,vector location,float life_time,float sk
 		chunk_cnt+=1;
 	}
 }
-
+*/
 
 void MeatChunks (vector org,vector dir,float chunk_count,entity loser)
 {
-float final;
+float final,t_type;
 entity chunk;
 
-	while(chunk_count)
+	if(deathmatch||coop)
+	{
+		if(dir=='0 0 0')
+		{
+			dir = ChunkVelocity();
+			dir=loser.velocity+dir;
+		}
+		if(loser.frozen>0)
+			t_type=THINGTYPE_ICE;
+		else if(loser.model=="models/spider.mdl")
+			t_type=THINGTYPE_GREENFLESH;
+		else
+			t_type=loser.thingtype;
+		starteffect(CE_CHUNK, org, t_type, dir, chunk_count);
+	}
+	else while(chunk_count)
 	{
 		chunk=spawn_temp();
 		chunk_count-=1;
 		final = random();
 
-		if(loser.model=="models/spider.mdl")
+		if(loser.frozen>0)
+			setmodel (chunk, "models/shardice.mdl");
+		else if(loser.model=="models/spider.mdl")
 		{
 			if (final < 0.33)
 				setmodel (chunk, "models/sflesh1.mdl");
@@ -129,11 +146,14 @@ entity chunk;
 //		chunk.skin=1;
 		chunk.movetype = MOVETYPE_BOUNCE;
 		chunk.solid = SOLID_NOT;
-		if(dir=='0 0 0')
-			chunk.velocity = ChunkVelocity();
-		else
-			chunk.velocity=dir;//+randomv('-200 -200 -200','200 200 200');
 		chunk.think = ChunkRemove;
+		if(dir=='0 0 0')
+		{
+			dir = ChunkVelocity();
+			dir=loser.velocity+dir;
+		}
+		else
+			chunk.velocity=dir;
 		chunk.avelocity_x = random(1200);
 		chunk.avelocity_y = random(1200);
 		chunk.avelocity_z = random(1200);
@@ -146,18 +166,80 @@ entity chunk;
 	}
 }
 
-void CreateModelChunks (vector space,float scalemod)
+void chunk_hurt ()
+{
+float damage;
+	if(!other.takedamage)
+		return;
+
+	if(self.attack_finished>time)
+		return;
+	
+	if(self.velocity=='0 0 0')
+		return;
+
+	//SOUND
+	self.attack_finished = time + 0.5;
+	damage = self.scale * vlen(self.velocity)/100 * self.dmg;
+	T_Damage(other,self,self.owner,damage);
+}
+
+void CreateModelChunks (vector space,float scalemod, float numChunks)
 {
 	entity chunk;
-	float final;
+	float final, tried,t_type;
+	vector chunk_vel,org;
+	//return;//Magical Network-Friendly Code!
+
+	chunk_vel = ChunkVelocity();
+	if(!self.flags&FL_ONGROUND&&self.movetype!=MOVETYPE_NONE)
+		chunk_vel=self.velocity+chunk_vel;
+
+	if(deathmatch||coop)
+	{
+		if(self.origin=='0 0 0'&&self.solid==SOLID_BSP)
+			org=(self.absmin+self.absmax)*0.5;
+		else
+			org=self.origin;
+		if(self.frozen>0)
+			t_type=THINGTYPE_ICE;
+		else if(self.model=="models/spider.mdl")
+			t_type=THINGTYPE_GREENFLESH;
+		else
+			t_type=self.thingtype;
+		starteffect(CE_CHUNK, org, t_type, chunk_vel, numChunks);
+		return;
+	}
 
 	chunk = spawn_temp();
 
 	space_x = space_x * random();
 	space_y = space_y * random();
-	space_z = space_z * random();
 
-	setorigin (chunk, self.absmin + space);
+	if(self.solid==SOLID_TRIGGER&&self.thingtype!=THINGTYPE_WEBS)//Trigger event
+	{
+		traceline(self.absmin + space, self.absmin + space + '0 0 1' * self.maxs_z,TRUE,self);
+		tried = 0;
+		while((trace_startsolid||pointcontents(trace_endpos)!=CONTENT_EMPTY) && tried < 20)
+		{
+			space_x = space_x * random();
+			space_y = space_y * random();
+			traceline(self.absmin + space, self.absmin + space + '0 0 1' * self.maxs_z,TRUE,self);
+			tried+=1;
+		}
+		if(tried == 20)
+			return;
+		space_z = trace_endpos_z;
+		setorigin (chunk, trace_endpos);
+		chunk.solid = SOLID_BBOX;
+		chunk.touch = chunk_hurt;
+	}
+	else
+	{
+		space_z = space_z * random();
+		setorigin (chunk, self.absmin + space);
+		chunk.solid = SOLID_NOT;
+	}
 
 	final = random();
 	if ((self.thingtype==THINGTYPE_GLASS) || (self.thingtype==THINGTYPE_REDGLASS) || 
@@ -184,7 +266,14 @@ void CreateModelChunks (vector space,float scalemod)
 		else if (self.thingtype==THINGTYPE_WEBS)
 		{
 			chunk.skin=3;
-//			chunk.drawflags (+) DRF_TRANSLUCENT;
+			chunk.drawflags (+) DRF_TRANSLUCENT;
+			if(self.drawflags&MLS_ABSLIGHT)
+			{
+				chunk.drawflags(+)MLS_ABSLIGHT;
+				chunk.abslight=self.abslight;
+			}
+			chunk_vel*=.1;
+			chunk.gravity=random(0.3,0.8);
 		}
 	}
 	else if (self.thingtype==THINGTYPE_WOOD)
@@ -241,7 +330,7 @@ void CreateModelChunks (vector space,float scalemod)
 			setmodel (chunk, "models/schunk4.mdl");
 		chunk.skin = 1;
 	}
-	else if (self.thingtype==THINGTYPE_CLAY)
+	else if ((self.thingtype==THINGTYPE_CLAY) || (self.thingtype==THINGTYPE_BONE))
 	{
 		if (final < 0.25)
 			setmodel (chunk, "models/clshard1.mdl");
@@ -251,6 +340,10 @@ void CreateModelChunks (vector space,float scalemod)
 			setmodel (chunk, "models/clshard3.mdl");
 		else 
 			setmodel (chunk, "models/clshard4.mdl");
+		if (self.thingtype==THINGTYPE_BONE)
+		{
+			chunk.skin = 1;
+		}
 	}
 	else if (self.thingtype==THINGTYPE_LEAVES)
 	{
@@ -391,11 +484,22 @@ void CreateModelChunks (vector space,float scalemod)
 		chunk.skin = 0;
 	}
 
-	setsize (chunk, '0 0 0', '0 0 0');
+	if(self.solid==SOLID_TRIGGER)//Trigger event
+	{
+		setsize(chunk,'-1 -1 -1', '1 1 1');
+		chunk.hull = HULL_POINT;
+		thinktime chunk :  random(2)+2;
+		chunk.dmg = self.dmg;
+	}
+	else
+	{
+		setsize (chunk, '0 0 0', '0 0 0');
+		thinktime chunk :  random(2);
+	}
+
 	chunk.movetype = MOVETYPE_BOUNCE;
-	chunk.solid = SOLID_NOT;
-	chunk.velocity = ChunkVelocity();
 	chunk.think = ChunkRemove;
+	chunk.velocity=chunk_vel;
 	chunk.avelocity_x = random(1200);
 	chunk.avelocity_y = random(1200);
 	chunk.avelocity_z = random(1200);
@@ -406,13 +510,13 @@ void CreateModelChunks (vector space,float scalemod)
 		chunk.scale = random(scalemod,scalemod + .1);
 
 	chunk.ltime = time;
-	thinktime chunk :  random(2);
 }
 
 void DropBackpack(void);  // in items.hc
 
 
 // Put a little splat down if it will fit
+/*
 void TinySplat (vector location)
 {
 	vector holdplane;
@@ -453,7 +557,8 @@ void TinySplat (vector location)
     setorigin(splat,trace_endpos + '0 0 2');
 
 }
-
+*/
+/*
 void BloodSplat(void)
 {
 	entity splat;
@@ -516,7 +621,7 @@ void BloodSplat(void)
     setorigin(splat,trace_endpos + '0 0 2');
 
 }
-
+*/
 void chunk_reset ()
 {
 	chunk_cnt=FALSE;
@@ -560,25 +665,31 @@ void chunk_death (void)
 		deathsound="fx/metalbrk.wav";
 	else if ((self.thingtype==THINGTYPE_CLOTH) || (self.thingtype==THINGTYPE_REDGLASS))
 		deathsound="fx/clothbrk.wav";
-	else if (self.thingtype==THINGTYPE_FLESH)
+	else if (self.thingtype==THINGTYPE_FLESH)//||(self.thingtype==THINGTYPE_ACID&&self.flags2&FL_ALIVE))
 	{
 		//Made temporary changes to make weapons look and sound
 		//better, more blood and gory sounds.
-		if(self.health<-80)
+		if(self.health<random(-40,-20))
 			deathsound="player/megagib.wav";
-		else
+		else if(random()<0.5)
 			deathsound="player/gib1.wav";
-		sound(self,CHAN_AUTO,deathsound,1,ATTN_NORM);
+		else
+			deathsound="player/gib2.wav";
+		sound(self,CHAN_ITEM,deathsound,1,ATTN_NORM);
 		self.level=-666;
 	}
 	else if (self.thingtype==THINGTYPE_CLAY)
 		deathsound="fx/claybrk.wav";
+	else if (self.thingtype==THINGTYPE_BONE)
+		deathsound="fx/bonebrk.wav";
 	else if ((self.thingtype==THINGTYPE_LEAVES)  || (self.thingtype==THINGTYPE_WOOD_LEAF))
 		deathsound="fx/leafbrk.wav";
 	else if (self.thingtype==THINGTYPE_ICE)
 		deathsound="misc/icestatx.wav";
-	else
+	else if(self.thingtype!=THINGTYPE_WEBS)
 		deathsound="fx/wallbrk.wav";
+	else
+		deathsound="misc/null.wav";
 
 	if(self.level!=-666)
 		sound (self, CHAN_VOICE, deathsound, 1, ATTN_NORM);
@@ -612,15 +723,22 @@ void chunk_death (void)
 	if(model_cnt>CHUNK_MAX)
 		model_cnt=CHUNK_MAX;
 
-	while (model_cnt>0)
+	if(deathmatch||coop)
+	{	// this function handles deathmatch specially...
+		CreateModelChunks(space,scalemod, model_cnt);
+	}
+	else
 	{
-		if (chunk_cnt < CHUNK_MAX*2)
+		while (model_cnt>0)
 		{
-			CreateModelChunks(space,scalemod);
-			chunk_cnt+=1;
-		}
+			if (chunk_cnt < CHUNK_MAX*2)
+			{
+				CreateModelChunks(space,scalemod, 1);
+				chunk_cnt+=1;
+			}
 
-		model_cnt-=1;
+			model_cnt-=1;
+		}
 	}
 	
 	make_chunk_reset();
@@ -633,6 +751,209 @@ void chunk_death (void)
 	if(self.headmodel!=""&&self.classname!="head")
 		ThrowSolidHead (50);
 	else
+	{
+		if(self.movechain)
+			remove(self.movechain);
 		remove(self);
+	}
 }
+
+/*
+ * $Log: /H2 Mission Pack/HCode/chunk.hc $
+ * 
+ * 18    3/01/98 3:12p Mgummelt
+ * 
+ * 17    2/28/98 6:46p Mgummelt
+ * 
+ * 16    2/25/98 6:10p Mgummelt
+ * 
+ * 15    2/20/98 1:00p Jmonroe
+ * added thingtype_bone
+ * 
+ * 14    2/12/98 3:32p Jmonroe
+ * removed unused funcs
+ * 
+ * 13    2/07/98 6:50p Mgummelt
+ * 
+ * 12    2/06/98 12:21p Mgummelt
+ * 
+ * 11    2/06/98 11:57a Mgummelt
+ * 
+ * 10    2/06/98 11:30a Mgummelt
+ * 
+ * 9     2/06/98 5:03a Nalbury
+ * Put in preliminary client chunks for network games...
+ * 
+ * 8     2/05/98 10:23p Mgummelt
+ * 
+ * 7     1/30/98 10:14p Mgummelt
+ * 
+ * 6     1/26/98 6:18p Mgummelt
+ * 
+ * 5     1/20/98 5:16p Mgummelt
+ * 
+ * 4     1/19/98 6:20p Mgummelt
+ * 
+ * 73    10/28/97 1:00p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 71    9/04/97 3:50p Mgummelt
+ * 
+ * 70    9/03/97 2:31a Mgummelt
+ * 
+ * 69    9/02/97 2:55a Mgummelt
+ * 
+ * 68    9/01/97 6:34a Mgummelt
+ * 
+ * 67    8/29/97 4:17p Mgummelt
+ * Long night
+ * 
+ * 66    8/29/97 1:00a Mgummelt
+ * 
+ * 65    8/28/97 10:11p Mgummelt
+ * 
+ * 64    8/28/97 9:19p Mgummelt
+ * 
+ * 63    8/28/97 9:16p Mgummelt
+ * 
+ * 62    8/28/97 8:54p Mgummelt
+ * 
+ * 61    8/28/97 8:51p Mgummelt
+ * 
+ * 60    8/26/97 8:31p Mgummelt
+ * 
+ * 59    8/23/97 8:24p Mgummelt
+ * 
+ * 58    8/23/97 5:16p Rlove
+ * 
+ * 57    8/19/97 6:27p Mgummelt
+ * 
+ * 56    8/16/97 5:46p Mgummelt
+ * 
+ * 55    8/07/97 9:55a Rlove
+ * 
+ * 54    8/07/97 8:43a Rlove
+ * 
+ * 53    8/04/97 12:19p Rlove
+ * 
+ * 51    7/30/97 3:32p Mgummelt
+ * 
+ * 50    7/29/97 7:52a Rlove
+ * 
+ * 49    7/21/97 3:03p Rlove
+ * 
+ * 48    7/19/97 9:57p Mgummelt
+ * 
+ * 47    7/15/97 2:31p Mgummelt
+ * 
+ * 46    7/10/97 6:21p Rlove
+ * 
+ * 45    7/09/97 7:43a Rlove
+ * 
+ * 44    7/09/97 7:35a Rlove
+ * New thingtype of CLEARGLASS
+ * 
+ * 43    7/07/97 7:26p Mgummelt
+ * 
+ * 42    7/07/97 7:01p Mgummelt
+ * 
+ * 41    7/03/97 11:13a Rlove
+ * 
+ * 40    7/02/97 8:46p Mgummelt
+ * 
+ * 39    6/30/97 3:26p Mgummelt
+ * 
+ * 38    6/30/97 3:25p Mgummelt
+ * 
+ * 37    6/30/97 3:24p Rlove
+ * 
+ * 36    6/23/97 4:50p Mgummelt
+ * 
+ * 35    6/19/97 5:15p Mgummelt
+ * 
+ * 34    6/19/97 3:41p Mgummelt
+ * 
+ * 33    6/19/97 7:47a Rlove
+ * 
+ * 32    6/18/97 6:03p Mgummelt
+ * 
+ * 31    6/18/97 5:30p Mgummelt
+ * 
+ * 30    6/18/97 4:00p Mgummelt
+ * 
+ * 29    6/17/97 8:16p Mgummelt
+ * 
+ * 28    6/15/97 5:10p Mgummelt
+ * 
+ * 27    6/14/97 5:51p Mgummelt
+ * 
+ * 26    6/13/97 7:36p Mgummelt
+ * 
+ * 25    6/05/97 8:16p Mgummelt
+ * 
+ * 24    6/03/97 10:48p Mgummelt
+ * 
+ * 23    5/29/97 2:22p Rlove
+ * Spawn less chunks but they are larger.
+ * 
+ * 22    5/29/97 8:57a Rlove
+ * Added combo thingtypes wood/leaf, wood/metal, wood/stone, metal/stone,
+ * metal/cloth
+ * 
+ * 21    5/28/97 3:36p Mgummelt
+ * 
+ * 20    5/27/97 8:22p Mgummelt
+ * 
+ * 19    5/27/97 10:57a Rlove
+ * Took out old Id sound files
+ * 
+ * 18    5/27/97 7:58a Rlove
+ * New thingtypes of GreyStone,BrownStone, and Cloth.
+ * 
+ * 17    5/21/97 3:34p Rlove
+ * New chunks
+ * 
+ * 16    5/13/97 2:26p Rlove
+ * 
+ * 15    5/06/97 9:12a Rlove
+ * Added thingtype_leaves
+ * 
+ * 14    4/30/97 5:03p Mgummelt
+ * 
+ * 13    4/29/97 1:08p Mgummelt
+ * 
+ * 12    4/26/97 6:30a Rlove
+ * Added thingtype of CLAY for pots
+ * 
+ * 11    4/24/97 2:53p Rjohnson
+ * Added backpack functionality and spawning of objects
+ * 
+ * 10    4/24/97 2:15p Mgummelt
+ * 
+ * 9     4/21/97 8:47p Mgummelt
+ * 
+ * 8     4/21/97 10:32a Rlove
+ * Added stone chunk models 
+ * 
+ * 7     4/18/97 3:46p Rlove
+ * 
+ * 6     4/18/97 7:01a Rlove
+ * Added new gib models
+ * 
+ * 5     4/17/97 1:28p Rlove
+ * added new built advanceweaponframe
+ * 
+ * 4     3/31/97 6:37a Rlove
+ * Chunks now scale to the size of the object they come from
+ * 
+ * 3     3/28/97 10:15a Jweier
+ * removed old code (incorrect)
+ * 
+ * 2     3/26/97 2:43p Aleggett
+ * Allowed breakable brushes to "use" an entity when they "die".
+ * 
+ * 1     3/21/97 9:35a Rlove
+ * 
+ */
 

@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/spit.hc 13    8/15/97 2:00p Bgokey $
+ * $Header: /H3MP/hcode/spit.hc 15    10/28/97 1:01p Mgummelt $
  */
 /*
 ==============================================================================
@@ -116,3 +116,67 @@ void(vector offset) do_spit =
 	thinktime missile : 0.1;
 };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+ * $Log: /H3MP/hcode/spit.hc $
+ * 
+ * 15    10/28/97 1:01p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 13    8/15/97 2:00p Bgokey
+ * 
+ * 12    8/14/97 7:38p Bgokey
+ * 
+ * 10    8/14/97 12:27a Mgummelt
+ * 
+ * 9     7/15/97 1:25p Rjohnson
+ * Updates
+ * 
+ * 8     6/19/97 3:09p Rjohnson
+ * Code optimizations
+ * 
+ * 7     6/18/97 7:37p Mgummelt
+ * 
+ * 6     6/14/97 2:22p Mgummelt
+ * 
+ * 5     5/15/97 6:34p Rjohnson
+ * Code cleanup
+ * 
+ * 4     5/06/97 1:29p Mgummelt
+ * 
+ * 3     4/24/97 2:22p Mgummelt
+ * 
+ * 2     1/09/97 1:47p Rjohnson
+ * Additional refining
+ * 
+ * 1     1/02/97 11:19a Rjohnson
+ * Initial version
+ * 
+ * 2     12/11/96 11:44a Rjohnson
+ * Used monster modifiers for the spit damage
+ * 
+ * 1     12/09/96 11:51a Rjohnson
+ * Initial Revision
+ * 
+ */

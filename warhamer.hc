@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/warhamer.hc 59    10/07/97 6:02p Mgummelt $
+ * $Header: /H2 Mission Pack/HCode/warhamer.hc 4     3/13/98 3:27a Mgummelt $
  */
 
 /*
@@ -66,10 +66,12 @@ void ThrowHammerReturn (void)
 //then go back to what you were doing with the current weapon
 	self.controller.weapon=IT_WEAPON1;
 	self.controller.th_weapon=warhammer_select;
-    sound(self, CHAN_VOICE, "misc/null.wav", 0.3, ATTN_NORM);
+	stopSound(self,CHAN_VOICE);
+    //sound(self, CHAN_VOICE, "misc/null.wav", 0.3, ATTN_NORM);
 	remove(self);
 }
 
+/*
 void HammerZap (void)
 {
 vector zapangle, tospot, fromspot;
@@ -86,7 +88,7 @@ float numstrikes, strikelength;
 		makevectors(zapangle);
 		fromspot = self.origin + v_forward*16;
 		tospot=self.origin + (v_forward*random(strikelength+32,32)); //Keep it to 30 si it won' have to draw more than one model
-		do_lightning (self,self.level,STREAM_ATTACHED,1,fromspot,tospot,3);
+		do_lightning (self,self.level,STREAM_ATTACHED,1,fromspot,tospot,3,TE_STREAM_LIGHTNING);
 		self.level+=1;
 		numstrikes-=1;
 		if(self.level>32)
@@ -94,6 +96,7 @@ float numstrikes, strikelength;
 	}
 	self.effects=EF_MUZZLEFLASH;
 }
+*/
 
 void hammer_bounce ()
 {
@@ -152,7 +155,8 @@ float distance;
 	
 	if(self.controller.health<=0||!self.controller.flags2&FL_ALIVE||self.controller.model=="models/sheep.mdl")
     {
-        sound(self, CHAN_VOICE, "misc/null.wav", 0.3, ATTN_NORM);
+        stopSound(self,CHAN_VOICE);
+		//sound(self, CHAN_VOICE, "misc/null.wav", 0.3, ATTN_NORM);
 		if(pointcontents(self.origin)==CONTENT_SOLID)
 			remove(self);
 		else
@@ -272,6 +276,7 @@ void warhammer_throw ()
 		warhammer_gone();
 }
 
+/*
 void test_traceline ()
 {
 	vector	source;
@@ -286,6 +291,7 @@ void test_traceline ()
 //	if (trace_fraction <1.0)
 //		spawntestmarker(trace_endpos);
 }
+*/
 
 void warhammer_fire (string hitdir,vector ofs)
 {
@@ -494,4 +500,3 @@ float r;
 			warhammer_c();
 	}
 }
-

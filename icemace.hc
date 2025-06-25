@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/icemace.hc 95    9/25/97 4:06p Mgummelt $
+ * $Header: /H2 Mission Pack/HCode/icemace.hc 8     3/18/98 3:49p Mgummelt $
  */
 
 /*
@@ -38,6 +38,15 @@ $frame power6      power7      power8      power9
 //
 $frame select1      select2      select3      select4      select5      
 $frame select6      select7      select8      select9      select10     
+
+void chain_remove ()
+{
+	if(self.movechain.movechain!=world)
+		remove(self.movechain.movechain);
+	if(self.movechain!=world)
+		remove(self.movechain);
+	remove(self);
+}
 
 void() IceCubeThink =
 {
@@ -87,11 +96,18 @@ entity oself;
 		return;
 	}
 
+
 	sound(loser,CHAN_BODY,"crusader/frozen.wav",1,ATTN_NORM);
+
+	if(loser.flags&FL_GODMODE)
+		return;
+
 	loser.frozen=50;
     loser.oldskin=loser.skin;
 	if(loser.classname!="player")
 	{
+		if(loser.gravity!=loser.standard_grav)
+			loser.gravity=loser.standard_grav;
 		loser.colormap=159;		
 		loser.thingtype=THINGTYPE_ICE;
 		loser.freeze_time=time+5;
@@ -115,7 +131,7 @@ entity oself;
 		loser.deathtype="ice melt";
 		loser.th_die=shatter;
 		AwardExperience(forwhom,loser,loser.experience_value);
-		loser.experience_value=0;
+		loser.experience_value=	loser.init_exp_val = 0;
 		oself=self;
 		self=loser;
 		SUB_UseTargets();
@@ -187,7 +203,7 @@ void() FreezeTouch=
 				thinktime newmis : 0.1;
 			}
 		}
-		if(other.flags&FL_COLDHEAL)//Had to take out cold heal, so cold resist
+		if(other.flags2&FL2_COLDHEAL)//Had to take out cold heal, so cold resist
 	        T_Damage(other,self,self.owner,3);
 		else if((other.health<=10||(other.classname=="player"&&other.frozen<=-5&&other.health<200))&&other.solid!=SOLID_BSP&&!other.artifact_active&ART_INVINCIBILITY&&other.thingtype==THINGTYPE_FLESH&&other.health<100)
 			SnowJob(other,self.owner);
@@ -234,6 +250,8 @@ void()FireFreeze=
     setmodel (newmis, "models/iceshot1.mdl");
 	newmis.drawflags=MLS_ABSLIGHT;
 	newmis.abslight=0.5;
+	newmis.think=chain_remove;
+	thinktime newmis : 3;
 
     setsize (newmis, '0 0 0', '0 0 0');
     setorigin (newmis, self.origin+self.proj_ofs + v_forward*8);
@@ -253,6 +271,7 @@ entity corona;
 	setorigin(corona,newmis.origin);
 };
 
+/*
 void shard_hit (void)
 {
 	if(other.classname=="blizzard shard")
@@ -265,7 +284,9 @@ void shard_hit (void)
 //	particle2(self.origin,'-10 -10 -10','10 10 10',145,14,5);
 	remove(self);
 }
+*/
 
+/*
 void FireShard (void)
 {
 local vector org,dir;
@@ -302,7 +323,7 @@ local vector org,dir;
 		setsize(newmis,'0 0 0','0 0 0');
 		setorigin(newmis,org);
 }
-	
+*/	
 void() blizzard_think=
 {
 entity loser;
@@ -379,7 +400,7 @@ float beam_count;
 	while(loser)
 	{
 		if(loser.takedamage&&loser.health&&loser.frozen<=0&&loser!=self.owner&&loser.solid!=SOLID_BSP)
-			if(loser.flags&FL_COLDHEAL)
+			if(loser.flags2&FL2_COLDHEAL)
 				T_Damage(loser,self,self.owner,1);
 			else
 			{
@@ -655,3 +676,220 @@ void Cru_Ice_Fire (void)
 		icestaff_shard();
 }
 
+/*
+ * $Log: /H2 Mission Pack/HCode/icemace.hc $
+ * 
+ * 8     3/18/98 3:49p Mgummelt
+ * Last minute original game fixes, doors, eidolon, icemace, rats.
+ * 
+ * 7     3/03/98 7:31p Mgummelt
+ * 
+ * 6     2/18/98 4:59p Mgummelt
+ * 
+ * 5     2/12/98 5:55p Jmonroe
+ * remove unreferenced funcs
+ * 
+ * 4     2/06/98 7:06p Mgummelt
+ * 
+ * 3     1/26/98 6:18p Mgummelt
+ * 
+ * 97    10/28/97 1:01p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 95    9/25/97 4:06p Mgummelt
+ * 
+ * 94    9/19/97 8:47a Rlove
+ * 
+ * 93    9/11/97 12:02p Mgummelt
+ * 
+ * 92    9/02/97 7:54p Mgummelt
+ * 
+ * 91    9/01/97 8:18p Mgummelt
+ * 
+ * 90    8/31/97 2:36p Mgummelt
+ * 
+ * 89    8/31/97 11:38a Mgummelt
+ * To which I say- shove where the sun don't shine- sideways!  Yeah!
+ * How's THAT for paper cut!!!!
+ * 
+ * 88    8/31/97 3:42a Mgummelt
+ * 
+ * 87    8/31/97 3:41a Mgummelt
+ * 
+ * 86    8/30/97 6:58p Mgummelt
+ * 
+ * 85    8/28/97 8:49p Mgummelt
+ * 
+ * 84    8/27/97 7:07p Mgummelt
+ * 
+ * 83    8/26/97 6:01p Mgummelt
+ * 
+ * 82    8/26/97 7:38a Mgummelt
+ * 
+ * 81    8/25/97 11:32p Mgummelt
+ * 
+ * 80    8/25/97 4:42p Mgummelt
+ * 
+ * 79    8/22/97 5:15p Mgummelt
+ * 
+ * 78    8/19/97 8:14p Mgummelt
+ * 
+ * 77    8/19/97 12:57p Mgummelt
+ * 
+ * 76    8/19/97 12:22a Mgummelt
+ * 
+ * 75    8/17/97 3:45p Mgummelt
+ * 
+ * 74    8/16/97 4:26p Mgummelt
+ * 
+ * 73    8/15/97 11:27p Mgummelt
+ * 
+ * 72    8/15/97 4:25p Mgummelt
+ * 
+ * 71    8/12/97 6:10p Mgummelt
+ * 
+ * 70    8/09/97 1:49a Mgummelt
+ * 
+ * 69    8/08/97 6:21p Mgummelt
+ * 
+ * 68    8/08/97 3:34p Mgummelt
+ * 
+ * 67    8/05/97 4:10p Mgummelt
+ * 
+ * 66    8/04/97 6:21p Mgummelt
+ * 
+ * 65    7/31/97 11:23p Mgummelt
+ * 
+ * 64    7/31/97 12:57a Mgummelt
+ * 
+ * 63    7/31/97 12:33a Mgummelt
+ * 
+ * 62    7/30/97 11:22p Mgummelt
+ * 
+ * 61    7/30/97 10:43p Mgummelt
+ * 
+ * 60    7/30/97 8:27p Mgummelt
+ * 
+ * 59    7/30/97 3:33p Mgummelt
+ * 
+ * 58    7/28/97 7:50p Mgummelt
+ * 
+ * 57    7/28/97 1:51p Mgummelt
+ * 
+ * 56    7/26/97 8:38a Mgummelt
+ * 
+ * 55    7/26/97 2:17a Mgummelt
+ * 
+ * 54    7/25/97 10:19p Mgummelt
+ * 
+ * 53    7/25/97 8:39p Mgummelt
+ * 
+ * 52    7/25/97 4:03p Mgummelt
+ * 
+ * 51    7/25/97 3:43p Mgummelt
+ * 
+ * 50    7/25/97 3:32p Mgummelt
+ * 
+ * 49    7/25/97 2:56p Mgummelt
+ * 
+ * 48    7/24/97 12:34p Mgummelt
+ * 
+ * 47    7/24/97 12:32p Mgummelt
+ * 
+ * 46    7/24/97 3:26a Mgummelt
+ * 
+ * 45    7/22/97 7:36p Bgokey
+ * 
+ * 44    7/22/97 11:47a Mgummelt
+ * 
+ * 43    7/21/97 7:03p Mgummelt
+ * 
+ * 42    7/21/97 4:03p Mgummelt
+ * 
+ * 41    7/21/97 4:02p Mgummelt
+ * 
+ * 40    7/19/97 9:53p Mgummelt
+ * 
+ * 39    7/16/97 10:57p Mgummelt
+ * 
+ * 38    7/15/97 8:30p Mgummelt
+ * 
+ * 37    7/14/97 9:30p Mgummelt
+ * 
+ * 36    7/10/97 7:21p Mgummelt
+ * 
+ * 35    7/09/97 6:31p Mgummelt
+ * 
+ * 34    7/01/97 3:30p Mgummelt
+ * 
+ * 33    7/01/97 2:21p Mgummelt
+ * 
+ * 32    6/30/97 5:38p Mgummelt
+ * 
+ * 31    6/19/97 4:03p Rjohnson
+ * removed crandom()
+ * 
+ * 30    6/18/97 6:39p Mgummelt
+ * 
+ * 29    6/18/97 4:00p Mgummelt
+ * 
+ * 28    6/16/97 4:00p Mgummelt
+ * 
+ * 27    6/05/97 9:29a Rlove
+ * Weapons now have deselect animations
+ * 
+ * 26    5/30/97 10:04p Mgummelt
+ * 
+ * 25    5/28/97 8:13p Mgummelt
+ * 
+ * 24    5/22/97 2:50a Mgummelt
+ * 
+ * 23    5/19/97 11:36p Mgummelt
+ * 
+ * 22    5/16/97 11:28p Mgummelt
+ * 
+ * 21    5/15/97 6:34p Rjohnson
+ * Code cleanup
+ * 
+ * 20    5/15/97 5:05a Mgummelt
+ * 
+ * 19    5/08/97 5:47p Mgummelt
+ * 
+ * 18    5/07/97 3:40p Mgummelt
+ * 
+ * 17    5/06/97 1:29p Mgummelt
+ * 
+ * 16    5/05/97 4:48p Mgummelt
+ * 
+ * 15    5/02/97 8:06p Mgummelt
+ * 
+ * 14    4/28/97 6:53p Mgummelt
+ * 
+ * 13    4/28/97 1:10p Mgummelt
+ * 
+ * 12    4/25/97 8:32p Mgummelt
+ * 
+ * 11    4/24/97 2:21p Mgummelt
+ * 
+ * 10    4/21/97 8:47p Mgummelt
+ * 
+ * 9     4/21/97 6:15p Mgummelt
+ * 
+ * 8     4/21/97 12:31p Mgummelt
+ * 
+ * 7     4/18/97 8:22p Mgummelt
+ * 
+ * 6     4/18/97 5:24p Mgummelt
+ * 
+ * 5     4/18/97 11:44a Rlove
+ * changed advanceweaponframe to return frame state
+ * 
+ * 4     4/17/97 9:12p Mgummelt
+ * 
+ * 3     4/17/97 2:50p Mgummelt
+ * 
+ * 2     4/14/96 3:52p Mgummelt
+ * 
+ * 1     4/14/96 3:51p Mgummelt
+ */

@@ -5,14 +5,23 @@ void() bubble_bob;
 
 void PlayerSpeed_Calc (void)
 {
-	if (self.playerclass==CLASS_ASSASSIN)
+	switch (self.playerclass)
+	{
+	case CLASS_ASSASSIN:
+	case CLASS_SUCCUBUS:
 		self.hasted=1;
-	else if (self.playerclass==CLASS_PALADIN)
+		self.hasted=1;
+	break;
+	case CLASS_PALADIN:
 		self.hasted=.96;
-	else if (self.playerclass==CLASS_CRUSADER)
+	break;
+	case CLASS_CRUSADER:
 		self.hasted=.93;
-	else if(self.playerclass==CLASS_NECROMANCER)
+	break;
+	case CLASS_NECROMANCER:
 		self.hasted=.9;
+	break;
+	}
 
 	if (self.artifact_active & ART_HASTE)
 		self.hasted *= 2.9;
@@ -48,7 +57,7 @@ void ReadySolid ()
 
 void StandardPain(void)
 {
-	if(self.playerclass==CLASS_ASSASSIN)
+	if(self.playerclass==CLASS_ASSASSIN||self.playerclass==CLASS_SUCCUBUS)
 		if (random() > 0.5)
 			sound (self, CHAN_VOICE, "player/asspain1.wav", 1, ATTN_NORM);
 		else 
@@ -81,7 +90,7 @@ void PainSound (void)
 		sheep_sound(1);
 	else if (/*self.watertype == CONTENT_WATER &&*/ self.waterlevel == 3)
 	{
-		if(self.playerclass==CLASS_ASSASSIN)
+		if(self.playerclass==CLASS_ASSASSIN||self.playerclass==CLASS_SUCCUBUS)
 			sound (self, CHAN_VOICE, "player/assdrown.wav", 1, ATTN_NORM);
 		else
 			sound (self, CHAN_VOICE, "player/paldrown.wav", 1, ATTN_NORM);
@@ -92,7 +101,7 @@ void PainSound (void)
 	}
 /*	else if (self.watertype == CONTENT_LAVA)
 	{
-		if(self.playerclass==CLASS_ASSASSIN)
+		if(self.playerclass==CLASS_ASSASSIN||self.playerclass==CLASS_SUCCUBUS)
 			if (random() > 0.5)
 				sound (self, CHAN_VOICE, "player/asspain1.wav", 1, ATTN_NORM);
 			else 
@@ -104,7 +113,7 @@ void PainSound (void)
 	}
 	else
 	{	
-		if(self.playerclass==CLASS_ASSASSIN)
+		if(self.playerclass==CLASS_ASSASSIN||self.playerclass==CLASS_SUCCUBUS)
 			if (random() > 0.5)
 				sound (self, CHAN_VOICE, "player/asspain1.wav", 1, ATTN_NORM);
 			else 
@@ -116,12 +125,32 @@ void PainSound (void)
 	}*/
 }
 
-void player_pain (void)
+void player_pain (entity attacker,float total_damage)
 {
 //FIX this = need to check if firing, else make idle frames of all
 //	weapons frame 0?
 //if (self.weaponframe)
 //		return;
+
+	if(self.playerclass==CLASS_SUCCUBUS)
+		if(self.flags&FL_SPECIAL_ABILITY2)
+		{//Sound &/or effect?
+			if(self.level>9)
+			{
+				self.greenmana+=total_damage;
+				self.bluemana+=total_damage;
+			}
+			else
+			{
+				if(self.level>6)
+					self.greenmana+=total_damage*(self.level - 2/10);
+				self.bluemana+=total_damage*(self.level/10);
+			}
+			if(self.bluemana>self.max_mana)
+				self.bluemana=self.max_mana;
+			if(self.greenmana>self.max_mana)
+				self.greenmana=self.max_mana;
+		}
 
 	if (self.last_attack + 0.5 > time || self.button0)
 		return;
@@ -199,7 +228,7 @@ void DeathSound ()
 	if (self.waterlevel == 3)
 	{
 		DeathBubbles(20);
-		if(self.playerclass==CLASS_ASSASSIN)
+		if(self.playerclass==CLASS_ASSASSIN||self.playerclass==CLASS_SUCCUBUS)
 			sound (self, CHAN_VOICE, "player/assdieh2.wav", 1, ATTN_NONE);
 		else
 			sound (self, CHAN_VOICE, "player/paldieh2.wav", 1, ATTN_NONE);
@@ -207,7 +236,7 @@ void DeathSound ()
 	}
 	else
 	{
-		if(self.playerclass==CLASS_ASSASSIN)
+		if(self.playerclass==CLASS_ASSASSIN||self.playerclass==CLASS_SUCCUBUS)
 			if (random() > 0.5)
 				sound (self, CHAN_VOICE, "player/assdie1.wav", 1, ATTN_NORM);
 			else 
@@ -229,7 +258,7 @@ void PlayerDead ()
 	if(self.model!=self.headmodel)
 	{
 		self.angles_x=self.angles_z=0;
-		pitch_roll_for_slope('0 0 0');
+		pitch_roll_for_slope('0 0 0',self);
 	}
 }
 
@@ -285,10 +314,11 @@ vector org;
 	self.mass = 1;
 	self.view_ofs = '0 0 8';
 	self.proj_ofs='0 0 2';
-	self.hull=HULL_POINT;
 	org=self.origin;
 	org_z=self.absmax_z - 4;
+//This may be bad...
 	setsize (self, '-4 -4 -4', '4 4 4');
+	self.hull=HULL_POINT;
 	setorigin(self,org);
 	self.flags(-)FL_ONGROUND;
 	self.avelocity = randomv('0 -600 0', '0 600 0');
@@ -353,6 +383,7 @@ void PlayerCrouching ()
 	self.act_state=ACT_CROUCH_MOVE;
 }
 
+/*
 void PlayerCrouch () 
 {
 	if (self.hull==HULL_PLAYER)
@@ -360,7 +391,7 @@ void PlayerCrouch ()
 	else if (self.hull==HULL_CROUCH)
 		PlayerUnCrouching();	
 }
-
+*/
 
 void GibPlayer ()
 {
@@ -444,6 +475,9 @@ void PlayerDie ()
 		CameraViewPort(self,self);
 		CameraViewAngles(self,self);
 	}
+
+	if(self.gravity!=self.standard_grav)
+		self.gravity=self.standard_grav;
 
 	msg_entity=self;
 	WriteByte(MSG_ONE, SVC_CLEAR_VIEW_FLAGS);

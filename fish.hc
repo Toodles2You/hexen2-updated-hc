@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/fish.hc 4     8/16/97 5:46p Mgummelt $
+ * $Header: /H2 Mission Pack/HCode/fish.hc 4     2/05/98 3:27p Mgummelt $
  */
 
 /*
@@ -240,3 +240,28 @@ void monster_fish(void)
 	thinktime self : HX_FRAME_TIME;
 }
 
+
+/*
+ * $Log: /H2 Mission Pack/HCode/fish.hc $
+ * 
+ * 4     2/05/98 3:27p Mgummelt
+ * 
+ * 3     2/04/98 1:57p Mgummelt
+ * 
+ * 2     2/02/98 3:39p Mgummelt
+ * 
+ * 6     10/28/97 1:00p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 4     8/16/97 5:46p Mgummelt
+ * 
+ * 3     7/22/97 10:52a Rjohnson
+ * Fix a return type value
+ * 
+ * 2     7/08/97 5:10p Rjohnson
+ * Update
+ * 
+ * 1     7/07/97 12:01p Rjohnson
+ * Initial Version
+ */

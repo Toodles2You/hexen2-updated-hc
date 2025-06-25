@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/ravenai.hc 16    9/03/97 9:14p Mgummelt $
+ * $Header: /H2 Mission Pack/HCode/ravenai.hc 2     2/12/98 5:55p Jmonroe $
  */
 
 float() LocateTarget =
@@ -264,6 +264,7 @@ void (float l, float r, float u, float d, float last_move, vector where) find_pa
 	}
 };
 
+/*
 float () FindDir =
 { // Monster couldn't go in the direction it is pointed to, so find one it can go to
 	local vector a,b,c;
@@ -295,4 +296,54 @@ float () FindDir =
 
 	return self.angles_y;
 };
+*/
 
+
+/*
+ * $Log: /H2 Mission Pack/HCode/ravenai.hc $
+ * 
+ * 2     2/12/98 5:55p Jmonroe
+ * remove unreferenced funcs
+ * 
+ * 18    10/28/97 1:01p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 16    9/03/97 9:14p Mgummelt
+ * Fixing targetting AI
+ * 
+ * 15    8/26/97 2:26a Mgummelt
+ * 
+ * 14    8/14/97 10:28p Bgokey
+ * 
+ * 13    8/14/97 7:32p Bgokey
+ * 
+ * 12    8/14/97 7:05p Bgokey
+ * 
+ * 11    8/12/97 6:10p Mgummelt
+ * 
+ * 10    7/21/97 4:04p Mgummelt
+ * 
+ * 9     7/21/97 4:02p Mgummelt
+ * 
+ * 8     6/18/97 5:40p Mgummelt
+ * 
+ * 7     6/16/97 12:03p Rjohnson
+ * Removed imp stuff
+ * 
+ * 6     5/31/97 4:00p Mgummelt
+ * 
+ * 5     5/30/97 10:04p Mgummelt
+ * 
+ * 4     2/26/97 3:14p Rlove
+ * Changes to basic monster ai
+ * 
+ * 3     1/09/97 1:48p Rjohnson
+ * Made FindDir() return a direction instead of just setting it
+ * 
+ * 2     1/02/97 11:20a Rjohnson
+ * Christmas Changes
+ * 
+ * 1     12/17/96 10:38a Rjohnson
+ * Initial Version
+ */

@@ -1,7 +1,6 @@
 /*
- * $Header: /H3/game/hcode/spawn.hc 66    9/11/97 8:59a Mgummelt $
+ * $Header: /H2 Mission Pack/HCode/spawn.hc 21    3/03/98 7:34p Mgummelt $
  */
-
 float ENT_WORLD					= 0;
 float ENT_CHAIR					= 1;
 float ENT_BARSTOOL				= 2;
@@ -78,6 +77,26 @@ float ENT_PLANT_GENERIC			= 72;
 float ENT_PLANT_MESO			= 73;
 float ENT_PLANT_ROME			= 74;
 float ENT_FANGEL_HEAD			= 75;
+float ENT_CANDLE				= 76;
+float ENT_SKELETON				= 77;
+float ENT_STALAG1				= 78;
+float ENT_STALAG2				= 79;
+float ENT_SNOW_CORNER			= 80;
+float ENT_SNOW_PILE				= 81;
+float ENT_SNOW_WALL				= 82;
+float ENT_CH_KITE				= 83;
+float ENT_CH_HANG				= 84;
+float ENT_BUDDHA				= 85;
+float ENT_SKELTHRN				= 86;
+float ENT_DEMSTAT				= 87;
+float ENT_SHIVA					= 88;
+float ENT_BOTD					= 89;
+float ENT_SAMURAI				= 90;
+float ENT_DRAGLION				= 91;
+
+//float ENT_LASTENT				= 91;
+
+
 
 
 float SPAWNVALU_SIZE	= 6;	// Number of fields for each entity in entity_spawnvalues array
@@ -88,8 +107,8 @@ float SOLIDTYPE_OFS		= 3;
 float THINGTYPE_OFS		= 4;
 float DAMAGETYPE_OFS	= 5;
 
-
-float entity_spawnvalues[456] =
+			//SPAWNVALU_SIZE * ENT_LASTENT
+float entity_spawnvalues[552] =//6 per entity
 {  // Health    Mass    Movetype         Solid    Thingtype        DamageType
 		25,		3,		0,				0,				2,				1,	// ENT_WORLD		
 		25,		3,	   13,				3,				2,				1,	// ENT_CHAIR
@@ -152,12 +171,12 @@ float entity_spawnvalues[456] =
 	   100,	   10,	    5,				3,			    4,				1,	// ENT_FANGEL
 	   200,	    0,	    0,				3,			    1,				1,	// ENT_STATUE_ATHENA
 	   200,	    0,	    0,				3,			    1,				1,	// ENT_STATUE_NEPTUNE
-	    50,	    0,	    0,				3,			    1,				1,	// ENT_BONEPILE
+	    50,	    0,	    0,				3,			    24,				1,	// ENT_BONEPILE
 		25,	   10,		4,				3,				2,				1,  // ENT_CHEST3
 	   200,	    0,	    0,				3,			    1,				1,	// ENT_STATUE_CAESAR
 	     0,	    0,	    4,				0,			    1,				0,	// ENT_TELEPORT
 	   200,	 9999,	    0,				3,			    1,				1,	// ENT_STATUE_SNAKE_COIL
-	    10,	    3,	    0,				3,			    6,				1,	// ENT_SKULL
+	    10,	    3,	    0,				3,			    24,				1,	// ENT_SKULL
 	    50,	    8,	    4,				3,			    2,				1,	// ENT_PEW
 	   200,	    0,	    0,				3,			    1,				1,	// ENT_STATUE_OLMEC
 	   200,	    0,	    0,				3,			    1,				1,	// ENT_STATUE_MARS
@@ -166,14 +185,31 @@ float entity_spawnvalues[456] =
 	    10,	 9999,	    0,				3,				7,				1,	// ENT_PLANT_GENERIC
 	    10,	   20,	    4,				3,				6,				1,	// ENT_PLANT_MESO
 	    10,	   50,	    4,				3,				6,				1,	// ENT_PLANT_ROME
-	    10,	    3,	   10,				3,			    4,				1	// ENT_FANGEL_HEAD
-}; 
+	    10,	    3,	   10,				3,			    4,				1,	// ENT_FANGEL_HEAD
+	    10,	  100,	    4,				3,				6,				1,	// ENT_CANDLE
+	    20,	  200,	    4,				2,			   24,				1,	// ENT_SKELETON
+	    20,	   50,	    4,				2,			   16,				1,	// ENT_STALAG1
+	    40,	  100,	    4,				2,			   16,				1,	// ENT_STALAG2
+	     0,	  100,	    0,				0,			   16,				0,	// ENT_SNOW_CORNER
+	     0,	  100,	    0,				0,			   16,				0,	// ENT_SNOW_PILE
+	     0,	  100,	    0,				0,			   16,				0,	// ENT_SNOW_WALL
+		25,	    8,	    0,				3,			   10,				1,	// ENT_CH_KITE
+		25,		8,	    0,				3,			    2,				1,	// ENT_CH_HANG
+	  9999,	  100,	    4,				3,			    2,				1,	// ENT_BUDDHA
+		 0,	  100,	    0,				3,			    2,				0,	// ENT_SKELTHRN
+	   100,	    0,	    0,				3,			    1,				1,	// ENT_DEMSTAT
+	   100,	    0,	    0,				3,			    1,				0,	// ENT_SHIVA
+		20,		0,		0,				3,				1,				1,	// ENT_BOTD
+	   100,	    0,	    0,				3,			    1,				1,	// ENT_SAMURAI
+	   100,	  200,	    0,				3,			    1,				1	// ENT_DRAGLION
+};//Health    Mass    Movetype         Solid    Thingtype        DamageType
 
 
 float BOX_SIZE	= 2;	// Number of fields for each entity in entity_box array
 float BMAX_OFS	= 1;
 
-vector entity_box[152] =
+		//BOX_SIZE* ENT_LASTENT
+vector entity_box[184] =
 {   // Min             Maxs
 	'   0    0    0',	'  0   0   0',			// ENT_WORLD
 	' -10  -10    0',	' 10  10  40',			// ENT_CHAIR
@@ -250,7 +286,23 @@ vector entity_box[152] =
 	' -10  -10    0',	' 10  10  20',			// ENT_PLANT_GENERIC
 	' -10  -10    0',	' 10  10  40',			// ENT_PLANT_MESO
 	' -24  -24    0',	' 24  24  90',			// ENT_PLANT_ROME
-	'  -8   -8    0',	'  8   8  16'			// ENT_FANGEL_SKULL
+	'  -8   -8    0',	'  8   8  16',			// ENT_FANGEL_SKULL
+	'  -8   -8    0',	'  8   8  16',			// ENT_CANDLE
+	' -37  -12    0',	' 37  12  11',			// ENT_SKELETON
+	' -10  -10  -17',	' 10  10  17',			// ENT_STALAG1
+	' -24  -24   21',	' 24  24  21',			// ENT_STALAG2
+	' -41  -55   0',	' 41  55  65',			// ENT_SNOW_CORNER
+	' -52  -52   0',	' 52  52  16',			// ENT_SNOW_PILE
+	' -83  -83   0',	' 83  83  45',			// ENT_SNOW_WALL
+	' -22  -22   -120',	' 22  22  0',			// ENT_CH_KITE
+	' -48  -48   -66',	' 48  48  0',			// ENT_CH_HANG
+	' -48  -48   -66',	' 48  48  0',			// ENT_BUDDHA
+	' -33  -33   0',	' 33  33  5',			// ENT_SKELTHRN
+	' -64  -64   0',	' 64  64  102',			// ENT_DEMSTAT
+	' -16  -16   0',	' 16  16  72',			// ENT_SHIVA
+	' -10  -10   0',	' 10  10  4',			// ENT_BOTD
+	' -25  -25   0',	' 25  25  106',			// ENT_SAMURAI
+	' -25  -25   0',	' 25  25  62'			// ENT_DRAGLION
 };
 
 void(vector org) spawn_tfog;
@@ -298,6 +350,9 @@ void CreateEntityNew(entity subject,float entity_id,string modelname,void() deat
 	if (!subject.health)
 		subject.health = entity_spawnvalues[index1];
  
+	if(!subject.max_health)
+		subject.max_health=subject.health;
+	
 	if (!subject.mass)
 	{
 		mass_flag = 0;
@@ -380,3 +435,189 @@ vector diff;
 	newmis.nextthink = time + 2.5;
 }
 
+/*
+ * $Log: /H2 Mission Pack/HCode/spawn.hc $
+ * 
+ * 21    3/03/98 7:34p Mgummelt
+ * 
+ * 20    2/27/98 11:52a Mgummelt
+ * 
+ * 19    2/26/98 12:10p Mgummelt
+ * 
+ * 18    2/26/98 1:11a Jweier
+ * 
+ * 17    2/23/98 3:13p Mgummelt
+ * 
+ * 16    2/20/98 1:44p Mgummelt
+ * 
+ * 15    2/20/98 1:06p Jmonroe
+ * changed obj_skeleton to thingtype_bone
+ * 
+ * 14    2/18/98 11:56a Jmonroe
+ * Added ent type for samurai
+ * 
+ * 13    2/13/98 3:27p Mgummelt
+ * 
+ * 12    2/10/98 5:08p Mgummelt
+ * 
+ * 11    2/08/98 6:22p Mgummelt
+ * 
+ * 10    2/02/98 10:38a Mgummelt
+ * 
+ * 9     2/02/98 10:28a Plipo
+ * 
+ * 8     1/27/98 4:18p Mgummelt
+ * 
+ * 7     1/23/98 2:58p Plipo
+ * 
+ * 6     1/19/98 4:47p Mgummelt
+ * 
+ * 68    10/28/97 1:01p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 66    9/11/97 8:59a Mgummelt
+ * 
+ * 65    9/04/97 3:08p Mgummelt
+ * 
+ * 64    9/04/97 3:08p Mgummelt
+ * 
+ * 63    9/04/97 3:01p Mgummelt
+ * 
+ * 62    9/04/97 3:01p Mgummelt
+ * 
+ * 61    9/03/97 7:50p Mgummelt
+ * 
+ * 60    9/03/97 7:55a Mgummelt
+ * 
+ * 59    9/02/97 3:34p Mgummelt
+ * 
+ * 58    9/02/97 2:52p Mgummelt
+ * 
+ * 57    8/29/97 3:04a Mgummelt
+ * 
+ * 56    8/29/97 1:38a Mgummelt
+ * 
+ * 55    8/28/97 5:41p Mgummelt
+ * 
+ * 54    8/27/97 10:52p Mgummelt
+ * 
+ * 53    8/26/97 9:00a Mgummelt
+ * 
+ * 52    8/26/97 8:53a Mgummelt
+ * 
+ * 51    8/23/97 1:39p Rlove
+ * 
+ * 50    8/23/97 9:59a Rlove
+ * 
+ * 49    8/21/97 12:18p Mgummelt
+ * 
+ * 48    8/20/97 2:34p Rjohnson
+ * Change for precache of fireball
+ * 
+ * 47    8/19/97 9:21p Mgummelt
+ * 
+ * 46    8/19/97 2:09p Mgummelt
+ * 
+ * 45    8/19/97 10:46a Rlove
+ * 
+ * 44    8/15/97 10:30a Rlove
+ * Changed cart bounding box
+ * 
+ * 43    8/15/97 9:09a Rlove
+ * 
+ * 42    8/14/97 7:34a Rlove
+ * Added plants, corpses  
+ * 
+ * 41    8/14/97 6:42a Rlove
+ * 
+ * 40    8/09/97 12:17p Rlove
+ * 
+ * 39    8/07/97 3:34p Rlove
+ * 
+ * 38    8/02/97 10:11a Rlove
+ * Added Olmec Statue (whatever the heck that is)
+ * 
+ * 37    7/31/97 2:22p Rlove
+ * Added the pew
+ * 
+ * 36    7/30/97 6:46a Rlove
+ * Added skull
+ * 
+ * 35    7/29/97 8:35a Rlove
+ * 
+ * 34    7/21/97 4:04p Mgummelt
+ * 
+ * 33    7/21/97 4:02p Mgummelt
+ * 
+ * 32    7/21/97 3:03p Rlove
+ * 
+ * 31    7/21/97 10:25a Rlove
+ * 
+ * 30    7/17/97 11:46a Rlove
+ * 
+ * 29    7/15/97 5:23p Mgummelt
+ * 
+ * 28    7/15/97 4:05p Rlove
+ * Added hull consideration when bounding box is being scaled.
+ * 
+ * 27    7/10/97 1:45p Rlove
+ * 
+ * 26    7/10/97 11:19a Rlove
+ * 
+ * 25    7/07/97 5:23p Mgummelt
+ * 
+ * 24    7/01/97 2:36p Rlove
+ * Fixed solid_phase problem
+ * 
+ * 23    6/27/97 4:55p Rlove
+ * 
+ * 22    6/25/97 2:25p Rlove
+ * 
+ * 21    6/21/97 1:23p Rlove
+ * 
+ * 20    6/21/97 10:09a Rlove
+ * 
+ * 19    6/21/97 9:52a Rlove
+ * 
+ * 18    6/21/97 9:11a Rlove
+ * 
+ * 17    6/20/97 5:09p Rlove
+ * Pulling out references to old CreateEntity function
+ * 
+ * 15    6/20/97 8:25a Rlove
+ * Tightened up the code a bit.
+ * 
+ * 14    6/19/97 9:15a Rlove
+ * 
+ * 13    6/18/97 7:37p Mgummelt
+ * 
+ * 12    6/18/97 4:58p Rlove
+ * 
+ * 11    6/18/97 4:30p Rlove
+ * Rewrote entity spawning code
+ * 
+ * 10    5/27/97 8:22p Mgummelt
+ * 
+ * 9     5/23/97 3:44p Mgummelt
+ * 
+ * 8     5/22/97 6:30p Mgummelt
+ * 
+ * 7     5/15/97 6:34p Rjohnson
+ * Code cleanup
+ * 
+ * 6     5/10/97 12:07p Mgummelt
+ * 
+ * 5     5/08/97 9:47p Mgummelt
+ * 
+ * 4     5/08/97 3:58p Jweier
+ * 
+ * 3     4/25/97 4:20p Rlove
+ * Fixed Scaling bounding box, added more pots, fixed mummy statue. 
+ * 
+ * 2     3/25/97 4:25p Rjohnson
+ * Fixed caching problem
+ * 
+ * 1     3/19/97 11:33a Rlove
+ */
+ 

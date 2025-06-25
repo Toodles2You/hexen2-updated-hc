@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/meteor.hc 77    9/11/97 12:02p Mgummelt $
+ * $Header: /H2 Mission Pack/HCode/meteor.hc 9     3/16/98 6:21p Jweier $
  */
 
 /*
@@ -189,6 +189,7 @@ void() tornato_die = [++24 .. 47]
 void() tornato_spin = [++0 .. 23]
 {
 float distance,content;
+float pick_up;
 
 	if(time>self.lifetime||self.torncount<self.owner.torncount - 1)
 	{
@@ -243,6 +244,10 @@ float distance,content;
 			org=self.origin;
 		else
 			org_z+=random(10)*self.scale+4*self.scale;
+
+		if(vlen(self.enemy.origin-self.origin))
+			let_go=TRUE;
+		
 		if(!self.enemy.flags2&FL_TORNATO_SAFE)
 		{
 			self.enemy.velocity='0 0 0';
@@ -312,7 +317,15 @@ float distance,content;
 		sucker=findradius(self.origin,500);
 		while(sucker)
 		{
-			if(sucker.takedamage&&sucker.health&&sucker!=self.enemy&&sucker.mass<500*self.scale&&visible(sucker)&&sucker!=self.owner)
+			pick_up=TRUE;
+			if(sucker.monsterclass>=CLASS_BOSS)
+				if(sucker.flags&FL_MONSTER||sucker.classname=="buddha_shield"||sucker.classname=="buddha_firewalker")
+					pick_up=FALSE;
+			if(!sucker.solid||sucker.solid==SOLID_BSP)
+				pick_up=FALSE;
+			if(teamplay&&sucker.classname=="player"&&(coop||self.controller.team==sucker.team))
+				pick_up=FALSE;
+			if(pick_up&&sucker.takedamage&&sucker.health&&sucker!=self.enemy&&sucker.mass<500*self.scale&&visible(sucker)&&sucker!=self.owner&&sucker.owner!=self.owner)
 				if(sucker.movetype&&sucker.movetype!=MOVETYPE_PUSH)
 				{
 					seekspeed=(500 - vlen(sucker.origin-self.origin));
@@ -346,7 +359,14 @@ float distance,content;
 			sucker=findradius(self.origin,1000);
 			while(sucker)
 			{
-				if(sucker.takedamage&&sucker.health&&sucker!=self.enemy&&sucker.mass<500*self.scale&&visible(sucker)&&sucker!=self.owner&&!sucker.effects&EF_NODRAW)
+				pick_up=TRUE;
+				if(sucker.classname=="buddha_shield"||sucker.classname=="buddha_firewalker")
+					pick_up=FALSE;
+				if(!sucker.solid)
+					pick_up=FALSE;
+				if(teamplay&&sucker.classname=="player"&&(coop||self.controller.team==sucker.team))
+					pick_up=FALSE;
+				if(sucker.takedamage&&sucker.health&&sucker!=self.enemy&&sucker.mass<500*self.scale&&visible(sucker)&&sucker!=self.owner&&!sucker.effects&EF_NODRAW&&pick_up&&sucker.owner!=self.owner)
 				{
 					if(sucker.solid==SOLID_BSP&&sucker.origin=='0 0 0')
 						distance=vlen((sucker.absmax+sucker.absmin)*0.5-self.origin);
@@ -446,7 +466,7 @@ void tornato_merge (void)
 void funnal_touch (void)
 {
 //FIXME:  Ignore the controlling player's projectiles, leaving it in to test
-	if(other.flags&FL_MONSTER&&other.monsterclass>=CLASS_BOSS)
+	if(other.monsterclass>=CLASS_BOSS&&(other.flags&FL_MONSTER||other.classname=="buddha_shield"||other.classname=="buddha_firewalker"))
 	{
 		T_Damage(other,self,self.owner,7);
 		traceline((self.absmin+self.absmax)*0.5,(other.absmin+other.absmax)*0.5,FALSE,self);
@@ -455,6 +475,9 @@ void funnal_touch (void)
 	}
 
 	if(other==self.controller||other.controller==self.owner||other==world||other==self.owner||other==self.owner||other.classname=="tornato"||(other.classname=="funnal"&&other.aflag)||other.movetype==MOVETYPE_PUSH)
+		return;
+
+	if(teamplay&&other.classname=="player"&&(coop||self.controller.team==other.team))
 		return;
 
 	if(self.aflag)
@@ -691,3 +714,177 @@ void meteor_deselect (void)
 		W_SetCurrentAmmo();
 }
 
+/*
+ * $Log: /H2 Mission Pack/HCode/meteor.hc $
+ * 
+ * 9     3/16/98 6:21p Jweier
+ * 
+ * 8     3/16/98 6:38a Mgummelt
+ * 
+ * 7     3/16/98 2:19a Mgummelt
+ * 
+ * 6     3/09/98 7:06p Mgummelt
+ * 
+ * 5     2/26/98 1:55a Mgummelt
+ * 
+ * 4     2/26/98 1:48a Mgummelt
+ * 
+ * 3     2/26/98 1:38a Mgummelt
+ * 
+ * 2     2/26/98 1:11a Mgummelt
+ * 
+ * 79    10/28/97 1:01p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 77    9/11/97 12:02p Mgummelt
+ * 
+ * 76    9/02/97 7:54p Mgummelt
+ * 
+ * 75    9/01/97 8:18p Mgummelt
+ * 
+ * 74    9/01/97 7:09a Mgummelt
+ * 
+ * 73    9/01/97 5:58a Mgummelt
+ * 
+ * 72    9/01/97 5:13a Mgummelt
+ * 
+ * 71    9/01/97 3:08a Mgummelt
+ * 
+ * 70    8/31/97 6:55p Mgummelt
+ * 
+ * 69    8/30/97 6:58p Mgummelt
+ * 
+ * 68    8/30/97 3:05p Mgummelt
+ * 
+ * 67    8/28/97 2:41p Mgummelt
+ * 
+ * 66    8/26/97 6:01p Mgummelt
+ * 
+ * 65    8/26/97 7:38a Mgummelt
+ * 
+ * 64    8/26/97 2:26a Mgummelt
+ * 
+ * 63    8/25/97 11:41p Mgummelt
+ * 
+ * 62    8/25/97 4:15p Mgummelt
+ * 
+ * 61    8/22/97 5:15p Mgummelt
+ * 
+ * 60    8/12/97 6:10p Mgummelt
+ * 
+ * 59    8/08/97 6:21p Mgummelt
+ * 
+ * 58    8/07/97 10:30p Mgummelt
+ * 
+ * 57    8/06/97 10:19p Mgummelt
+ * 
+ * 56    8/04/97 8:03p Mgummelt
+ * 
+ * 55    7/30/97 10:43p Mgummelt
+ * 
+ * 54    7/29/97 5:44p Mgummelt
+ * 
+ * 53    7/28/97 7:50p Mgummelt
+ * 
+ * 52    7/28/97 1:51p Mgummelt
+ * 
+ * 51    7/26/97 8:39a Mgummelt
+ * 
+ * 50    7/24/97 4:06p Rlove
+ * 
+ * 49    7/24/97 3:53p Rlove
+ * 
+ * 48    7/24/97 3:26a Mgummelt
+ * 
+ * 47    7/21/97 4:04p Mgummelt
+ * 
+ * 46    7/21/97 4:02p Mgummelt
+ * 
+ * 45    7/21/97 11:45a Mgummelt
+ * 
+ * 44    7/19/97 9:53p Mgummelt
+ * 
+ * 43    7/18/97 3:55p Mgummelt
+ * 
+ * 42    7/15/97 8:31p Mgummelt
+ * 
+ * 41    7/14/97 9:30p Mgummelt
+ * 
+ * 40    7/10/97 7:21p Mgummelt
+ * 
+ * 39    7/09/97 6:31p Mgummelt
+ * 
+ * 38    7/01/97 3:30p Mgummelt
+ * 
+ * 37    7/01/97 2:21p Mgummelt
+ * 
+ * 36    6/30/97 5:38p Mgummelt
+ * 
+ * 35    6/23/97 4:50p Mgummelt
+ * 
+ * 34    6/18/97 7:06p Mgummelt
+ * 
+ * 33    6/18/97 4:19p Mgummelt
+ * 
+ * 32    6/18/97 4:00p Mgummelt
+ * 
+ * 31    6/16/97 4:00p Mgummelt
+ * 
+ * 30    6/15/97 5:10p Mgummelt
+ * 
+ * 29    6/05/97 9:29a Rlove
+ * Weapons now have deselect animations
+ * 
+ * 28    6/04/97 8:16p Mgummelt
+ * 
+ * 27    6/03/97 12:35p Mgummelt
+ * 
+ * 26    5/31/97 3:59p Mgummelt
+ * 
+ * 25    5/28/97 8:24p Mgummelt
+ * 
+ * 23    5/23/97 2:54p Mgummelt
+ * 
+ * 22    5/22/97 7:05p Mgummelt
+ * 
+ * 21    5/22/97 2:50a Mgummelt
+ * 
+ * 20    5/20/97 9:36p Mgummelt
+ * 
+ * 19    5/19/97 11:36p Mgummelt
+ * 
+ * 18    5/19/97 12:06p Mgummelt
+ * 
+ * 17    5/17/97 8:45p Mgummelt
+ * 
+ * 16    5/16/97 11:27p Mgummelt
+ * 
+ * 15    5/15/97 8:28p Mgummelt
+ * 
+ * 14    5/15/97 2:44p Mgummelt
+ * 
+ * 13    5/15/97 5:04a Mgummelt
+ * 
+ * 12    5/15/97 3:45a Mgummelt
+ * 
+ * 10    5/12/97 10:37a Rlove
+ * 
+ * 9     5/06/97 1:29p Mgummelt
+ * 
+ * 8     5/05/97 10:09p Mgummelt
+ * 
+ * 7     5/05/97 4:48p Mgummelt
+ * 
+ * 6     4/28/97 6:53p Mgummelt
+ * 
+ * 5     4/25/97 8:32p Mgummelt
+ * 
+ * 4     4/24/97 2:21p Mgummelt
+ * 
+ * 3     4/21/97 12:31p Mgummelt
+ * 
+ * 2     4/17/97 1:45p Mgummelt
+ * 
+ * 1     4/17/97 12:13p Mgummelt
+ */

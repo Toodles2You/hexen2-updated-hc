@@ -61,6 +61,7 @@ void()TransferWaypoint=
         remove(self);
 };
 
+/*
 void()WaypointTouch=
 {
         if(other!=self.controller)
@@ -71,7 +72,7 @@ void()WaypointTouch=
         else
                 ResetWaypoints();
 };
-
+*/
 void() SetNextWaypoint =
 {
         if(visible(self.enemy)&&self.classname=="waypoint")//keep the spot in mind, but don't spawn there yet

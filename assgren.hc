@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/assgren.hc 48    9/03/97 7:30a Mgummelt $
+ * $Header: /H3MP/hcode/assgren.hc 50    10/28/97 1:00p Mgummelt $
 * Grenade Throw, Assassin. 
 */
 
@@ -260,3 +260,70 @@ void grenade_deselect (void)
 		W_SetCurrentAmmo();
 }
 
+/*
+ * $Log: /H3MP/hcode/assgren.hc $
+ * 
+ * 50    10/28/97 1:00p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 48    9/03/97 7:30a Mgummelt
+ * 
+ * 47    8/30/97 11:53p Mgummelt
+ * 
+ * 46    8/26/97 6:00p Mgummelt
+ * 
+ * 45    8/26/97 7:38a Mgummelt
+ * 
+ * 44    8/19/97 12:57p Mgummelt
+ * 
+ * 43    8/13/97 5:46p Mgummelt
+ * 
+ * 42    8/08/97 6:22p Mgummelt
+ * 
+ * 41    7/30/97 8:26p Mgummelt
+ * 
+ * 40    7/24/97 11:38a Mgummelt
+ * 
+ * 39    7/17/97 6:53p Mgummelt
+ * 
+ * 38    7/16/97 6:06p Mgummelt
+ * 
+ * 37    7/15/97 9:19p Mgummelt
+ * 
+ * 36    7/15/97 8:30p Mgummelt
+ * 
+ * 35    7/14/97 9:30p Mgummelt
+ * 
+ * 34    7/10/97 7:21p Mgummelt
+ * 
+ * 33    7/09/97 6:31p Mgummelt
+ * 
+ * 32    7/02/97 6:35p Mgummelt
+ * 
+ * 31    7/01/97 3:30p Mgummelt
+ * 
+ * 30    7/01/97 2:21p Mgummelt
+ * 
+ * 29    6/30/97 5:37p Mgummelt
+ * 
+ * 28    6/18/97 8:14p Mgummelt
+ * 
+ * 27    6/18/97 6:58p Mgummelt
+ * 
+ * 26    6/18/97 6:21p Mgummelt
+ * 
+ * 25    6/18/97 6:19p Mgummelt
+ * 
+ * 24    6/18/97 5:56p Mgummelt
+ * 
+ * 23    6/18/97 4:00p Mgummelt
+ * 
+ * 22    6/16/97 2:21p Mgummelt
+ * 
+ * 21    6/16/97 2:20p Mgummelt
+ * 
+ * 20    6/05/97 9:29a Rlove
+ * Weapons now have deselect animations
+ * 
+ */

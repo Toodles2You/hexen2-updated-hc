@@ -70,6 +70,11 @@ assgren.hc
 crossbow.hc
 setstaff.hc
 
+bldrain.hc
+acidorb.hc
+flameorb.hc
+lightwp.hc		// Succubus Weapons
+
 weapons.hc
 tripmine.hc		// UQ tripmines
 
@@ -90,6 +95,7 @@ triggers.hc
 cat2.hc
 quake.hc
 plats.hc
+plats_mp.hc
 misc.hc
 torch.hc
 
@@ -100,6 +106,7 @@ torch.hc
 newplay.hc
 setmodth.hc
 
+//t_head.hc
 fish.hc
 sheep.hc
 raven.hc
@@ -116,20 +123,24 @@ golem.hc
 skullwiz.hc
 medusa.hc
 mezzoman.hc
+yakman.hc
 archer.hc
 spit.hc			// Hydra stuff
 hydra.hc
 faspell.hc      // Fallen angel stuff
 fablade.hc
 fangel.hc
+pentacles.hc
 
 eric.hc
 
-//rider.hc
-//pstboar.hc
-//famhorse.hc
-//warhorse.hc
-//dthhorse.hc
-//eidolon.hc
+rider.hc
+pstboar.hc
+famhorse.hc
+warhorse.hc
+dthhorse.hc
+eidolon.hc
+ph_eido.hc
+buddha.hc
 
 stats.hc

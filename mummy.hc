@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/mummy.hc 59    9/02/97 4:18p Rlove $
+ * $Header: /H2 Mission Pack/HCode/mummy.hc 7     3/09/98 3:05p Mgummelt $
  */
 
 /*
@@ -309,6 +309,7 @@ void launch_mumshot ()
 
 }
 
+/*
 void launch_mumshot2 (void)
 {
 	local vector diff;
@@ -341,6 +342,7 @@ void launch_mumshot2 (void)
 	newmis.think = SUB_Remove;
 
 }
+*/
 
 void mummy_die()
 {
@@ -949,7 +951,12 @@ void monster_mummy (void)
 		return;
 	}
 
-	if(!self.flags2&FL_SUMMONED)
+	if(!self.th_init)
+	{
+		self.th_init=monster_mummy;
+		self.init_org=self.origin;
+	}
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 	{
 		precache_model2("models/mummy.mdl");
 		precache_model2 ("models/larm.mdl");
@@ -987,11 +994,13 @@ void monster_mummy (void)
 	self.flags = self.flags|FL_MONSTER;
 	self.yaw_speed = 10;
 	self.health = 200;
+	self.max_health=self.health;
 	self.experience_value = 200;
+	self.init_exp_val = self.experience_value;
 	walkmonster_start();
 }
 
-/*QUAKED monster_mummy_lord (1 0.3 0) (-16 -16 0) (16 16 50) AMBUSH STUCK JUMP PLAY_DEAD DORMANT
+/*QUAKED monster_mummy_lord (1 0.3 0) (-16 -16 0) (16 16 50) AMBUSH STUCK JUMP x DORMANT
 He's big, he's bad, he's wrapped in moldy bandages - he's the mummy.
 -------------------------FIELDS-------------------------
 health : 500
@@ -1006,7 +1015,12 @@ void monster_mummy_lord (void)
 		return;
 	}
 
-	if(!self.flags2&FL_SUMMONED)
+	if(!self.th_init)
+	{
+		self.th_init=monster_mummy_lord;
+		self.init_org=self.origin;
+	}
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 	{
 		precache_model2("models/mummy.mdl");
 		precache_model2("models/larm.mdl");
@@ -1028,6 +1042,10 @@ void monster_mummy_lord (void)
 
 	}
 
+	if(!self.health)
+		self.health = 400;
+	if(!self.max_health)
+		self.max_health=self.health;
 	CreateEntityNew(self,ENT_MUMMY,"models/mummy.mdl",mummy_die);
 
 	self.mintel = 3;
@@ -1044,8 +1062,134 @@ void monster_mummy_lord (void)
 
 	self.flags = self.flags|FL_MONSTER;
 	self.yaw_speed = 10;
-	self.health = 400;
 	self.experience_value = 300;
+	self.init_exp_val = self.experience_value;
 	walkmonster_start();
 }
+
+/*
+ * $Log: /H2 Mission Pack/HCode/mummy.hc $
+ * 
+ * 7     3/09/98 3:05p Mgummelt
+ * 
+ * 6     3/03/98 7:31p Mgummelt
+ * 
+ * 5     2/12/98 5:55p Jmonroe
+ * remove unreferenced funcs
+ * 
+ * 4     2/05/98 12:30p Mgummelt
+ * 
+ * 3     2/04/98 4:58p Mgummelt
+ * spawnflags on monsters cleared out
+ * 
+ * 61    10/28/97 1:01p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 59    9/02/97 4:18p Rlove
+ * 
+ * 58    8/31/97 12:21a Mgummelt
+ * 
+ * 57    8/29/97 3:04a Mgummelt
+ * 
+ * 56    8/28/97 8:39p Mgummelt
+ * 
+ * 55    8/28/97 7:23p Jweier
+ * 
+ * 54    8/28/97 7:12p Mgummelt
+ * 
+ * 53    8/28/97 6:21p Mgummelt
+ * 
+ * 52    8/23/97 4:30p Rlove
+ * 
+ * 51    8/23/97 9:59a Rlove
+ * 
+ * 42    7/24/97 3:53p Rlove
+ * 
+ * 41    7/21/97 3:03p Rlove
+ * 
+ * 40    7/12/97 9:09a Rlove
+ * Reworked Assassin Punch Dagger
+ * 
+ * 38    7/07/97 5:13p Rlove
+ * 
+ * 37    7/03/97 5:06p Rlove
+ * 
+ * 36    7/03/97 8:47a Rlove
+ * 
+ * 35    6/27/97 10:18a Rlove
+ * Monsters drop stuff on death
+ * 
+ * 34    6/18/97 4:30p Rlove
+ * Rewrote entity spawning code
+ * 
+ * 33    6/17/97 7:40a Rlove
+ * Fixed his stand routine
+ * 
+ * 32    6/16/97 4:05p Rlove
+ * 
+ * 31    6/16/97 9:39a Rlove
+ * 
+ * 30    6/16/97 9:03a Rlove
+ * Added 30 points to his health
+ * 
+ * 29    6/14/97 3:22p Mgummelt
+ * 
+ * 28    6/14/97 1:26p Rlove
+ * 
+ * 27    6/14/97 1:12p Rlove
+ * 
+ * 26    6/14/97 10:19a Mgummelt
+ * 
+ * 25    6/13/97 6:08p Rlove
+ * 
+ * 23    6/13/97 12:11p Rlove
+ * 
+ * 22    6/13/97 10:11a Rlove
+ * Moved all message.hc to strings.hc
+ * 
+ * 18    5/27/97 10:58a Rlove
+ * Took out old Id sound files
+ * 
+ * 17    5/23/97 3:43p Mgummelt
+ * 
+ * 16    5/22/97 3:30p Mgummelt
+ * 
+ * 15    5/20/97 10:58a Mgummelt
+ * 
+ * 14    5/16/97 2:12p Mgummelt
+ * 
+ * 13    5/15/97 6:34p Rjohnson
+ * Code cleanup
+ * 
+ * 12    5/08/97 9:47p Mgummelt
+ * 
+ * 11    5/03/97 11:56a Rlove
+ * 
+ * 10    5/03/97 8:51a Rlove
+ * 
+ * 9     4/22/97 9:59a Rlove
+ * Toned down vorpal kickback
+ * 
+ * 8     4/22/97 9:28a Rlove
+ * 
+ * 7     4/22/97 9:02a Rlove
+ * Revamped Mummy AI
+ * 
+ * 6     4/15/97 8:30a Rlove
+ * 
+ * 5     4/14/97 3:28p Rlove
+ * A few changes to the mummy, he still needs tweaking but ...
+ * 
+ * 4     3/31/97 4:07p Rlove
+ * New mummy AI
+ * 
+ * 3     3/31/97 6:38a Rlove
+ * New mummy ai
+ * 
+ * 2     3/21/97 3:49p Rlove
+ * Added mummy and mezzoman
+ * 
+ * 1     3/20/97 4:00p Rlove
+ */
 

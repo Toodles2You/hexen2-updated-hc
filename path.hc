@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/path.hc 6     6/13/97 4:08p Mgummelt $
+ * $Header: /H3MP/hcode/path.hc 8     10/28/97 1:01p Mgummelt $
  */
 
 /*
@@ -12,7 +12,7 @@ change to the next target and continue.
 */
 void() pathcorner_touch =
 {
-local entity	temp;
+entity	temp;
 
 	if (other.pathentity != self)	// This corner was not targeted by this monster
 		return;
@@ -82,3 +82,24 @@ void path_corner ()
 	setsize (self, '-8 -8 -8', '8 8 8');
 }
 
+/*
+ * $Log: /H3MP/hcode/path.hc $
+ * 
+ * 8     10/28/97 1:01p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 6     6/13/97 4:08p Mgummelt
+ * 
+ * 5     5/16/97 11:27p Mgummelt
+ * 
+ * 4     5/15/97 2:46p Mgummelt
+ * 
+ * 3     5/15/97 12:30a Mgummelt
+ * 
+ * 2     3/10/97 8:29a Rlove
+ * Halfway through rewriting Monster AI
+ * 
+ * 1     3/07/97 10:31a Rlove
+ * 
+ */

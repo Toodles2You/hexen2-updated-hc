@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/Items.hc 108   9/24/97 3:16p Mgummelt $
+ * $Header: /H2 Mission Pack/HCode/Items.hc 14    3/27/98 2:14p Mgummelt $
  */
 void() W_SetCurrentAmmo;
 void() W_SetCurrentWeapon;
@@ -18,7 +18,7 @@ void() SUB_regen =
 	setorigin (self, self.origin);
 };
 
-
+/*
 void ItemHitFloorWait ()
 {
 //	dprint("Waiting to hit\n");
@@ -44,6 +44,8 @@ void ItemHitFloorWait ()
 	else
 		thinktime self : 0.05;
 }
+*/
+
 /*
 ============
 PlaceItem
@@ -81,8 +83,16 @@ void() PlaceItem =
 		self.hull=oldHull;
 		if(self.touch==puzzle_touch)
 		{
-			setorigin(self,self.origin+'0 0 28');
-			setsize (self, '-8 -8 -28', '8 8 8');
+			if(self.puzzle_id=="scept"&&mapname=="egypt5")
+			{
+				setorigin(self,self.origin+'0 0 28');
+				setsize (self, '-1 -1 -28', '1 1 0');
+			}
+			else
+			{
+				setorigin(self,self.origin+'0 0 28');
+				setsize (self, '-8 -8 -28', '8 8 8');
+			}
 		}
 		else
 		{
@@ -380,48 +390,74 @@ void weapon_touch (void)
 	else
 		leave = 0;
 
-	other.oldweapon = other.weapon;
-
-
 	new = self.items;
 	// Give player weapon and mana
 	if (self.classname=="wp_weapon2")
 	{
-		if (other.playerclass == CLASS_PALADIN)
+		switch(other.playerclass)
+		{
+		case CLASS_PALADIN:
 			self.netname = STR_VORPAL;
-		else if (other.playerclass == CLASS_CRUSADER)
+			break;
+		case CLASS_CRUSADER:
 			self.netname = 	STR_ICESTAFF;
-		else if (other.playerclass == CLASS_NECROMANCER)
+			break;
+		case CLASS_NECROMANCER:
 			self.netname = 	STR_MAGICMISSILE;
-		else if (other.playerclass == CLASS_ASSASSIN)
+			break;
+		case CLASS_SUCCUBUS:
+			self.netname = 	STR_ACIDORB;
+			break;
+		default:	//CLASS_ASSASSIN
 			self.netname = 	STR_CROSSBOW;
+			break;
+		}
 
 		other.bluemana += 25;		
 	}
 	else if (self.classname=="wp_weapon3")
 	{
-		if (other.playerclass == CLASS_PALADIN)
+		switch(other.playerclass)
+		{
+		case CLASS_PALADIN:
 			self.netname = STR_AXE;
-		else if (other.playerclass == CLASS_CRUSADER)
+			break;
+		case CLASS_CRUSADER:
 			self.netname = 	STR_METEORSTAFF;
-		else if (other.playerclass == CLASS_NECROMANCER)
+			break;
+		case CLASS_NECROMANCER:
 			self.netname = 	STR_BONESHARD;
-		else if (other.playerclass == CLASS_ASSASSIN)
+			break;
+		case CLASS_SUCCUBUS:
+			self.netname = 	STR_FLAMEORB;
+			break;
+		default:	//CLASS_ASSASSIN
 			self.netname = 	STR_GRENADES;
-
+			break;
+		}
 		other.greenmana += 25;		
 
 	}
 	else if (self.classname=="wp_weapon4_head")
 	{
-		if (other.playerclass == CLASS_PALADIN)
+		switch(other.playerclass)
+		{
+		case CLASS_PALADIN:
 			self.netname = STR_PURIFIER1;
-		else if (other.playerclass == CLASS_CRUSADER)
+			break;
+		case CLASS_CRUSADER:
 			self.netname = 	STR_SUN1;
-		else if (other.playerclass == CLASS_NECROMANCER)
+			break;
+		case CLASS_NECROMANCER:
 			self.netname = 	STR_RAVENSTAFF1;
-		else if (other.playerclass == CLASS_ASSASSIN)
+			break;
+		case CLASS_SUCCUBUS:
+			self.netname = 	STR_LIGHTNING1;
+			break;
+		default:	//CLASS_ASSASSIN
 			self.netname = 	STR_SET1;
+			break;
+		}
 
 		other.bluemana += 25;		
 		other.greenmana += 25;	
@@ -432,14 +468,24 @@ void weapon_touch (void)
 	}
 	else if (self.classname=="wp_weapon4_staff")
 	{
-		if (other.playerclass == CLASS_PALADIN)
+		switch(other.playerclass)
+		{
+		case CLASS_PALADIN:
 			self.netname = STR_PURIFIER2;
-		else if (other.playerclass == CLASS_CRUSADER)
+			break;
+		case CLASS_CRUSADER:
 			self.netname = 	STR_SUN2;
-		else if (other.playerclass == CLASS_NECROMANCER)
+			break;
+		case CLASS_NECROMANCER:
 			self.netname = 	STR_RAVENSTAFF2;
-		else if (other.playerclass == CLASS_ASSASSIN)
+			break;
+		case CLASS_SUCCUBUS:
+			self.netname = 	STR_LIGHTNING2;
+			break;
+		default:	//CLASS_ASSASSIN
 			self.netname = 	STR_SET2;
+			break;
+		}
 
 		other.bluemana += 25;		
 		other.greenmana += 25;	
@@ -474,6 +520,7 @@ void weapon_touch (void)
 
 	if(self.attack_finished<time)
 	{//So you don't interrupt another selection or firing frame
+		self.oldweapon = self.weapon;
 		if(!deathmatch||!hadweap)	//In DM, don't switch to new weapon if already had it
 			NewBestWeapon (old, new);
 
@@ -583,6 +630,11 @@ void ihealth_touch(void)
 		activator = other;
 		SUB_UseTargets();				// fire all targets / killtargets
 	}
+	if(other.flags2&FL2_POISONED)
+	{
+		other.flags2(-)FL2_POISONED;
+		centerprint(other,"The poison has been cleansed from your blood...\n");
+	}
 }
 
 
@@ -648,12 +700,14 @@ void mana_touch(void)
 
 	self.model = string_null;
 	self.solid = SOLID_NOT;
-	if (deathmatch == 1)
-		self.nextthink = time + RESPAWN_TIME;
 	self.think = SUB_regen;
 
 	activator = other;
 	SUB_UseTargets();				// fire all targets / killtargets
+	if (!self.owner && deathmatch == 1||world.target=="sheep")
+		self.nextthink = time + RESPAWN_TIME;
+	else
+		remove(self);	//test this!
 }
 
 void spawn_item_mana_green(float amount)
@@ -897,7 +951,7 @@ PLAYER BACKPACKS
 ===============================================================================
 */
 
-void GetPuzzle2(entity item, entity person, string which);
+//void GetPuzzle2(entity item, entity person, string which);
 
 void BackpackTouch(void)
 {
@@ -1250,13 +1304,20 @@ void BackpackTouch(void)
 
 void MonsterDropStuff(void)
 {
-	float chance;
 
 	if(!self.flags&FL_MONSTER)
 		return;
 
 	if (self.monsterclass < CLASS_GRUNT)
 		return;
+
+	DropBackpack();
+}
+
+float RandomMonsterGoodies ()
+{
+float chance;
+float it_total;	
 
 	// Grunts drop only instant items
 	if (self.monsterclass == CLASS_GRUNT)
@@ -1277,6 +1338,7 @@ void MonsterDropStuff(void)
 			{
 				self.spawn_health = 1;
 			}
+			it_total+=1;
 		}
 	}
 
@@ -1314,6 +1376,7 @@ void MonsterDropStuff(void)
 				self.cnt_haste = 1;
 			else if (chance < .90)
 				self.cnt_blast = 1;
+			it_total+=1;
 		}		
 	}
 	// Leaders drop armor or artifacts
@@ -1331,7 +1394,7 @@ void MonsterDropStuff(void)
 				self.cnt_sh_boost = 1;
 			else if (chance < .20)
 				self.cnt_mana_boost = 1;
-			else if (chance < .25)
+			else if (chance < .25&&!(world.spawnflags&MISSIONPACK))
 				self.cnt_teleport = 1;
 			else if (chance < .30)
 				self.cnt_tome = 1;
@@ -1359,10 +1422,10 @@ void MonsterDropStuff(void)
 				self.armor_breastplate = 20;
 			else
 				self.armor_helmet = 20;
+			it_total+=1;
 		}
 	}
-
-	DropBackpack();
+	return it_total;
 }
 
 /*
@@ -1372,12 +1435,12 @@ DropBackpack
 */
 void DropBackpack(void)
 {
-	entity item,old_self;
-	float total;
+entity item,old_self;
+float total;
 
 	item = spawn();
 
-	if(self.playerclass==CLASS_NECROMANCER)
+	if(self.playerclass==CLASS_CRUSADER)
 		self.cnt_glyph=rint(self.cnt_glyph/5);
 	total = 0;
 
@@ -1481,55 +1544,15 @@ void DropBackpack(void)
 		item.armor_helmet = self.armor_helmet;
 	}
 
-/*	if (self.puzzle_inv1)
-	{
-		item.puzzle_inv1 = self.puzzle_inv1;
-		total = 999;
-	}
-	if (self.puzzle_inv2)
-	{
-		item.puzzle_inv2 = self.puzzle_inv2;
-		total = 999;
-	}
-	if (self.puzzle_inv3)
-	{
-		item.puzzle_inv3 = self.puzzle_inv3;
-		total = 999;
-	}
-	if (self.puzzle_inv4)
-	{
-		item.puzzle_inv4 = self.puzzle_inv4;
-		total = 999;
-	}
-	if (self.puzzle_inv5)
-	{
-		item.puzzle_inv5 = self.puzzle_inv5;
-		total = 999;
-	}
-	if (self.puzzle_inv6)
-	{
-		item.puzzle_inv6 = self.puzzle_inv6;
-		total = 999;
-	}
-	if (self.puzzle_inv7)
-	{
-		item.puzzle_inv7 = self.puzzle_inv7;
-		total = 999;
-	}
-	if (self.puzzle_inv8)
-	{
-		item.puzzle_inv8 = self.puzzle_inv8;
-		total = 999;
-	}
-*/
-
 	// Any mana or instant health 	
 	item.bluemana = self.bluemana;
 	item.greenmana = self.greenmana;
 	item.spawn_health = self.spawn_health;
 
-//	total = 1;
-//	item.cnt_tome = 1;
+
+	if (!total && !item.bluemana && !item.greenmana && !item.spawn_health) 
+		if(self.classname!="player")
+			total=RandomMonsterGoodies();
 
 	if (!total && !item.bluemana && !item.greenmana && !item.spawn_health) 
 	{	// Nothing to put in the backpack
@@ -1618,10 +1641,13 @@ void DropBackpack(void)
 		{
 			spawn_artifact (ARTIFACT_INVINCIBILITY,NO_RESPAWN);
 		}
-		else if ((item.bluemana) && (item.greenmana))
+		//this could never happen
+		/*else if ((item.bluemana) && (item.greenmana))
 		{
 			spawn_item_mana_both(self.bluemana);
 		}
+		*/
+		//these items could respawn in dmatch!
 		else if (item.bluemana)
 		{
 			spawn_item_mana_blue(self.bluemana);
@@ -1652,12 +1678,11 @@ void DropBackpack(void)
 		}
 		else
 		{
-			dprint("Bad backpack!");
+//			dprint("Bad backpack!");
 			remove(item);
 			self = old_self;
 			return;
 		}
-
 		self = old_self;
 	}
 	else
@@ -1706,3 +1731,284 @@ void DropBackpack(void)
 	self.spawn_health=0;
 }
 
+/*
+ * $Log: /H2 Mission Pack/HCode/Items.hc $
+ * 
+ * 14    3/27/98 2:14p Mgummelt
+ * Sheephunt fix
+ * 
+ * 13    3/24/98 12:00a Jmonroe
+ * first test of fixed dmatch respawning dropped mana
+ * 
+ * 12    3/23/98 5:48p Mgummelt
+ * 
+ * 11    3/19/98 2:16p Mgummelt
+ * 
+ * 10    3/12/98 11:05p Jmonroe
+ * fixed stuck weapon on fast weap pickup
+ * 
+ * 9     3/10/98 3:51p Mgummelt
+ * 
+ * 8     3/02/98 1:19a Jmonroe
+ * added dm map cycling for keep and tibet.
+ * reduced code size by changing to switch
+ * 
+ * 7     2/26/98 2:59p Mgummelt
+ * 
+ * 6     2/12/98 5:55p Jmonroe
+ * remove unreferenced funcs
+ * 
+ * 5     2/08/98 3:09p Mgummelt
+ * 
+ * 4     1/19/98 6:20p Mgummelt
+ * 
+ * 3     1/07/98 2:34p Mgummelt
+ * 
+ * 110   10/28/97 1:01p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 108   9/24/97 3:16p Mgummelt
+ * 
+ * 107   9/23/97 5:18p Mgummelt
+ * 
+ * 106   9/11/97 12:02p Mgummelt
+ * 
+ * 105   9/02/97 9:30p Rlove
+ * 
+ * 104   9/02/97 6:48p Rlove
+ * 
+ * 103   9/02/97 2:56p Mgummelt
+ * 
+ * 102   9/02/97 2:06p Rlove
+ * 
+ * 101   9/02/97 1:52p Rlove
+ * 
+ * 100   9/02/97 2:12a Rlove
+ * 
+ * 99    9/01/97 5:07a Rjohnson
+ * Doesn't throw out empty backpacks
+ * 
+ * 98    8/30/97 6:58p Mgummelt
+ * 
+ * 97    8/28/97 2:41p Mgummelt
+ * 
+ * 96    8/27/97 7:59p Mgummelt
+ * 
+ * 95    8/26/97 6:01p Mgummelt
+ * 
+ * 94    8/26/97 4:45p Rlove
+ * 
+ * 93    8/26/97 11:36a Mgummelt
+ * 
+ * 92    8/26/97 10:08a Mgummelt
+ * 
+ * 91    8/25/97 8:26p Mgummelt
+ * 
+ * 90    8/25/97 6:06p Mgummelt
+ * 
+ * 89    8/25/97 4:40p Mgummelt
+ * 
+ * 88    8/22/97 2:59p Rlove
+ * 
+ * 87    8/21/97 6:32p Mgummelt
+ * 
+ * 86    8/21/97 3:53p Mgummelt
+ * 
+ * 85    8/21/97 1:08p Rjohnson
+ * Puzzle Change
+ * 
+ * 84    8/20/97 11:56p Mgummelt
+ * 
+ * 83    8/20/97 10:09p Mgummelt
+ * 
+ * 82    8/20/97 9:58p Mgummelt
+ * 
+ * 81    8/20/97 4:43p Mgummelt
+ * 
+ * 80    8/20/97 4:08p Rjohnson
+ * Removed message
+ * 
+ * 79    8/20/97 3:39p Mgummelt
+ * 
+ * 78    8/20/97 11:31a Rlove
+ * 
+ * 77    8/18/97 1:45p Mgummelt
+ * 
+ * 76    8/18/97 1:44p Mgummelt
+ * 
+ * 75    8/18/97 12:40p Mgummelt
+ * 
+ * 74    8/17/97 3:06p Mgummelt
+ * 
+ * 73    8/15/97 4:59p Mgummelt
+ * 
+ * 72    8/14/97 6:42a Rlove
+ * 
+ * 71    8/07/97 10:30p Mgummelt
+ * 
+ * 70    8/04/97 11:29a Rjohnson
+ * Removed unused variable
+ * 
+ * 69    7/25/97 5:52p Mgummelt
+ * 
+ * 68    7/25/97 4:23p Mgummelt
+ * 
+ * 67    7/24/97 11:29a Mgummelt
+ * 
+ * 66    7/21/97 3:03p Rlove
+ * 
+ * 65    7/19/97 9:53p Mgummelt
+ * 
+ * 64    7/19/97 2:30a Bgokey
+ * 
+ * 63    7/18/97 12:27a Bgokey
+ * 
+ * 62    7/17/97 11:46a Rlove
+ * 
+ * 61    7/16/97 10:57p Mgummelt
+ * 
+ * 60    7/15/97 6:28p Rlove
+ * 
+ * 59    7/14/97 1:50p Rlove
+ * 
+ * 58    7/14/97 10:23a Rlove
+ * 
+ * 57    7/10/97 6:21p Rlove
+ * 
+ * 56    7/10/97 8:43a Rlove
+ * 
+ * 55    7/10/97 8:38a Rlove
+ * Renaming some artifacts
+ * 
+ * 54    7/08/97 7:33a Rlove
+ * Added item name to error message
+ * 
+ * 53    7/03/97 4:46p Mgummelt
+ * 
+ * 51    7/03/97 10:20a Rlove
+ * 
+ * 50    6/27/97 3:40p Rlove
+ * 
+ * 49    6/27/97 2:37p Rlove
+ * 
+ * 48    6/27/97 10:18a Rlove
+ * Monsters drop stuff on death
+ * 
+ * 47    6/26/97 4:54p Rjohnson
+ * No respawn for smashed things
+ * 
+ * 46    6/26/97 7:36a Rlove
+ * Changed Vindictus to Ravenstaff
+ * 
+ * 45    6/20/97 9:43a Rlove
+ * New mana system
+ * 
+ * 44    6/20/97 9:34a Rlove
+ * 
+ * 43    6/20/97 9:12a Rlove
+ * New mana system added
+ * 
+ * 42    6/18/97 6:53p Mgummelt
+ * 
+ * 41    6/18/97 5:26p Mgummelt
+ * 
+ * 40    6/18/97 2:03p Mgummelt
+ * 
+ * 39    6/18/97 10:46a Rjohnson
+ * Code cleanu
+ * 
+ * 38    6/16/97 4:03p Mgummelt
+ * 
+ * 37    6/16/97 3:08p Rlove
+ * Removed POWERMODE flag from drawflag. The C code is going to handle it.
+ * 
+ * 36    6/13/97 10:23a Rlove
+ * New light effect on pickups.
+ * 
+ * 35    6/13/97 10:11a Rlove
+ * Moved all message.hc to strings.hc
+ * 
+ * 34    6/10/97 3:43p Rlove
+ * New armor calc
+ * 
+ * 33    6/09/97 1:22p Rjohnson
+ * Fix for multi class items
+ * 
+ * 32    6/06/97 4:46p Rlove
+ * Now using just the generic weapon artifacts.
+ * 
+ * 31    6/05/97 9:30a Rlove
+ * 
+ * 29    6/03/97 8:00a Rlove
+ * Changed  ihealth
+ * 
+ * 27    5/30/97 2:07p Rlove
+ * 
+ * 26    5/27/97 8:22p Mgummelt
+ * 
+ * 25    5/27/97 9:40a Rlove
+ * Took out super_damage and radsuit fields
+ * 
+ * 24    5/24/97 3:31p Mgummelt
+ * 
+ * 23    5/23/97 3:49p Rlove
+ * 
+ * 22    5/23/97 1:29p Rlove
+ * 
+ * 21    5/22/97 6:30p Mgummelt
+ * 
+ * 20    5/22/97 3:30p Mgummelt
+ * 
+ * 19    5/15/97 6:34p Rjohnson
+ * Code cleanup
+ * 
+ * 18    5/08/97 9:47p Mgummelt
+ * 
+ * 17    5/01/97 3:49p Rjohnson
+ * Made items spawn out with more velocity so they will fly above the
+ * floor
+ * 
+ * 16    4/28/97 10:17a Rlove
+ * New artifacts and items
+ * 
+ * 15    4/24/97 10:00p Rjohnson
+ * Fixed problem with precache and spawning artifacts
+ * 
+ * 14    4/24/97 3:26p Rjohnson
+ * Removed a debugging thing
+ * 
+ * 13    4/24/97 2:53p Rjohnson
+ * Added backpack functionality and spawning of objects
+ * 
+ * 12    4/16/97 7:59a Rlove
+ * Removed references to ammo_  fields
+ * 
+ * 11    4/15/97 10:14a Rlove
+ * Changed cleric to crusader
+ * 
+ * 10    4/15/97 8:46a Rlove
+ * Weapon pick ups are working better.  Instant health is also working
+ * 
+ * 9     4/14/97 5:04p Rlove
+ * 
+ * 8     4/09/97 2:41p Rlove
+ * New Raven weapon sounds
+ * 
+ * 7     3/25/97 4:58p Rjohnson
+ * Cleaned up pre-cache stuff
+ * 
+ * 6     3/11/97 2:55p Aleggett
+ * 
+ * 5     3/11/97 2:51p Aleggett
+ * Added item_megahealth (non-quaked) for item spawner
+ * 
+ * 4     3/11/97 12:56p Aleggett
+ * Added done_precache checking for health spawner
+ * 
+ * 3     2/20/97 4:41p Rlove
+ * Removed Quake weapons
+ * 
+ * 2     11/11/96 1:19p Rlove
+ * Added Source Safe stuff
+ */

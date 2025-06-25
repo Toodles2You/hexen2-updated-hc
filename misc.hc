@@ -1,13 +1,42 @@
-/*
- * $Header: /H3/game/hcode/Misc.hc 87    9/02/97 10:03p Mgummelt $
- */
 
-/*QUAKED info_null (0 0.5 0) (-4 -4 -4) (4 4 4)
+/*
+ * $Header: /H2 Mission Pack/HCode/Misc.hc 18    2/26/98 2:03p Mgummelt $
+ */
+float DONT_REMOVE = 1;
+/*QUAKED miscellaneous_info (0 0 0) ?
+NOT AN ENTITY- just miscellaneous
+info that doesn't belong in any
+one entity's comments.
+
+Use these fields to make something
+spit out an item or artifact when
+it dies...
+cnt_torch;
+cnt_h_boost;
+
+cnt_sh_boost
+cnt_mana_boost
+cnt_teleport
+cnt_tome
+cnt_summon
+cnt_invisibility
+cnt_glyph
+cnt_haste
+cnt_blast
+cnt_polymorph
+cnt_flight
+cnt_cubeofforce
+cnt_invincibility
+
+
+*/
+/*QUAKED info_null (0 0.5 0) (-4 -4 -4) (4 4 4) DONT_REMOVE
 Used as a positional target for spotlights, etc.
 */
 void info_null()
 {
-	remove(self);
+	if(!self.spawnflags&DONT_REMOVE)
+		remove(self);
 }
 
 float ROTATE_BREAK = 16;
@@ -426,7 +455,7 @@ void () trap_lightning_track =
 		return;
 	}
 				
-	do_lightning (self,1,0,4, p1, p2, self.dmg);
+	do_lightning (self,1,0,4, p1, p2, self.dmg,TE_STREAM_LIGHTNING);
 
 	fx_flash (p2);		// Flash of light
 
@@ -538,27 +567,9 @@ void () trap_lightning =
 void bubble_remove();
 void bubble_bob();
 
-/*QUAK-ED air_bubbles (0 .5 .8) (-8 -8 -8) (8 8 8)
-
-testing air bubbles
-*/
-/*
-void air_bubbles()
-{
-	if (deathmatch)
-	{
-		remove (self);
-		return;
-	}
-	precache_model ("models/s_bubble.spr");
-	thinktime self : 1;
-	self.think = make_bubbles;
-}
-
-
 void make_bubbles()
 {
-local entity	bubble;
+entity	bubble;
 
 	bubble = spawn_temp();
 	setmodel (bubble, "models/s_bubble.spr");
@@ -573,13 +584,44 @@ local entity	bubble;
 	bubble.frame = 0;
 	bubble.cnt = 0;
 	setsize (bubble, '-8 -8 -8', '8 8 8');
-	thinktime self : random(0.5,1.5);
+	self.cnt-=1;
 	self.think = make_bubbles;
+	if(self.cnt)
+		thinktime self : random(0.05,.15);
+	else if(self.wait == -2)
+		remove(self);
+	else if(self.wait = -1)
+		self.nextthink=-1;
+	else
+		thinktime self : self.wait + ((random()*self.level) - self.level/2)/100;
 }
+
+/*QUAKED air_bubbles (0 .5 .8) (-8 -8 -8) (8 8 8)
+'cnt' - How many bubbles
+'wait' How long to wait between spurts (-1 will never spurt again, unless triggered again, -2 will make it remove after one spurt)
+'level' - random factor (0 - 100) more or less bubbles, longer or shorter wait
+
+Target this guy and it will wait to spew bubbles when triggered.
 */
+
+void air_bubbles()
+{
+	precache_model ("models/s_bubble.spr");
+	self.cnt+=((random()*self.level) - self.level/2)/10;
+	if(self.cnt<1)
+		self.cnt=1;
+	if(self.targetname)
+		self.use=make_bubbles;
+	else
+	{
+		self.think = make_bubbles;
+		thinktime self : self.wait;
+	}
+}
+
 void() bubble_split =
 {
-local entity	bubble;
+entity	bubble;
 	bubble = spawn_temp();
 	setmodel (bubble, "models/s_bubble.spr");
 	setorigin (bubble, self.origin);
@@ -602,19 +644,15 @@ local entity	bubble;
 void() bubble_remove =
 {
 	if (other.classname == self.classname)
-	{
-//		dprint ("bump");
 		return;
-	}
 	remove(self);
 };
 
 
 void() bubble_bob =
 {
-local float		rnd1, rnd2, rnd3;
-
-local float waterornot;
+float		rnd1, rnd2, rnd3;
+float waterornot;
 	waterornot=pointcontents(self.origin);
 	if (waterornot!=CONTENT_WATER&&waterornot!=CONTENT_SLIME)
 		remove(self);
@@ -682,9 +720,10 @@ void() func_wall_use =
 	self.frame = 1 - self.frame;
 };
 
-/*QUAKED func_wall (0 .5 .8) ? TRANSLUCENT
+/*QUAKED func_wall (0 .5 .8) ? TRANSLUCENT INVISIBLE
 This is just a solid wall if not inhibitted
 TRANSLUCENT - makes it see-through
+Invisible - makes it invisible
 abslight = how bright to make it
 */
 void func_wall()
@@ -699,6 +738,8 @@ void func_wall()
 		self.drawflags=DRF_TRANSLUCENT;
 	if(self.abslight)
 		self.drawflags(+)MLS_ABSLIGHT;
+	if(self.spawnflags&2)
+		self.effects(+)EF_NODRAW;
 }
 
 
@@ -721,7 +762,14 @@ void func_illusionary()
 	self.movetype = MOVETYPE_NONE;
 	self.solid = SOLID_NOT;
 	setmodel (self, self.model);
-	makestatic (self);
+	if(deathmatch||teamplay)
+		makestatic (self);
+	else
+	{
+		self.solid=SOLID_NOT;
+		self.movetype=MOVETYPE_NONE;
+	}
+
 }
 
 //============================================================================
@@ -1077,7 +1125,7 @@ entity found;
 	else
 		self.owner=found;
 }
-/*
+
 void trigger_fan_blow_touch (void)
 {
 vector blowdir, org;
@@ -1158,7 +1206,7 @@ void trigger_fan_blow (void)
 	self.think=trigger_find_owner;
 	thinktime self : 0.1;
 }
-*/
+
 
 void() angletrigger_done =
 {
@@ -1269,3 +1317,267 @@ void() func_angletrigger =
 	self.inactive = FALSE;	
 };
 
+void velocity_damage ()
+{
+float impact;
+	if(!other.takedamage)
+		return;
+	if(other.last_onground+0.25>time)
+		return;
+
+	impact=vlen(other.velocity)*other.mass/10;
+	impact*=self.dmg;
+	T_Damage(other,self,self,impact);
+}
+
+/*QUAKED func_obstacle (0 .5 .8) ? 
+Does damage on impact based on the speed of the impactee
+"dmg" - multiplier on damage (damage is based on speed of impact and mass of impactee)
+"level" - velocity threshold to not do damage under (400 is running speed)
+*/
+void func_obstacle ()
+{
+	self.angles = '0 0 0';
+	self.movetype = MOVETYPE_PUSH;	// so it doesn't get pushed by anything
+	self.solid = SOLID_BSP;
+	self.classname="solid wall";
+//	self.use = func_wall_use;
+	setmodel (self, self.model);
+	if(self.spawnflags&1)
+		self.drawflags=DRF_TRANSLUCENT;
+	if(self.abslight)
+		self.drawflags(+)MLS_ABSLIGHT;
+	if(!self.dmg)
+		self.dmg=1;
+	self.touch=velocity_damage;
+}
+
+
+/*
+ * $Log: /H2 Mission Pack/HCode/Misc.hc $
+ * 
+ * 18    2/26/98 2:03p Mgummelt
+ * 
+ * 17    2/17/98 12:10p Mgummelt
+ * 
+ * 16    2/02/98 3:39p Mgummelt
+ * 
+ * 15    2/01/98 10:53a Mgummelt
+ * 
+ * 14    2/01/98 7:19a Mgummelt
+ * 
+ * 13    1/31/98 2:05a Mgummelt
+ * 
+ * 12    1/31/98 2:03a Mgummelt
+ * 
+ * 11    1/31/98 1:51a Mgummelt
+ * 
+ * 10    1/31/98 1:49a Mgummelt
+ * 
+ * 9     1/07/98 2:34p Mgummelt
+ * 
+ * 89    10/28/97 1:01p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 87    9/02/97 10:03p Mgummelt
+ * 
+ * 86    9/01/97 3:08a Mgummelt
+ * 
+ * 85    8/27/97 6:47p Rjohnson
+ * Auto abslight for illusionary walls
+ * 
+ * 84    8/25/97 1:38p Mgummelt
+ * 
+ * 83    8/23/97 7:15p Rlove
+ * 
+ * 82    8/19/97 12:57p Mgummelt
+ * 
+ * 81    8/16/97 10:51a Rjohnson
+ * Precache update
+ * 
+ * 80    8/15/97 4:41p Mgummelt
+ * 
+ * 79    7/21/97 3:03p Rlove
+ * 
+ * 78    7/21/97 11:25a Mgummelt
+ * 
+ * 77    7/09/97 11:53a Mgummelt
+ * 
+ * 76    7/09/97 7:35a Rlove
+ * New thingtype of CLEARGLASS
+ * 
+ * 75    7/07/97 2:23p Mgummelt
+ * 
+ * 74    7/03/97 12:48p Mgummelt
+ * 
+ * 73    7/03/97 11:20a Mgummelt
+ * 
+ * 72    7/01/97 4:28p Mgummelt
+ * 
+ * 71    6/23/97 4:50p Mgummelt
+ * 
+ * 70    6/18/97 7:10p Mgummelt
+ * 
+ * 69    6/18/97 5:30p Mgummelt
+ * 
+ * 68    6/18/97 4:00p Mgummelt
+ * 
+ * 67    6/18/97 10:46a Rjohnson
+ * Code cleanu
+ * 
+ * 66    6/16/97 11:23a Mgummelt
+ * 
+ * 65    6/16/97 9:56a Jweier
+ * 
+ * 64    6/05/97 8:51p Mgummelt
+ * 
+ * 63    6/04/97 2:56p Jweier
+ * 
+ * 62    6/03/97 5:58p Jweier
+ * 
+ * 61    6/01/97 5:09a Mgummelt
+ * 
+ * 60    5/31/97 9:28p Mgummelt
+ * 
+ * 59    5/28/97 8:13p Mgummelt
+ * 
+ * 58    5/27/97 1:28p Rjohnson
+ * Added abslight to func_rotating
+ * 
+ * 57    5/27/97 7:58a Rlove
+ * New thingtypes of GreyStone,BrownStone, and Cloth.
+ * 
+ * 56    5/23/97 11:51p Mgummelt
+ * 
+ * 55    5/22/97 3:59p Jweier
+ * 
+ * 54    5/21/97 4:15p Jweier
+ * 
+ * 53    5/20/97 6:05p Jweier
+ * 
+ * 52    5/20/97 6:03p Jweier
+ * 
+ * 51    5/15/97 6:34p Rjohnson
+ * Code cleanup
+ * 
+ * 50    5/09/97 7:17p Mgummelt
+ * 
+ * 49    5/09/97 6:24p Jweier
+ * 
+ * 48    4/29/97 5:38p Jweier
+ * 
+ * 47    4/27/97 4:47p Rjohnson
+ * Added an illusionary option
+ * 
+ * 46    4/26/97 3:52p Mgummelt
+ * 
+ * 45    4/26/97 7:32a Rlove
+ * Getting rid of some Id sounds
+ * 
+ * 44    4/25/97 5:16p Jweier
+ * 
+ * 43    4/24/97 2:21p Mgummelt
+ * 
+ * 42    4/22/97 10:46a Rjohnson
+ * Added translucency as an option for illusionary walls
+ * 
+ * 41    4/21/97 4:15p Rjohnson
+ * Renamed the imps
+ * 
+ * 40    4/16/96 11:52p Mgummelt
+ * 
+ * 39    3/31/97 2:40p Aleggett
+ * 
+ * 38    3/31/97 6:35a Rlove
+ * Changed SpawnBlood to SpawnPuff. Added PRECACHE.HC
+ * 
+ * 37    3/25/97 4:58p Rjohnson
+ * Cleaned up pre-cache stuff
+ * 
+ * 36    3/24/97 7:24p Jweier
+ * 
+ * 35    3/24/97 7:08p Jweier
+ * 
+ * 34    3/24/97 7:07p Jweier
+ * Added breakable rotating brushes
+ * 
+ * 33    3/20/97 4:54p Aleggett
+ * Used teleport effect on spawners
+ * 
+ * 32    3/19/97 7:09p Jweier
+ * moved func_magicfield to triggers
+ * 
+ * 31    3/19/97 4:15p Rjohnson
+ * Added bmodel rotating code
+ * 
+ * 30    3/18/97 7:35p Jweier
+ * added func_magicfield
+ * 
+ * 29    3/15/97 12:31p Jweier
+ * Added basic trap_lightning
+ * 
+ * 28    3/14/97 6:31p Aleggett
+ * Consolidated health item spawners into one
+ * 
+ * 27    3/13/97 9:57a Rlove
+ * Changed constant DAMAGE_AIM  to DAMAGE_YES and the old DAMAGE_YES to
+ * DAMAGE_NO_GRENADE
+ * 
+ * 26    3/11/97 3:03p Aleggett
+ * Made the itemspawner really good!
+ * 
+ * 25    3/07/97 7:12p Aleggett
+ * Added Item Spawner
+ * 
+ * 24    3/07/97 5:42p Aleggett
+ * Added Power Pool
+ * 
+ * 23    3/07/97 2:38p Aleggett
+ * 
+ * 22    3/07/97 2:01p Aleggett
+ * Enhanced monster spawner...still needs whoosh! F/X
+ * 
+ * 21    3/06/97 1:08p Aleggett
+ * Redid monster spawner... again!
+ * 
+ * 20    3/05/97 4:56p Jweier
+ * spikeshooter retains triggerer to award frags
+ * 
+ * 19    3/05/97 1:54p Rlove
+ * Placed light entites in LIGHT.HC and placed breakable entities in
+ * BREAKABL.HC
+ * 
+ * 18    3/04/97 4:01p Aleggett
+ * Split apart monster spawner
+ * 
+ * 17    2/28/97 6:05p Aleggett
+ * Added Monster Spawner - scary!
+ * 
+ * 16    2/28/97 5:49p Aleggett
+ * 
+ * 15    2/28/97 2:33p Jweier
+ * 
+ * 14    2/28/97 2:31p Jweier
+ * func_quake is now trigger_quake
+ * 
+ * 13    2/28/97 1:02p Jweier
+ * Added basic func_quake structures
+ * 
+ * 12    2/27/97 2:33p Aleggett
+ * 
+ * 11    2/27/97 2:16p Aleggett
+ * Added fading lights - beautiful!
+ * 
+ * 10    2/27/97 1:43p Rlove
+ * Added Gem Light
+ * 
+ * 9     2/26/97 5:05p Jweier
+ * Added trap_spikeshooter_spray
+ * 
+ * 3     1/15/97 12:02p Rjohnson
+ * Removed all of quake's monsters
+ * 
+ * 2     11/11/96 1:19p Rlove
+ * Added Source Safe stuff
+ */
