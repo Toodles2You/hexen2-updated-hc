@@ -236,7 +236,7 @@ void imp_die ()
 	
 	MonsterCheckContents();
 	
-	if(self.frame==$death14 &&self.flags&FL_ONGROUND)
+	if(self.frame==$death14 &&(self.flags & FL_ONGROUND))
 		MakeSolidCorpse();
 	else if(self.health<-30)
 		chunk_death();
@@ -535,7 +535,7 @@ float imp_new_action ()
 float too_close;
 	enemy_vis=visible(self.enemy);
 	too_close=imp_check_too_close();
-	if((random()<0.7&&self.enemy.flags2&FL_ALIVE)||!enemy_vis||too_close||self.attack_state==AS_FERRY)
+	if((random()<0.7&&(self.enemy.flags2 & FL_ALIVE))||!enemy_vis||too_close||self.attack_state==AS_FERRY)
 	{
 		if(self.think!=imp_fly&&self.enemy!=world)
 		{
@@ -791,7 +791,7 @@ void imp_attack_anim() [++ $impfir1 .. $impfir21]
 	else if (cycle_wrapped)
 	{
 		self.think=imp_fly;
-		if(visible(self.enemy)&&self.enemy.flags2&FL_ALIVE)
+		if(visible(self.enemy)&&(self.enemy.flags2 & FL_ALIVE))
 			if(random()<0.2+skill/10)
 				self.think=imp_attack_anim;
 		if(skill>=4)
@@ -872,7 +872,7 @@ vector dir,destiny,org;
 
 		self.count += 1;
 
-		if (self.flags & FL_ONGROUND || self.count > 30)
+		if ((self.flags & FL_ONGROUND) || self.count > 30)
 		{  // Didn't hit our target, so go back up
 			self.flags (-) FL_ONGROUND;
 			imp_abort_swoop();
@@ -1011,7 +1011,7 @@ vector punch,dir;
 				damg = (10 + (damg_plus / 2));
 				T_Damage (other, self, self, damg);
 			}
-			if(other.classname=="player"&&other.flags2&FL_ALIVE)
+			if(other.classname=="player"&&(other.flags2 & FL_ALIVE))
 			{
 				makevectors(other.v_angle);
 				dir=normalize(self.velocity)*-1;
@@ -1094,7 +1094,7 @@ vector destiny,org;
 		if(random()<0.5-skill/10)
 			return FALSE;
 
-	if(!self.spawnflags & MONSTER_STAND_GROUND)
+	if(!(self.spawnflags & MONSTER_STAND_GROUND))
 	{
 	vector min,max;
 		swoop_no_drop=FALSE;
@@ -1164,7 +1164,7 @@ float too_close;
 	}
 
 	if(self.skin==3)
-		if(self.lifetime<time||!self.controller.flags2&FL_ALIVE||self.controller.imp_count!=self.imp_count)
+		if(self.lifetime<time||!(self.controller.flags2 & FL_ALIVE)||self.controller.imp_count!=self.imp_count)
 		{
 			self.think=summoned_imp_die;
 			thinktime self : 0;
@@ -1315,7 +1315,7 @@ void(entity attacker, float damage) imp_pain =
 
 void imp_use (void)
 {
-	if (!self.flags2&FL_ALIVE)
+	if (!(self.flags2 & FL_ALIVE))
 		return;
 	self.use=SUB_Null;
 	self.targetname="";
@@ -1373,7 +1373,7 @@ void imp_wait() [++ $impwat1 .. $impwat24]
 
 	if(self.skin==2)
 		self.frame=$impwat1;
-	else if(!self.flags&FL_ONGROUND)
+	else if(!(self.flags & FL_ONGROUND))
 	{
 		self.think=imp_hover;
 		thinktime self : 0;
@@ -1398,7 +1398,7 @@ void imp_fly () [++ $impfly1 .. $impfly20]
 	}
 
 	if(self.skin==3)
-		if(self.lifetime<time||!self.controller.flags2&FL_ALIVE||self.controller.imp_count!=self.imp_count)
+		if(self.lifetime<time||!(self.controller.flags2 & FL_ALIVE)||self.controller.imp_count!=self.imp_count)
 		{
 			self.think=summoned_imp_die;
 			thinktime self : 0;
@@ -1474,7 +1474,7 @@ void init_imp (float which_skin)
 		return;
 	}
 
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!(self.flags2 & FL_SUMMONED)&&!(self.flags2 & FL2_RESPAWN))
 	{
 		precache_model4 ("models/imp.mdl");//converted for MP
 		precache_model3 ("models/h_imp.mdl");//empty for now

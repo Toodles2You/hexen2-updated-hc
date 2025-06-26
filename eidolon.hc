@@ -368,7 +368,7 @@ entity	targ;
 		traceline (trace_endpos, spot2, FALSE, trace_ent);
 
 	if (trace_ent != targ)
-		if(trace_ent.health>200||!trace_ent.takedamage||(trace_ent.flags&FL_MONSTER&&trace_ent.classname!="player_sheep"))
+		if(trace_ent.health>200||!trace_ent.takedamage||((trace_ent.flags & FL_MONSTER)&&trace_ent.classname!="player_sheep"))
 			return FALSE;//Don't have a clear shot, and don't want to shoot obstruction
 			
 	enemy_range=vlen(self.enemy.origin-self.origin);
@@ -382,7 +382,7 @@ entity	targ;
 	if (time < self.attack_finished)
 		return FALSE;
 		
-	if(random()<0.3 - skill/10&&self.controller.flags2&FL_ALIVE)
+	if(random()<0.3 - skill/10&&(self.controller.flags2 & FL_ALIVE))
 		return FALSE;
 
 	self.th_missile ();
@@ -395,7 +395,7 @@ void check_use_model (string whichmodel)
 	if(self.model!=whichmodel)
 		setmodel(self,whichmodel);
 
-	if(!self.flags2&FL_SMALL)
+	if(!(self.flags2 & FL_SMALL))
 		setsize(self,'-54 -54 0', '54 54 666');
 	else
 		setsize(self,'-16 -16 0', '16 16 200');
@@ -608,7 +608,7 @@ entity found;
 	found=findradius(self.origin,self.size_x+25);
 	while(found)
 	{
-		if(found!=self&&found.solid&&found.movetype&&found.health&&found.flags2&FL_ALIVE)
+		if(found!=self&&found.solid&&found.movetype&&found.health&&(found.flags2 & FL_ALIVE))
 		{
 			found.velocity=normalize(found.origin-self.origin)*100;
 			found.velocity_z+=100;
@@ -684,10 +684,10 @@ entity watcher;
 		watcher=self.enemy;
 		if(self.enemy.classname=="monster_imp_lord")//if enemy an imp, look for it's owner
 			watcher=self.enemy.controller;
-		if(!watcher.flags2&FL_ALIVE)
+		if(!(watcher.flags2 & FL_ALIVE))
 		{//If enemy not alive, look for other players
 			watcher=find(world,classname,"player");
-			while(watcher!=world&&!watcher.flags2&FL_ALIVE)
+			while(watcher!=world&&!(watcher.flags2 & FL_ALIVE))
 				watcher=find(watcher,classname,"player");
 		}
 		if(infront_of_ent(self,watcher))
@@ -752,7 +752,7 @@ void eidolon_pain () [++ $painA1 .. $painA9]
 
 	if(self.frame==$painA9)
 	{
-		if(self.weapon>=1000&&self.controller.flags2&FL_ALIVE)
+		if(self.weapon>=1000&&(self.controller.flags2 & FL_ALIVE))
 		{
 			self.weapon=0;
 			self.think=eidolon_face_orb;
@@ -765,7 +765,7 @@ void eidolon_pain () [++ $painA1 .. $painA9]
 void eidolon_check_fake (entity attacker,float total_damage)
 {
 float pain_chance;
-	if(self.controller.flags2&FL_ALIVE||self.scale<1)
+	if((self.controller.flags2 & FL_ALIVE)||self.scale<1)
 	{//orb alive or still small
 		self.dmg+=self.max_health-self.health;
 		self.health=self.max_health;
@@ -1187,7 +1187,7 @@ void eidolon_run () [++ $walk1 .. $walk24]
 	if(self.scale>1&&(self.frame==$walk2 ||self.frame==$walk14))
 		sound(self,CHAN_BODY,"eidolon/stomp.wav",1,ATTN_NONE);
 
-	if(self.enemy!=world&&!self.enemy.flags2&FL_ALIVE)
+	if(self.enemy!=world&&!(self.enemy.flags2 & FL_ALIVE))
 	{
 		self.think=eidolon_ready_roar;
 		self.enemy=world;
@@ -1204,7 +1204,7 @@ void eidolon_guarding () [++ $wait1 .. $wait16]
 
 //	dprint("Guarding\n");
 	ai_face();
-	if(self.enemy!=world&&!self.enemy.flags2&FL_ALIVE)
+	if(self.enemy!=world&&!(self.enemy.flags2 & FL_ALIVE))
 	{
 		self.think=eidolon_ready_roar;
 		self.enemy=world;

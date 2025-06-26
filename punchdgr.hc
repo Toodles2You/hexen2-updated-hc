@@ -82,7 +82,7 @@ void fire_punchdagger ()
 	{
 
 		//FIXME:Add multiplier for level and strength
-		if (trace_ent.flags2&FL_ALIVE && !infront_of_ent(self,trace_ent) && self.playerclass==CLASS_ASSASSIN &&
+		if ((trace_ent.flags2 & FL_ALIVE) && !infront_of_ent(self,trace_ent) && self.playerclass==CLASS_ASSASSIN &&
               self.weapon==IT_WEAPON1 && self.level >5)
 		{
 			c_level = self.level;

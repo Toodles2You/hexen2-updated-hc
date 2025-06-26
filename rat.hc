@@ -87,7 +87,7 @@ float player_see_me;
 	else
 		self.velocity_z=-1;
 
-	if((random()<0.1||self.origin==self.oldorigin)&&self.pain_finished<time&&!self.flags&FL_SWIM)
+	if((random()<0.1||self.origin==self.oldorigin)&&self.pain_finished<time&&!(self.flags & FL_SWIM))
 	{
 	vector ahead_org;
 	float drop_content;
@@ -216,7 +216,7 @@ void rat_go (void)
 void monster_rat (void)
 {
 //FIXME: DAMN RAT JUMPS UP IN AIR AND GET STUCK IN EACH OTHER!!!!!!!!!!!
-	if(!self.flags2&FL_SUMMONED)
+	if(!(self.flags2 & FL_SUMMONED))
 	{
 		precache_model("models/rat.mdl");
 		precache_sound("misc/squeak.wav");

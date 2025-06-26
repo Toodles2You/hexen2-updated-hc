@@ -276,7 +276,7 @@ float inertia, lift;
 	dir=normalize(v_forward);	
 
 	traceline(self.origin+self.proj_ofs,self.origin+self.proj_ofs+dir*48,FALSE,self);
-	if(trace_ent.movetype&&trace_ent.solid&&trace_ent!=world&&trace_ent.flags&FL_ONGROUND&&trace_ent.solid!=SOLID_BSP)
+	if(trace_ent.movetype&&trace_ent.solid&&trace_ent!=world&&(trace_ent.flags & FL_ONGROUND)&&trace_ent.solid!=SOLID_BSP)
 	{
 		if(!trace_ent.mass)
 			inertia = 1;
@@ -333,7 +333,7 @@ void() ImpulseCommands =
 	float total;
 	string printnum;
 
-	if(self.flags2&FL_CHAINED&&self.impulse!=23)
+	if((self.flags2 & FL_CHAINED)&&self.impulse!=23)
 		return;
 
 	if (self.impulse == 9&&skill<3)
@@ -749,7 +749,7 @@ void() ImpulseCommands =
 			Polymorph(self);
 		break;
 	case 22:
-		if (!self.flags2 & FL2_CROUCHED)
+		if (!(self.flags2 & FL2_CROUCHED))
 		{
 			if(self.flags2 & FL2_CROUCH_TOGGLE)
 				self.flags2(-)FL2_CROUCH_TOGGLE;

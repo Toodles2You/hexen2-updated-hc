@@ -6,7 +6,7 @@
 
 void () crusader_soul_touch =
 {
-	if(!other.flags2&FL_ALIVE)
+	if(!(other.flags2 & FL_ALIVE))
 		return;
 
 	if ((other.classname == "player") && (other.playerclass==CLASS_CRUSADER))
@@ -37,7 +37,7 @@ void () crusader_soul_touch =
 
 void () necro_soul_touch =
 {
-	if(!other.flags2&FL_ALIVE)
+	if(!(other.flags2 & FL_ALIVE))
 		return;
 
 	if ((other.classname == "player") && (other.playerclass==CLASS_NECROMANCER))

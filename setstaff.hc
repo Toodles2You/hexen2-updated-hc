@@ -108,7 +108,7 @@ void() Yank =
 {	
 float dist;
 vector dir;
-		if(!self.enemy.health||!self.enemy.flags2&FL_ALIVE||!self.enemy.flags2&FL_CHAINED||self.attack_finished<time)
+		if(!self.enemy.health||!(self.enemy.flags2 & FL_ALIVE)||!(self.enemy.flags2 & FL_CHAINED)||self.attack_finished<time)
 		{
 			self.lifetime=time+2;
 			self.think=PullBack;
@@ -174,7 +174,7 @@ vector dir;
 		else 
 			self.enemy.velocity='0 0 0';
 
-		if(!self.enemy.health||!self.enemy.flags2&FL_ALIVE||!self.enemy.flags2&FL_CHAINED||self.attack_finished<time)
+		if(!self.enemy.health||!(self.enemy.flags2 & FL_ALIVE)||!(self.enemy.flags2 & FL_CHAINED)||self.attack_finished<time)
 		{
 			self.lifetime=time+2;
 			self.think=PullBack;
@@ -201,7 +201,7 @@ void(entity bound) Grab=
 		self.movedir=normalize(self.origin-self.view_ofs);
 
         self.enemy=bound;
-		if(!bound.flags2&FL_CHAINED)
+		if(!(bound.flags2 & FL_CHAINED))
 		{
 			if(other.flags&FL_CLIENT)
 			{
@@ -233,7 +233,7 @@ void() HookHit =
 
         self.touch = SUB_Null;
 
-		if(other.takedamage&&other.flags2&FL_ALIVE&&other.health<1000)
+		if(other.takedamage&&(other.flags2 & FL_ALIVE)&&other.health<1000)
             Grab(other);
         else
 			DarkExplosion();
@@ -356,9 +356,9 @@ void scarab_die ()
 
 void LatchOn (void)
 {
-	if(other.takedamage&&other.movetype&&other.health&&other.solid!=SOLID_BSP&&other.flags2&FL_ALIVE&&!other.artifact_active&ART_INVINCIBILITY)
+	if(other.takedamage&&other.movetype&&other.health&&other.solid!=SOLID_BSP&&(other.flags2 & FL_ALIVE)&&!(other.artifact_active & ART_INVINCIBILITY))
 	{
-		if(other.health>150||(other.flags&FL_MONSTER&&other.monsterclass>=CLASS_BOSS))//other.classname!="player")
+		if(other.health>150||((other.flags & FL_MONSTER)&&other.monsterclass>=CLASS_BOSS))//other.classname!="player")
 		{
 			self.lockentity=other;
 			scarab_die();
@@ -493,7 +493,7 @@ void pincer_think ()
 		sound(self,CHAN_BODY,"assassin/spin.wav",1,ATTN_NORM);
 	}
 
-	if(self.lifetime<time||self.flags&FL_ONGROUND)
+	if(self.lifetime<time||(self.flags & FL_ONGROUND))
 		DarkExplosion();
 	else
 	{

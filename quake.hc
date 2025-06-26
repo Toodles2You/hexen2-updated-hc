@@ -30,7 +30,7 @@ vector dir;
 				inertia=1;
 			else
 				inertia=head.mass/10;
-			if((!head.flags2&FL_ALIVE)&&head.takedamage&&head.health&&random()<0.2&&head!=self.owner)
+			if((!(head.flags2 & FL_ALIVE))&&head.takedamage&&head.health&&random()<0.2&&head!=self.owner)
 				T_Damage(head,self,self.owner,richter*dist);
 			if(head.flags&FL_ONGROUND)
 			{

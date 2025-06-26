@@ -196,7 +196,7 @@ void drop_fire_circ ()
 	self.cnt += 1;
 	self.attack_finished = time + 10;
 
-	if(!self.enemy.flags2&FL_ALIVE)
+	if(!(self.enemy.flags2 & FL_ALIVE))
 		self.enemy=find(world,classname,"player");
 
 	if(!self.enemy)
@@ -477,7 +477,7 @@ void death_missile_2_touch(void)
 
 void death_missile_2_think (void)
 {
-	if (self.lifetime < time || !self.enemy.flags2 & FL_ALIVE)
+	if (self.lifetime < time || !(self.enemy.flags2 & FL_ALIVE))
 	{
 		if(self.owner.cnt>0)
 			self.owner.cnt -= 1;
@@ -498,7 +498,7 @@ void death_missile_2(float dir)
 {
 	vector diff;
 
-	if(!self.enemy.flags2&FL_ALIVE)
+	if(!(self.enemy.flags2 & FL_ALIVE))
 		self.enemy=find(world,classname,"player");
 
 	if(!self.enemy)
@@ -560,7 +560,7 @@ void death_missile(void)
 	entity dm;
 
 
-	if(!self.enemy.flags2&FL_ALIVE)
+	if(!(self.enemy.flags2 & FL_ALIVE))
 		self.enemy=find(world,classname,"player");
 
 	if(!self.enemy)
@@ -676,7 +676,7 @@ void ghost_touch ()
 		return;
 	else
 	{
-		if(!self.owner.flags2&FL_ALIVE)
+		if(!(self.owner.flags2 & FL_ALIVE))
 			self.owner.enemy=other;
 		sound(self.enemy,CHAN_VOICE,"death/victory.wav",1,ATTN_NONE);
 		self.think=ghost_tint;
@@ -751,7 +751,7 @@ void deathhorse_move(void)
 	if (coop)
 		checkenemy();
 
-	if(!self.enemy.flags2&FL_ALIVE&&self.enemy!=world)
+	if(!(self.enemy.flags2 & FL_ALIVE)&&self.enemy!=world)
 		self.enemy=world;
 
 	self.think = deathhorse_move;
@@ -796,7 +796,7 @@ void deathhorse_move(void)
 			if (!self.enemy)		
 			{
 				self.enemy = find(world, classname, "player");
-				while(!self.enemy.flags2&FL_ALIVE&&self.enemy!=world)
+				while(!(self.enemy.flags2 & FL_ALIVE)&&self.enemy!=world)
 					self.enemy = find(self.enemy, classname, "player");
 			}
 
@@ -816,7 +816,7 @@ void deathhorse_move(void)
 
 	if (self.cnt && self.attack_finished < time) self.cnt = 0;
 
-	if (self.monster_stage && self.enemy.flags2 & FL_ALIVE)
+	if (self.monster_stage && (self.enemy.flags2 & FL_ALIVE))
 	{
 		if (self.rider_gallop_mode == 0)
 		{

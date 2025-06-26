@@ -64,7 +64,7 @@ float remainder, reflect_count,damg;
 	}
 
 	self.effects(+)EF_BRIGHTLIGHT;
-	if(self.artifact_active&ART_TOMEOFPOWER&&!ofs)
+	if((self.artifact_active & ART_TOMEOFPOWER)&&!ofs)
 		damg=17;
 	else
 		damg=7;

@@ -24,7 +24,7 @@ void CheckAbilities ()
 				self.drawflags(+)DRF_TRANSLUCENT|MLS_ABSLIGHT;
 			}
 		}
-		else if(self.drawflags&DRF_TRANSLUCENT|MLS_ABSLIGHT)
+		else if(self.drawflags & (DRF_TRANSLUCENT|MLS_ABSLIGHT))
 		{
 			self.still_time=-1;
 			if(self.abslight<1)

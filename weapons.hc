@@ -451,7 +451,7 @@ void W_SetCurrentAmmo (void)
 	}
 */
 
-	if(self.flags2&FL_SUMMONED&&self.weapon!=IT_WEAPON3)
+	if((self.flags2 & FL_SUMMONED)&&self.weapon!=IT_WEAPON3)
 	{
 		self.flags2(-)FL_SUMMONED;
 		self.effects(-)EF_DARKLIGHT;

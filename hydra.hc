@@ -251,7 +251,7 @@ void hydra_swim(float thrust)
 
 	if (self.velocity) self.velocity = self.velocity * 0.7;
 	
-	if (!self.enemy.flags2 & FL_ALIVE)
+	if (!(self.enemy.flags2 & FL_ALIVE))
 	{
 		self.goalentity = self.enemy = world;
 		self.monster_stage = HYDRA_STAGE_WAIT;
@@ -654,7 +654,7 @@ void hydra_TentFrames(void)
 {
 	float r;
 
-	if (!self.enemy.flags2 & FL_ALIVE)
+	if (!(self.enemy.flags2 & FL_ALIVE))
 	{
 		self.goalentity = self.enemy = world;
 		self.monster_stage = HYDRA_STAGE_WAIT;
@@ -766,7 +766,7 @@ void init_hydra(void)
 
 	self.monster_stage = HYDRA_STAGE_WAIT;
 
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!(self.flags2 & FL_SUMMONED)&&!(self.flags2 & FL2_RESPAWN))
 	{
 		precache_model ("models/hydra.mdl");
 		precache_model ("models/spit.mdl");
@@ -838,7 +838,7 @@ void monster_hydra(void)
 	}
 	init_hydra();
 
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!(self.flags2 & FL_SUMMONED)&&!(self.flags2 & FL2_RESPAWN))
 	{
 		precache_sound("hydra/pain.wav");
 		precache_sound("hydra/die.wav");

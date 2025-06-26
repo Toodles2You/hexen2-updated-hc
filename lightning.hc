@@ -350,7 +350,7 @@ void rolling_thunder (void)
 {
 	if(random(100)>=self.wait)
 	{
-		if(self.spawnflags&1&&random(100)<self.dmg)
+		if((self.spawnflags & 1)&&random(100)<self.dmg)
 		{
 			self.lightvalue2=25;
 			lightning_strike();
@@ -426,7 +426,7 @@ void light_thunderstorm()
 			self.wait=33;
 		if(!self.lightvalue1)
 			self.lightvalue1=11;
-		if(!self.dmg&&self.spawnflags&1)
+		if(!self.dmg&&(self.spawnflags & 1))
 			self.dmg=10;
 //			self.dmg=100;
 		lightstylestatic(self.style,self.lightvalue1);

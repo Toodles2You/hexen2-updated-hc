@@ -301,13 +301,13 @@ void() Nec_Mis_Attack;
 
 void magicmis_fire (void)
 {
-	if(self.button0&&self.weaponframe==$mfire5 &&!self.artifact_active&ART_TOMEOFPOWER)
+	if(self.button0&&self.weaponframe==$mfire5 &&!(self.artifact_active & ART_TOMEOFPOWER))
 		self.weaponframe=$mfire5;
 	else
 		self.wfs = advanceweaponframe($mfire1,$mfire8);
 	self.th_weapon=magicmis_fire;
 	self.last_attack=time;
-	if(self.wfs==WF_CYCLE_WRAPPED||self.bluemana<2||(self.artifact_active&ART_TOMEOFPOWER&&self.bluemana<10))
+	if(self.wfs==WF_CYCLE_WRAPPED||self.bluemana<2||((self.artifact_active & ART_TOMEOFPOWER)&&self.bluemana<10))
 		magicmis_ready();
 	else if(self.weaponframe==$mfire5)// &&self.attack_finished<=time)
 		if(self.artifact_active&ART_TOMEOFPOWER)

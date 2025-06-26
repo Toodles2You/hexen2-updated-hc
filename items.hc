@@ -66,7 +66,7 @@ void() PlaceItem =
 	self.velocity = '0 0 0';
 	self.origin_z = self.origin_z + 6;
 	oldz = self.origin_z;
-	if(!self.spawnflags&FLOATING)
+	if(!(self.spawnflags & FLOATING))
 	{
 		oldHull=self.hull;
 		self.hull = HULL_POINT;
@@ -377,7 +377,7 @@ void weapon_touch (void)
 	entity	stemp;
 	float	leave,hadweap;
 
-	if (!other.flags & FL_CLIENT||other.model=="models/sheep.mdl")
+	if (!(other.flags & FL_CLIENT)||other.model=="models/sheep.mdl")
 		return;
 
 	if (deathmatch == 2 || coop)
@@ -1305,7 +1305,7 @@ void BackpackTouch(void)
 void MonsterDropStuff(void)
 {
 
-	if(!self.flags&FL_MONSTER)
+	if(!(self.flags & FL_MONSTER))
 		return;
 
 	if (self.monsterclass < CLASS_GRUNT)
@@ -1394,7 +1394,7 @@ float it_total;
 				self.cnt_sh_boost = 1;
 			else if (chance < .20)
 				self.cnt_mana_boost = 1;
-			else if (chance < .25&&!(world.spawnflags&MISSIONPACK))
+			else if (chance < .25&&!((world.spawnflags & MISSIONPACK)))
 				self.cnt_teleport = 1;
 			else if (chance < .30)
 				self.cnt_tome = 1;

@@ -134,7 +134,7 @@ vector rollangle;
 	if(cycle_wrapped)
 	{
 		thinktime self : 0;
-		if(!self.flags&FL_ONGROUND)
+		if(!(self.flags & FL_ONGROUND))
 			self.think=mezzo_in_air;
 		else
 			self.think=self.th_run;
@@ -155,7 +155,7 @@ vector rollangle;
 	if(cycle_wrapped)
 	{
 		thinktime self : 0;
-		if(!self.flags&FL_ONGROUND)
+		if(!(self.flags & FL_ONGROUND))
 			self.think=mezzo_in_air;
 		else
 			self.think=self.th_run;
@@ -168,7 +168,7 @@ void mezzo_roll_forward () [++ $dive1 .. $dive18]
 //vector rollangle;
 //	if(!walkmove(self.angles_y,7,FALSE)&&self.frame<$dive12 &&self.flags&FL_ONGROUND)
 //		self.frame=$dive12;
-	if(!self.flags&FL_ONGROUND)
+	if(!(self.flags & FL_ONGROUND))
 	{
 		if(!infront(self.enemy))//stay facing enemy so if land behind him, will be facing him
 			ai_face();
@@ -186,7 +186,7 @@ void mezzo_roll_forward () [++ $dive1 .. $dive18]
 	if(cycle_wrapped)
 	{
 		thinktime self : 0;
-		if(!self.flags&FL_ONGROUND)
+		if(!(self.flags & FL_ONGROUND))
 			self.think=mezzo_in_air;
 		else
 			self.think=self.th_run;
@@ -269,7 +269,7 @@ float mezzo_check_jump (entity proj)
 float impact_hite, jump_hite;
 vector proj_dir, proj_top;
 
-	if(!self.flags&FL_ONGROUND)
+	if(!(self.flags & FL_ONGROUND))
 		return FALSE;
 
 	proj_dir=normalize(proj.velocity);
@@ -617,11 +617,11 @@ void mezzo_reflect_trig_touch ()
 vector  org, vec, dir;//, endspot,endplane, dif;
 float magnitude;//remainder, reflect_count, 
 
-	if (other.flags & FL_MONSTER || other.flags & FL_CLIENT || !other || other == self) return;
+	if ((other.flags & FL_MONSTER) || (other.flags & FL_CLIENT) || !other || other == self) return;
 
 	if (other.safe_time>time) return;
 
-	if(!self.owner.flags2&FL_ALIVE||self.owner.frozen>0)
+	if(!(self.owner.flags2 & FL_ALIVE)||self.owner.frozen>0)
 	{
 		if(self.owner.movechain==self)
 			self.owner.movechain=world;
@@ -645,7 +645,7 @@ float magnitude;//remainder, reflect_count,
 
 	if(!self.owner.strength&&self.owner.classname=="monster_mezzoman")
 	{//Just block it
-		if(!other.flags2&FL_ALIVE)
+		if(!(other.flags2 & FL_ALIVE))
 			other.flags2(+)FL_NODAMAGE;
 	}
 	else
@@ -891,7 +891,7 @@ void mezzo_pain_seq () [++ $pain1 .. $pain7]
 	if(cycle_wrapped)
 	{
 		thinktime self : 0;
-		if(!self.flags&FL_ONGROUND)
+		if(!(self.flags & FL_ONGROUND))
 			self.think=mezzo_in_air;
 		else
 			self.think=self.th_run;
@@ -922,7 +922,7 @@ void mezzo_pain (entity attacker, float damage)
 				self.yaw_speed=20;
 				self.aflag=TRUE;//Berzerk!
 			}
-			else if(!self.flags&FL_ONGROUND)
+			else if(!(self.flags & FL_ONGROUND))
 				self.think=mezzo_in_air;
 			else
 				self.think=self.th_run;
@@ -960,7 +960,7 @@ void mezzo_in_air ()
 {
 //	dprint("in air\n");
 	self.frame=$jump12;
-	if(!self.flags&FL_ONGROUND)
+	if(!(self.flags & FL_ONGROUND))
 	{
 		if(random()<0.1)
 		{
@@ -1138,7 +1138,7 @@ void mezzo_block_wait ()
 	if(range(self.enemy)==RANGE_MELEE)
 		if(CheckAnyAttack())
 			return;
-	if(!self.flags&FL_ONGROUND)
+	if(!(self.flags & FL_ONGROUND))
 	{
 //		dprint("what the fuck?!  off ground while blocking?!\n");
 		if(!self.velocity_x&&!self.velocity_y)
@@ -1280,7 +1280,7 @@ void mezzo_run_think ()
 		self.takedamage=DAMAGE_YES;
 	}
 
-	if(!self.enemy.flags2&FL_ALIVE&&self.enemy!=world)
+	if(!(self.enemy.flags2 & FL_ALIVE)&&self.enemy!=world)
 	{
 		self.monster_awake=FALSE;
 		if(visible(self.enemy)&&infront(self.enemy))
@@ -1464,7 +1464,7 @@ void mezzo_stand () [++ $stand1 .. $stand10]
 	{
 		mezzo_check_defense();
 
-		if((!self.enemy.flags2&FL_ALIVE&&self.enemy!=world)||self.enemy==world)
+		if((!(self.enemy.flags2 & FL_ALIVE)&&self.enemy!=world)||self.enemy==world)
 		{
 			self.monster_awake=FALSE;
 			if(self.oldenemy.flags2&FL_ALIVE)
@@ -1524,7 +1524,7 @@ void() monster_werejaguar =
 		self.init_org=self.origin;
 	}
 
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!(self.flags2 & FL_SUMMONED)&&!(self.flags2 & FL2_RESPAWN))
 	{
 		precache_model2 ("models/mezzoref.spr");
 		precache_sound2 ("mezzo/skid.wav");

@@ -570,7 +570,7 @@ entity() SelectSpawnPoint =
 			else*/ 
 			
 			if (spot != world && ((spot.targetname == startspot) ||
-				(startspot == string_null && spot.spawnflags & 1)))
+				(startspot == string_null && (spot.spawnflags & 1))))
 			{
 /*				self.scale=1.5;
 				self.proj_ofs_z*=1.5;
@@ -953,7 +953,7 @@ void ClientReEnter(float TimeDiff)
 entity spot;
 //string tempmodel;
 
-	if(!self.flags2&FL_ALIVE||self.health<1||(self.newclass&&!deathmatch&&!coop))
+	if(!(self.flags2 & FL_ALIVE)||self.health<1||(self.newclass&&!deathmatch&&!coop))
 	{//If dead, put them in the right spot.
 		self.weapon=IT_WEAPON1;
 		PutClientInServer();
@@ -1438,10 +1438,10 @@ void() WaterMove =
 	{
 //		dprintf("time: %s\n",time);
 //		dprintf("air fin: %s\n",self.air_finished);
-		if ((self.air_finished < time) && (!self.rings & RING_WATER))
+		if ((self.air_finished < time) && (!(self.rings & RING_WATER)))
 		{
 //			dprint("checking drown\n");
-			if(self.playerclass==CLASS_PALADIN&&self.flags&FL_SPECIAL_ABILITY1)
+			if(self.playerclass==CLASS_PALADIN&&(self.flags & FL_SPECIAL_ABILITY1))
 			{
 //				dprint("paladin free action\n");
 				self.air_finished = time + 12;
@@ -1480,7 +1480,7 @@ void() WaterMove =
 
 			if(self.flags2&FL2_FIREHEAL)
 				self.health=self.health+5*self.waterlevel;
-			else if(!self.flags2&FL2_FIRERESIST)
+			else if(!(self.flags2 & FL2_FIRERESIST))
 				T_Damage (self, world, world, 5*self.waterlevel);
 			else
 				T_Damage (self, world, world, 2*self.waterlevel);
@@ -1552,9 +1552,9 @@ void CheckCrouch (void)
 		}
 	}
 
-	if ((self.flags2 & FL2_CROUCHED||self.model=="models/sheep.mdl"||self.flags2&FL2_CROUCH_TOGGLE) && (self.hull!=HULL_CROUCH)) 
+	if (((self.flags2 & FL2_CROUCHED)||self.model=="models/sheep.mdl"||(self.flags2 & FL2_CROUCH_TOGGLE)) && (self.hull!=HULL_CROUCH)) 
 		PlayerCrouching ();
-	else if (((!self.flags2 & FL2_CROUCHED&&self.model!="models/sheep.mdl"&&!self.flags2&FL2_CROUCH_TOGGLE) && (self.hull==HULL_CROUCH)) ||
+	else if (((!(self.flags2 & FL2_CROUCHED)&&self.model!="models/sheep.mdl"&&!(self.flags2 & FL2_CROUCH_TOGGLE)) && (self.hull==HULL_CROUCH)) ||
 			(self.crouch_stuck))  // If stuck, constantly try to unstick
 		PlayerUnCrouching();
 
@@ -1564,7 +1564,7 @@ void CheckIncapacities ()
 {
 vector dir;
 	if(self.frozen>0)
-		if(self.flags2&FL_ALIVE&&self.health)
+		if((self.flags2 & FL_ALIVE)&&self.health)
 		{
 			if(self.colormap>144)
 			{
@@ -1604,7 +1604,7 @@ vector dir;
 			self.o_angle_y=dir_y;
 			self.o_angle_z=self.v_angle_z;
 		}
-		else if(!self.flags2&FL_ALIVE&&self.enemy.flags2&FL_ALIVE)//&&visible(self.enemy))
+		else if(!(self.flags2 & FL_ALIVE)&&(self.enemy.flags2 & FL_ALIVE))//&&visible(self.enemy))
 		{//face enemy
 			self.o_angle=normalize(self.enemy.origin+self.enemy.proj_ofs-self.origin+self.view_ofs);
 			self.o_angle=vectoangles(self.o_angle);
@@ -1665,7 +1665,7 @@ void() PlayerPreThink =
 			setorigin(self,self.oldorigin);
 		}
 	}
-	if (!self.flags & FL_INWATER) 
+	if (!(self.flags & FL_INWATER)) 
 		self.aflag = 0;
 
 	if (intermission_running)
@@ -1842,7 +1842,7 @@ void CheckRings (void)
 				self.ring_regen_time = time + 1;
 			}	
 
-			if ((self.ring_regeneration < 10)  && (!self.rings_low & RING_REGENERATION))
+			if ((self.ring_regeneration < 10)  && (!(self.rings_low & RING_REGENERATION)))
 			{
 				self.rings_low (+) RING_REGENERATION;
 				centerprint (self, "Ring of Regeneration is running low");
@@ -1864,7 +1864,7 @@ void CheckRings (void)
 		{
 			self.ring_flight -= 100/RING_FLIGHT_MAX;
 
-			if ((self.ring_flight < 25)  && (!self.rings_low & RING_FLIGHT))
+			if ((self.ring_flight < 25)  && (!(self.rings_low & RING_FLIGHT)))
 			{
 				self.rings_low (+) RING_FLIGHT;
 				centerprint (self, "Ring of Flight is running low");
@@ -1892,7 +1892,7 @@ void CheckRings (void)
 		{
 			self.ring_water -= 100/RING_WATER_MAX;
 
-			if ((self.ring_water < 25)  && (!self.rings_low & RING_WATER))
+			if ((self.ring_water < 25)  && (!(self.rings_low & RING_WATER)))
 			{
 				self.rings_low (+) RING_WATER;
 				centerprint (self, "Ring of Water Breathing is running low");
@@ -1948,7 +1948,7 @@ void CheckRings (void)
 		{
 			self.ring_turning -= 100/RING_TURNING_MAX;
 
-			if ((self.ring_turning < 10)  && (!self.rings_low & RING_TURNING))
+			if ((self.ring_turning < 10)  && (!(self.rings_low & RING_TURNING)))
 			{
 				self.rings_low (+) RING_TURNING;
 				centerprint (self, "Ring of Reflection is running low");
@@ -2226,7 +2226,7 @@ void PlayerTouch (void)
 								push_mod=0.33;
 							else
 								push_mod=0.77;
-							if(other.flags&FL_ONGROUND&&self.velocity_z<0)
+							if((other.flags & FL_ONGROUND)&&self.velocity_z<0)
 							{
 								other.velocity_x=(other.velocity_x/push_mod+self.velocity_x*push_mod)*push_mod;
 								other.velocity_y=(other.velocity_y/push_mod+self.velocity_y*push_mod)*push_mod;
@@ -2239,7 +2239,7 @@ void PlayerTouch (void)
 	if(self.flags&FL_ONGROUND)
 		return;
 
-	if((other.classname=="player"||other.flags&FL_ONGROUND||other.health)&&self.origin_z>=(other.absmin_z+other.absmax_z)*0.5&&self.velocity_z<10)
+	if((other.classname=="player"||(other.flags & FL_ONGROUND)||other.health)&&self.origin_z>=(other.absmin_z+other.absmax_z)*0.5&&self.velocity_z<10)
 		self.flags(+)FL_ONGROUND;
 }
 

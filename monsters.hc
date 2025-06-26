@@ -92,7 +92,7 @@ void() monster_use =
 		return;
 	if (self.health <= 0)
 		return;
-	if (!self.flags2&FL_ALIVE)
+	if (!(self.flags2 & FL_ALIVE))
 		return;
 	if (activator.items & IT_INVISIBILITY)
 		return;
@@ -156,7 +156,7 @@ void(float force_respawn) monster_death_use =
 	{
 		if(self.th_init!=SUB_Null||force_respawn)
 		{
-			if((self.monsterclass<CLASS_BOSS&&!self.flags2&FL_SUMMONED)||force_respawn)
+			if((self.monsterclass<CLASS_BOSS&&!(self.flags2 & FL_SUMMONED))||force_respawn)
 			{
 				entity newmonster;
 				newmonster=spawn();
@@ -219,7 +219,7 @@ void() walkmonster_start_go =
 	if(!self.touch)
 		self.touch=obj_push;
 
-	if(!self.spawnflags&NO_DROP)
+	if(!(self.spawnflags & NO_DROP))
 	{
 		self.origin_z = self.origin_z + 1;	// raise off floor a bit
 		droptofloor();
@@ -256,10 +256,10 @@ void() walkmonster_start_go =
 	if(!self.use)
 		self.use = monster_use;
 
-	if(!self.flags&FL_MONSTER)
+	if(!(self.flags & FL_MONSTER))
 		self.flags(+)FL_MONSTER;
 	
-	if(self.flags&FL_MONSTER&&self.classname=="player_sheep")
+	if((self.flags & FL_MONSTER)&&self.classname=="player_sheep")
 		self.flags(-)FL_MONSTER;
 
 	if (self.target)
@@ -280,7 +280,7 @@ void() walkmonster_start_go =
 				self.th_walk ();
 		else
 		{
-			if(self.goalentity.health>0&&self.goalentity.flags2&FL_ALIVE)
+			if(self.goalentity.health>0&&(self.goalentity.flags2 & FL_ALIVE))
 			{
 				self.enemy=self.goalentity;
 				self.th_run();

@@ -439,7 +439,7 @@ void art_torch()
 
 void KillTorch()
 {
-	if(!self.artifact_active&ART_INVISIBILITY)
+	if(!(self.artifact_active & ART_INVISIBILITY))
 		self.effects(-)EF_DIMLIGHT;   // Turn off lights
 	self.artifact_flags(-)AFL_TORCH;  // Turn off torch flag
 	if(self.netname==STR_TORCH)
@@ -496,7 +496,7 @@ void throw_torch (entity throwtorch)
 	throwtorch.think=thrown_torch_think;
 	thinktime throwtorch : 0;
 
-	if(!self.artifact_active&ART_INVISIBILITY)
+	if(!(self.artifact_active & ART_INVISIBILITY))
 		self.effects(-)EF_DIMLIGHT;   // Turn off lights
 	self.artifact_flags(-)AFL_TORCH;  // Turn off torch flag
 	self.effects(-)EF_TORCHLIGHT;

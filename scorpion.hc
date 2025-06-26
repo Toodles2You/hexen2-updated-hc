@@ -166,7 +166,7 @@ void ScorpionInit(float type)
 		return;
 	}
 
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!(self.flags2 & FL_SUMMONED)&&!(self.flags2 & FL2_RESPAWN))
 	{
 		precache_model2("models/scorpion.mdl");
 

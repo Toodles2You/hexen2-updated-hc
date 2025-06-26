@@ -164,7 +164,7 @@ void() train_wait_mp =
 	}
 
 	if (self.decap == 0 || self.decap == 2) 
-		if(!self.effects&EF_NODRAW)
+		if(!(self.effects & EF_NODRAW))
 			self.effects = 0;
 		else
 			self.effects=EF_NODRAW;
@@ -215,7 +215,7 @@ vector	slope_angles;
 	targ = find (world, targetname, self.target);
 	self.target = targ.target;
 
-	if (!self.decap && self.spawnflags & TRAIN_RETURN) 
+	if (!self.decap && (self.spawnflags & TRAIN_RETURN)) 
 		if (self.noise3 == targ.targetname) 
 			 self.decap = 2;
 
@@ -297,12 +297,12 @@ Don't mod roll
 //		dprintv("Target mangle: %s\n",targ.mangle);
 	}
 
-	if(self.spawnflags&USE_ORIGIN&&self.origin!='0 0 0')
+	if((self.spawnflags & USE_ORIGIN)&&self.origin!='0 0 0')
 		end_spot = targ.origin;
 	else
 		end_spot = targ.origin - self.mins;
 
-	if (!self.spawnflags&ANGLE_WAIT&&(targ.mangle_x != 0 || targ.mangle_y != 0 || targ.mangle_z != 0))
+	if (!(self.spawnflags & ANGLE_WAIT)&&(targ.mangle_x != 0 || targ.mangle_y != 0 || targ.mangle_z != 0))
 	{
 		dir = self.angles;
 		dir += targ.mangle;
@@ -311,7 +311,7 @@ Don't mod roll
 		if(targ.anglespeed)
 			self.anglespeed=targ.anglespeed;
 
-		if(targ.spawnflags&SYNCH||self.spawnflags&SLOPE)
+		if((targ.spawnflags & SYNCH)||(self.spawnflags & SLOPE))
 		{
 			if(!self.wait)
 				SUB_CalcMoveAndAngleInit (end_spot, self.speed, dir, self.anglespeed, train_next_mp,TRUE);
@@ -356,7 +356,7 @@ entity	targ;
 	targ = find (world, targetname, self.target);
 	self.enemy=targ;
 	self.target = targ.target;
-	if(self.spawnflags&USE_ORIGIN&&self.origin!='0 0 0')
+	if((self.spawnflags & USE_ORIGIN)&&self.origin!='0 0 0')
 		setorigin (self, targ.origin);
 	else
 		setorigin (self, targ.origin - self.mins);
@@ -467,7 +467,7 @@ void() func_train_mp =
 {
 entity targ;
 
-	if(!world.spawnflags&MISSIONPACK)
+	if(!(world.spawnflags & MISSIONPACK))
 	{
 		func_train();
 		return;

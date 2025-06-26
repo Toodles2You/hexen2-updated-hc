@@ -176,7 +176,7 @@ float dist, bestdist;
 	bestdist+=1;
 	while (loser)
 	{
-		if(loser.health&&loser.takedamage&&(loser.flags2&FL_ALIVE)&&visible(loser)&&loser!=self&&loser!=world&&loser!=self.owner&&!other.effects&EF_NODRAW)//&&!(loser.artifact_active&ARTFLAG_STONED) Why Not?
+		if(loser.health&&loser.takedamage&&(loser.flags2&FL_ALIVE)&&visible(loser)&&loser!=self&&loser!=world&&loser!=self.owner&&!(other.effects & EF_NODRAW))//&&!(loser.artifact_active&ARTFLAG_STONED) Why Not?
 			if((!self.aflag||self.ideal_yaw)&&!ahead(loser,self))			//looks for someone in front first time
 				dprint("");//not infront\n");
 			else if(teamplay&&loser.classname=="player"&&((loser.team==self.owner.team&&self.owner.classname=="player")||(loser.team==self.controller.team&&self.owner.classname=="player")))
@@ -283,7 +283,7 @@ void HomeThink()
 	}
 
 	if(self.enemy!=world&&!self.lockentity)
-		if(!visible(self.enemy)||!self.enemy.health||!self.enemy.flags2&FL_ALIVE)
+		if(!visible(self.enemy)||!self.enemy.health||!(self.enemy.flags2 & FL_ALIVE))
 		{
 		//if you can't see him, don't track (and look for someone else?)
 			self.oldenemy=self.enemy;//remember him

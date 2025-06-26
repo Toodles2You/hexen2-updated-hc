@@ -187,7 +187,7 @@ void door_blocked()
 	if(self.wait>-2&&self.strength<=0)
 		if(self.dmg==666)
 		{
-			if(other.classname=="player"&&other.flags2&FL_ALIVE)
+			if(other.classname=="player"&&(other.flags2 & FL_ALIVE))
 			{
 				other.decap=TRUE;
 				T_Damage (other, self, self, other.health+300);
@@ -207,7 +207,7 @@ void door_blocked()
 		other.flags(-)FL_ONGROUND;
 		other.velocity=normalize(self.origin-(other.absmin+other.absmax)*0.5)*100;
 	}
-	else*/ if(other.flags&FL_ONGROUND&&(self.movedir_x||self.movedir_z)&&self.strength==1)//&&other.origin_z>self.origin_z
+	else*/ if((other.flags & FL_ONGROUND)&&(self.movedir_x||self.movedir_z)&&self.strength==1)//&&other.origin_z>self.origin_z
 	{
 		other.flags(-)FL_ONGROUND;
 		other.velocity_z+=self.speed*2;
@@ -257,7 +257,7 @@ float do_dmg;
 	dprint("\n");*/
 	if(self.dmg==-1)
 	{
-		if(other.classname=="player" && other.flags2&FL_ALIVE)
+		if(other.classname=="player" && (other.flags2 & FL_ALIVE))
 		{
 			if (self.wait >= 0)
 			{
@@ -279,7 +279,7 @@ float do_dmg;
 	{
 		if(do_dmg==666)
 		{
-			if(other.classname=="player"&&other.flags2&FL_ALIVE)
+			if(other.classname=="player"&&(other.flags2 & FL_ALIVE))
 			{
 				other.decap=TRUE;
 				T_Damage (other, self, self, other.health+300);
@@ -570,10 +570,10 @@ void door_trigger_touch()
 //	if(!other.flags2&FL_ALIVE)
 //		return;
 
-	if(!other.flags&FL_CLIENT&&!other.flags&FL_MONSTER)
+	if(!(other.flags & FL_CLIENT)&&!(other.flags & FL_MONSTER))
 		return;
 
-	if(other.flags&FL_MONSTER&&world.spawnflags&MISSIONPACK)
+	if((other.flags & FL_MONSTER)&&(world.spawnflags & MISSIONPACK))
 		return;
 
 	if(time < self.attack_finished)
@@ -635,15 +635,15 @@ void door_touch()
 	//	if(!other.flags2&FL_ALIVE)
 //		return;
 
-	if(!other.flags&FL_CLIENT&&!other.flags&FL_MONSTER)
+	if(!(other.flags & FL_CLIENT)&&!(other.flags & FL_MONSTER))
 		return;
 
-	if(other.flags&FL_MONSTER&&world.spawnflags&MISSIONPACK)
+	if((other.flags & FL_MONSTER)&&(world.spawnflags & MISSIONPACK))
 		return;
 
 	if(self.dmg==666&&(self.velocity!='0 0 0'||self.avelocity!='0 0 0'))
 	{
-		if(other.classname=="player"&&other.flags2&FL_ALIVE)
+		if(other.classname=="player"&&(other.flags2 & FL_ALIVE))
 		{
 			other.decap=TRUE;
 			T_Damage (other, self, self, other.health+300);
@@ -1368,7 +1368,7 @@ void fd_secret_use()
 
 	SUB_UseTargets();				// fire all targets / killtargets
 
-	if(!self.spawnflags & SECRET_NO_SHOOT)
+	if(!(self.spawnflags & SECRET_NO_SHOOT))
 	{
 		self.th_pain = SUB_Null;
 		self.takedamage = DAMAGE_NO;
@@ -1429,7 +1429,7 @@ void fd_secret_move2()
 void fd_secret_move3()
 {
 	sound(self, CHAN_VOICE, self.noise3, 1, ATTN_NORM);
-	if(!self.spawnflags & SECRET_OPEN_ONCE)
+	if(!(self.spawnflags & SECRET_OPEN_ONCE))
 	{
 		self.nextthink = self.ltime + self.wait;
 		self.think = fd_secret_move4;
@@ -1463,7 +1463,7 @@ void fd_secret_move6()
 
 void fd_secret_done()
 {
-	if (!self.targetname || self.spawnflags&SECRET_YES_SHOOT)
+	if (!self.targetname || (self.spawnflags & SECRET_YES_SHOOT))
 	{
 		self.health = 10000;
 		self.takedamage = DAMAGE_YES;
@@ -1577,7 +1577,7 @@ void func_door_secret()
 	self.blocked = secret_blocked;
 	self.speed = 50;
 	self.use = fd_secret_use;
-	if ( !self.targetname || self.spawnflags&SECRET_YES_SHOOT)
+	if ( !self.targetname || (self.spawnflags & SECRET_YES_SHOOT))
 	{
 		self.health = 10000;
 		self.takedamage = DAMAGE_YES;

@@ -76,7 +76,7 @@ void MeteorTouch (void)
 		T_Damage(other,self,self.owner,self.dmg);
 		if(self.dmg>3)
 		{
-			if((other.flags&FL_CLIENT||other.flags&FL_MONSTER)&&other.mass<200)
+			if(((other.flags & FL_CLIENT)||(other.flags & FL_MONSTER))&&other.mass<200)
 			{
 			vector hitdir;
 				hitdir=self.o_angle*300;
@@ -248,7 +248,7 @@ float pick_up;
 		if(vlen(self.enemy.origin-self.origin))
 			let_go=TRUE;
 		
-		if(!self.enemy.flags2&FL_TORNATO_SAFE)
+		if(!(self.enemy.flags2 & FL_TORNATO_SAFE))
 		{
 			self.enemy.velocity='0 0 0';
 			setorigin(self.enemy,org);
@@ -259,7 +259,7 @@ float pick_up;
 			let_go=TRUE;
 		}
 //FIXME:  throw the Sheep
-		if(!let_go&&self.enemy!=world&&!self.enemy.flags2&FL_ALIVE)//Don't let go of it if it's not a creature
+		if(!let_go&&self.enemy!=world&&!(self.enemy.flags2 & FL_ALIVE))//Don't let go of it if it's not a creature
 			if(random()>=0.4||self.goalentity==world||(!visible(self.goalentity))||self.goalentity.health<=0)
 				self.pain_finished=time+1;
 			else
@@ -366,7 +366,7 @@ float pick_up;
 					pick_up=FALSE;
 				if(teamplay&&sucker.classname=="player"&&(coop||self.controller.team==sucker.team))
 					pick_up=FALSE;
-				if(sucker.takedamage&&sucker.health&&sucker!=self.enemy&&sucker.mass<500*self.scale&&visible(sucker)&&sucker!=self.owner&&!sucker.effects&EF_NODRAW&&pick_up&&sucker.owner!=self.owner)
+				if(sucker.takedamage&&sucker.health&&sucker!=self.enemy&&sucker.mass<500*self.scale&&visible(sucker)&&sucker!=self.owner&&!(sucker.effects & EF_NODRAW)&&pick_up&&sucker.owner!=self.owner)
 				{
 					if(sucker.solid==SOLID_BSP&&sucker.origin=='0 0 0')
 						distance=vlen((sucker.absmax+sucker.absmin)*0.5-self.origin);
@@ -380,7 +380,7 @@ float pick_up;
 							bestdist=distance;
 							self.goalentity=sucker;
 						}
-						else if(!self.goalentity.flags2&FL_ALIVE)
+						else if(!(self.goalentity.flags2 & FL_ALIVE))
 						{
 							if(sucker.flags2&FL_ALIVE)
 							{
@@ -393,7 +393,7 @@ float pick_up;
 								self.goalentity=sucker;
 							}
 						}
-						else if(sucker.flags2&FL_ALIVE&&distance<bestdist)
+						else if((sucker.flags2 & FL_ALIVE)&&distance<bestdist)
 						{
 							bestdist=distance;
 							self.goalentity=sucker;
@@ -530,7 +530,7 @@ void funnal_touch (void)
 				other.movetype=MOVETYPE_NONE;
 				self.owner.enemy=other;
 				self.owner.pain_finished=time+random(3,10);//How long to hold them before throwing them away
-				if(other.classname=="player_sheep"&&other.flags2&FL_ALIVE)
+				if(other.classname=="player_sheep"&&(other.flags2 & FL_ALIVE))
 				{
 					sound(other,CHAN_VOICE,"misc/sheepfly.wav",1,ATTN_NORM);
 					other.pain_finished=time+1;
@@ -546,7 +546,7 @@ void funnal_touch (void)
 		other.flags(-)FL_ONGROUND;
 		if(other.takedamage)
 			T_Damage(other,self.owner,self.owner.controller,5*self.scale);
-		if(other.classname=="player_sheep"&&other.flags2&FL_ALIVE)
+		if(other.classname=="player_sheep"&&(other.flags2 & FL_ALIVE))
 		{
 			sound(other,CHAN_VOICE,"misc/sheepfly.wav",1,ATTN_NORM);
 			other.pain_finished=time+1;
@@ -619,7 +619,7 @@ vector org;
 	tornato.velocity=normalize(v_forward)*250+'0 0 20';
 	tornato.velocity_z=0;
 	tornato.scale=1;
-	if(visible(self.enemy)&&self.enemy.flags2&FL_ALIVE)//Infront too?
+	if(visible(self.enemy)&&(self.enemy.flags2 & FL_ALIVE))//Infront too?
 		tornato.goalentity=self.enemy;
 	tornato.lifetime=time + 20;
 	tornato.think=tornato_grow;

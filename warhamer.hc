@@ -153,7 +153,7 @@ float distance;
 		self.pain_finished=time+0.3;
 	}
 	
-	if(self.controller.health<=0||!self.controller.flags2&FL_ALIVE||self.controller.model=="models/sheep.mdl")
+	if(self.controller.health<=0||!(self.controller.flags2 & FL_ALIVE)||self.controller.model=="models/sheep.mdl")
     {
         stopSound(self,CHAN_VOICE);
 		//sound(self, CHAN_VOICE, "misc/null.wav", 0.3, ATTN_NORM);

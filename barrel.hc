@@ -122,7 +122,7 @@ void barrel_check_float (void)
 {
 vector org;
 	org=self.origin;
-	if(pointcontents(org)==CONTENT_WATER||pointcontents(org)==CONTENT_SLIME||pointcontents(org)==CONTENT_LAVA&&(!self.spawnflags&BARREL_SINK))
+	if(pointcontents(org)==CONTENT_WATER||pointcontents(org)==CONTENT_SLIME||pointcontents(org)==CONTENT_LAVA&&(!(self.spawnflags & BARREL_SINK)))
 	{
 		self.classname="barrel_floating";
 		self.think=float;
@@ -370,7 +370,7 @@ void obj_barrel_use()
 void spawn_barrel(float barrel_type)
 {
 	self.frags=barrel_type;
-	if(!self.flags2&FL_SUMMONED)
+	if(!(self.flags2 & FL_SUMMONED))
 	{
 		precache_model("models/barrel.mdl");
 		if(barrel_type==BARREL_NORMAL)
@@ -417,19 +417,19 @@ void spawn_barrel(float barrel_type)
 		self.skin=2;
 	}
 
-	if(!self.spawnflags&BARREL_SINK)
+	if(!(self.spawnflags & BARREL_SINK))
 	{
 		self.think=barrel_check_float;
 		thinktime self : 0;
 	}
 
-	if(pointcontents(self.origin)!=CONTENT_EMPTY&&(!self.spawnflags&BARREL_SINK))
+	if(pointcontents(self.origin)!=CONTENT_EMPTY&&(!(self.spawnflags & BARREL_SINK)))
 	{
 		self.classname="barrel_floating";
 		self.think=float;
 		thinktime self : 0;
 	}
-	else if(!self.flags2&FL_SUMMONED&&!self.spawnflags&BARREL_NO_DROP)
+	else if(!(self.flags2 & FL_SUMMONED)&&!(self.spawnflags & BARREL_NO_DROP))
 		droptofloor();
 
 	if(self.spawnflags&DROP_USE)

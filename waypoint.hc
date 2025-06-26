@@ -135,7 +135,7 @@ void() SetNextWaypoint =
         }
         if(self.classname=="waypoint")
         {
-                if(self.controller.enemy!=self.enemy||(!self.enemy.flags2&FL_ALIVE)||(!self.controller.flags2&FL_ALIVE))
+                if(self.controller.enemy!=self.enemy||(!(self.enemy.flags2 & FL_ALIVE))||(!(self.controller.flags2 & FL_ALIVE)))
 				{
 //						dprint("Owner's enemy has changed or died or owner died\n");
                         ResetWaypoints();

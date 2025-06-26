@@ -29,7 +29,7 @@ float cube_find_target(void)
 					traceline (self.origin,(item.absmin+item.absmax)*0.5,TRUE,self);
 					if (trace_fraction==1.0)
 					{
-						if ((!item.effects & EF_NODRAW)||item.classname=="monster_pentacles")
+						if ((!(item.effects & EF_NODRAW))||item.classname=="monster_pentacles")
 						{
 							sound(self, CHAN_ITEM, "misc/Beep1.wav", 1, ATTN_NORM);
 							self.attack_finished=time+random(0.5);
@@ -190,7 +190,7 @@ void CubeThinkerB(void)
 	if(random()<0.1)
 		sound(self, CHAN_VOICE, "misc/cubehum.wav", 1, ATTN_NORM);
 	updateSoundPos(self,CHAN_VOICE);
-	if (!self.owner.flags2 & FL_ALIVE) 
+	if (!(self.owner.flags2 & FL_ALIVE)) 
 	{
 		CubeDie();
 		return;

@@ -20,7 +20,7 @@ entity	temp;
 	if (other.enemy)
 		return;		// fighting, not following a path
 
-	if(self.wait==-2&&other.flags&FL_MONSTER)
+	if(self.wait==-2&&(other.flags & FL_MONSTER))
 		remove(other);
 
 	temp = self;
