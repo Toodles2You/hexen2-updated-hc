@@ -379,7 +379,7 @@ void archerdrawdone () [-- $tranA7..$tranA1]
   -----------------------------------------*/
 void archermissile () [++ $fire1..$fire4]
 {
-float enemy_range,chance,ok,tspeed;
+float chance,ok,tspeed;
 vector spot1, spot2;
 
 	self.attack_state = AS_MISSILE;

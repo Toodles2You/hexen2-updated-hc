@@ -22,6 +22,7 @@ vector ofs;
 void smolder (vector org)
 {
 //	starteffect(CE_SMOLDER,org);
+/*
 	return;//Magical Network-Friendly Code!
 	newmis=spawn();
 	setorigin(newmis,org);
@@ -29,6 +30,7 @@ void smolder (vector org)
 	newmis.lifetime=time+7;
 	newmis.think=smolder_think;
 	thinktime newmis : 0;
+*/
 }
 
 /*

@@ -424,7 +424,6 @@ float pick_up;
 	}
 	if(self.flags&FL_ONGROUND)
 	{
-	vector dir;
 		self.velocity_z*=-0.333;//Maybe a little more bounce?
 		self.flags(-)FL_ONGROUND;
 		dir_z=random(20,70);

@@ -1230,7 +1230,6 @@ void eidolon_wait () [++ $wait1 .. $wait16]
 void multiplayer_health ()
 {
 entity lastent;
-float num_players;
 	if(coop)
 	{
 		lastent=nextent(world);

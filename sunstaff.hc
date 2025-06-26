@@ -45,7 +45,7 @@ $frame settle1      settle2      settle3      settle4      settle5
 
 void FireSunstaff (vector dir, float ofs)
 {
-vector  org1,org2, vec, dir, endspot,endplane;
+vector  org1,org2, vec, endspot,endplane;
 float remainder, reflect_count,damg;
 //Draw a larger pulsating transparent yellow beam,
 //rotating, with a smaller solid white beam in the

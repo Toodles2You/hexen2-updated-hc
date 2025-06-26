@@ -126,7 +126,7 @@ void linkBreakables()
 //============================================================================
 void brush_use_hierarchy()
 {
-   local entity starte, oself, other;
+   local entity starte, oself;
 	local float headNum;
 
 	oself = starte = self;
@@ -169,7 +169,7 @@ void brush_use_ordered()
 
 void brush_use()
 {
-	local entity starte, other;
+	local entity starte;
 	
 	starte = self;
 	

@@ -1096,7 +1096,6 @@ vector destiny,org;
 
 	if(!self.spawnflags & MONSTER_STAND_GROUND)
 	{
-	float swoop_no_drop;
 	vector min,max;
 		swoop_no_drop=FALSE;
 		
@@ -1337,13 +1336,13 @@ float imp_find_target(void)
 	{	// We found a target
 		if (self.skin==2) 
 		{
-			float self_infront, self_vis, enemy_dist, r1, r2;
+			float self_infront, self_vis, enemy_dist, r1, r3;
 			self_infront=infront_of_ent(self,self.enemy);
 			self_vis=visible2ent(self,self.enemy);
 			enemy_dist=vlen(self.origin-self.enemy.origin);
 			r1=random();
-			r2=random();
-			if((self_infront&&self_vis&&r1<0.1&&r2<0.5&&enemy_dist<1000)||enemy_dist<=RANGE_MELEE)
+			r3=random();
+			if((self_infront&&self_vis&&r1<0.1&&r3<0.5&&enemy_dist<1000)||enemy_dist<=RANGE_MELEE)
 			{
 				self.goalentity = self.enemy;
 				self.think=stone_imp_awaken;

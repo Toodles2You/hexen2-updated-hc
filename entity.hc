@@ -456,11 +456,9 @@ void end_sys_fields;
 	};
 	struct	// For raven staff Ravens
 	{
-		float idealpitch;
 		float pitchdowntime;
 		float searchtime;	// Amount of time bird has been searching
 		float next_action;	// Next time to take action
-		float searchtime;	// When search was first started
 		float damage_max; // Amount of damage each raven can do before it has to leave
 	};
 	struct

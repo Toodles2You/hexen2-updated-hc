@@ -496,7 +496,6 @@ void death_missile_2_think (void)
 
 void death_missile_2(float dir)
 {
-	entity newmis;
 	vector diff;
 
 	if(!self.enemy.flags2&FL_ALIVE)

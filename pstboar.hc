@@ -164,7 +164,6 @@ void hive_trail ()
 void()hive_touch;
 void throw_hive (void)
 {
-	entity newmis;
 	vector diff;
 
     makevectors(self.movechain.angles);
@@ -248,8 +247,6 @@ void pestilence_missile_think (void)
 
 void pestilence_missile(void)
 {
-	entity newmis;
-
 	sound(self,CHAN_AUTO,"pest/xbowfire.wav",1,ATTN_NORM);	
 	newmis = spawn ();
 	newmis.owner = self;

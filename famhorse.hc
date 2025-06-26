@@ -356,7 +356,6 @@ void famine_missile_think (void)
 
 void famine_missile(float dir)
 {
-	entity newmis;
 	vector diff;
 
 	newmis = spawn ();
