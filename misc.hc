@@ -193,7 +193,7 @@ void() barrel_explode =
 	self.origin_z = self.origin_z + 32;
 	BecomeExplosion (FALSE);
 };
-
+*/
 
 
 /*QUAK-ED misc_explobox (0 .5 .8) (0 0 0) (32 32 64)
@@ -230,7 +230,7 @@ void() misc_explobox =
 
 /*QUAK-ED misc_explobox2 (0 .5 .8) (0 0 0) (32 32 64)
 Smaller exploding box, REGISTERED ONLY
-*
+*/
 /*
 void() misc_explobox2 =
 {
