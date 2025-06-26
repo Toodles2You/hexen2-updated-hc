@@ -317,6 +317,7 @@ void() ImpulseCommands =
 
 	if (self.impulse == 9&&skill<3)
 		CheatCommand ();
+/*
 	else if(self.impulse==177)//Make BBOX model
 		if(self.movechain.model=="models/playrbox.mdl")
 		{
@@ -336,6 +337,7 @@ void() ImpulseCommands =
 			self.movechain.movetype=MOVETYPE_NOCLIP;
 			self.movechain.angles='0 0 0';
 		}
+*/
 	else if(self.impulse==178)//test trace
 		if(self.flags2&FL2_TEST_TRACE)
 			self.flags2(-)FL2_TEST_TRACE;
