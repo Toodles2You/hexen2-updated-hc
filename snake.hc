@@ -194,7 +194,6 @@ void snake_missile_think (void)
 
 void snake_missile_shoot(vector spot1)
 {
-	entity newmis;
 	vector diff;
 
 	newmis = spawn ();

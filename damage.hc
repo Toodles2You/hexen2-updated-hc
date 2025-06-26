@@ -656,7 +656,7 @@ float armor_calc(entity targ,float damage)
 	float armor_cnt;
 	float armor_damage;
 	float perpiece;
-	float curr_damage,armor_damage;
+	float curr_damage;
 
 	total_armor_protection = 0;
 

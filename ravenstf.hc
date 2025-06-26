@@ -427,8 +427,6 @@ Launch all ravens
 ----------------------*/
 void launch_superraven (void)
 {
-	entity newmis;
-
 	self.attack_finished = time + 0.5;
 
 	makevectors(self.v_angle);

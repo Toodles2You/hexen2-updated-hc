@@ -1056,7 +1056,7 @@ Puzzle Pieces (use the puzzle_id value from the pieces)
 */
 void func_door()
 {
-float movedist, num_axes;
+float num_axes;
 	door_sounds();
 
 	SetMovedir ();
