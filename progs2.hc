@@ -1,4 +1,4 @@
-float MedusaCheckAttack (void) {}
+float MedusaCheckAttack (void) { return FALSE; }
 void SpiderMeleeBegin (void) {}
 void spider_onwall_wait (void) {}
 void SpiderJumpBegin (void) {}
