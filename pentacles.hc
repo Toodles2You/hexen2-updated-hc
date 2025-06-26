@@ -239,7 +239,7 @@ vector hitdir;
 		hitdir=normalize(self.velocity);
 		self.velocity='0 0 0';
 		tracearea(self.origin,self.origin+hitdir*64,self.mins*0.5,self.maxs*0.5,TRUE,self);
-		if(trace_plane_normal=='0 0 0');
+		if(trace_plane_normal=='0 0 0')
 		{
 //			dprint("trace_area failed, using traceline\n");
 			traceline(self.origin,self.origin+hitdir*64,TRUE,self);
