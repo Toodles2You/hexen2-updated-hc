@@ -66,7 +66,7 @@ $frame wait16
 
 //==================================================================
 
-void()ph_eidolon_pain;
+void ph_eidolon_pain (entity attacker, float damage);
 void ph_eidolon_wait () [++ $wait1 .. $wait16]
 {
 }
@@ -84,14 +84,14 @@ void ph_eidolon_roar () [++ $howl1 .. $howl60]
 
 void ph_eidolon_ready_roar()
 {
-	self.th_pain=SUB_Null;
+	self.th_pain=SUB_null_pain;
 	sound(self,CHAN_VOICE,"eidolon/roar.wav",1,ATTN_NONE);
 	self.frame=$howl1;
 	self.think=ph_eidolon_roar;
 	thinktime self : 0;
 }
 
-void ph_eidolon_pain () [++ $painA1 .. $painA9]
+void ph_eidolon_pain_anim () [++ $painA1 .. $painA9]
 {
 	if(random()<0.95)
 		return;
@@ -103,10 +103,15 @@ void ph_eidolon_pain () [++ $painA1 .. $painA9]
 		self.think=self.th_stand;
 }
 
+void ph_eidolon_pain (entity attacker, float damage)
+{
+	ph_eidolon_pain_anim (); 
+}
+
 void ph_eidolon_die () [++ $death1 .. $death105]
 {//FIXME: death frames, thud when hit ground
 	if(self.frame>=$death1)
-		self.th_pain=SUB_Null;
+		self.th_pain=SUB_null_pain;
 	if(self.frame==$death85)
 		setsize(self,'-24 -24 0','24 24 64');
 	if(self.frame==$death8)

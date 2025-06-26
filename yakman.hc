@@ -1023,7 +1023,8 @@ void yakman_shoot_or_charge ()
 			self.think=yakman_throw_sheep;
 		else
 		{
-			self.th_pain=self.touch=SUB_Null;
+			self.touch=SUB_Null;
+			self.th_pain = SUB_null_pain;
 			self.think=yakman_ready_fire;
 		}
 	}

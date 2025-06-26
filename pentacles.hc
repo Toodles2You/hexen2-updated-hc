@@ -101,7 +101,7 @@ void setnewwalldir ()
 float shortest, dirnum;
 	makevectors (self.angles);
 	dirnum=shortest=1;
-	self.th_pain=SUB_Return;
+	self.th_pain=SUB_null_pain;
 //	dprint("Grabbing any wall\n");
 	while(dirnum<7)
 	{
