@@ -843,7 +843,7 @@ void GolemSRushBegin(void) [++ $rush1..$rush12]
 //
 //==========================================================================
 
-void GolemSRushSlide(void) [$rush12 GolemSRushSlide]
+void GolemSRushSlide(void) [$rush12, GolemSRushSlide]
 {
 	if(walkmove(self.angles_y, 20, FALSE))
 	{
@@ -978,7 +978,7 @@ void GolemDoBeam(float offset, float damage)
 	WriteCoord (MSG_BROADCAST, trace_endpos_z);		
 }
 
-void GolemBBeamFireArch1(void) [$bgem18 GolemBBeamFireArch1]
+void GolemBBeamFireArch1(void) [$bgem18, GolemBBeamFireArch1]
 {
 	if (self.golemBeamDelay < time)
 	{
@@ -992,7 +992,7 @@ void GolemBBeamFireArch1(void) [$bgem18 GolemBBeamFireArch1]
 	GolemDoBeam(self.golemBeamOff1, random(7, 12));
 }
 
-void GolemBBeamFireArch2(void) [$bgem18 GolemBBeamFireArch2]
+void GolemBBeamFireArch2(void) [$bgem18, GolemBBeamFireArch2]
 {
 	if (self.golemBeamDelay < time)
 	{
@@ -1051,7 +1051,7 @@ void GolemBBeamFire(void) [++ $bgem11..$bgem18]
 	}
 }
 
-void GolemBBeamPause(void) [$bgem11 GolemBBeamPause]
+void GolemBBeamPause(void) [$bgem11, GolemBBeamPause]
 {
 	if (self.golemBeamDelay < time && !self.cnt)
 	{
@@ -1458,7 +1458,7 @@ void GolemDeathFinish(void) [++ $death12..$death22]
 	thinktime self : 0.07;
 }
 
-void GolemDeathPause(void) [$death11 GolemDeathPause]
+void GolemDeathPause(void) [$death11, GolemDeathPause]
 {
 	vector vect;
 
