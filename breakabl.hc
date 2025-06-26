@@ -94,7 +94,7 @@ void linkBreakables()
 
 		if (EntitiesTouching(self,t) && 
 			(((self.spawnflags & BREAK_CHECKNAME) && (self.netname == t.netname)) ||
-			(!self.spawnflags & BREAK_CHECKNAME)))
+			(!(self.spawnflags & BREAK_CHECKNAME))))
 		{	
 	
 			if (t.enemy) 

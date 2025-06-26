@@ -114,7 +114,7 @@ void catapult_fire (void)
 				if(!found.touch)
 					found.touch=obj_push;
 				found.flags(-)FL_ONGROUND;
-				if(!found.flags2&FL_ALIVE)
+				if(!(found.flags2 & FL_ALIVE))
 				{
 					found.avelocity=found.velocity*random(-1,1);
 					found.movetype=MOVETYPE_BOUNCE;
@@ -147,7 +147,7 @@ void catapult_fire (void)
 
 void catapult_pain (void)
 {
-	if(!self.enemy.flags2&FL_ALIVE)
+	if(!(self.enemy.flags2 & FL_ALIVE))
 		return;
 
 	if(self.frame==20)
@@ -285,7 +285,7 @@ void obj_catapult2 (void)
 		self.health=1000;
 	self.max_health = self.health;
 
-	if(!self.spawnflags&1)
+	if(!(self.spawnflags & 1))
 	{
 		self.touch=catapult2_touch;
 		self.th_die = chunk_death;

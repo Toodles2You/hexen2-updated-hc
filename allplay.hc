@@ -274,7 +274,7 @@ vector org;
 			self.movedir_z=0;
 		}
 		traceline(self.origin + self.view_ofs, self.origin+self.view_ofs+self.movedir*100, FALSE, self);
-		if (trace_fraction < 1&&!trace_ent.flags2&FL_ALIVE&&trace_ent.solid==SOLID_BSP)
+		if (trace_fraction < 1&&!(trace_ent.flags2 & FL_ALIVE)&&trace_ent.solid==SOLID_BSP)
 		{
 			self.wallspot=trace_endpos;
 			ZeBrains(trace_endpos, trace_plane_normal, random(1.3,2), rint(random(1)),random(360));

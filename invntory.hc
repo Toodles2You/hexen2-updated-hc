@@ -57,7 +57,7 @@ float move_cnt;
 		newmis.team=self.owner.team;
 		newmis.classname="monster_imp_lord";
 		newmis.lifetime=time+30;
-		if(self.owner.enemy!=world&&self.owner.enemy.flags2&FL_ALIVE&&visible2ent(self.owner.enemy,self))
+		if(self.owner.enemy!=world&&(self.owner.enemy.flags2 & FL_ALIVE)&&visible2ent(self.owner.enemy,self))
 		{
 			newmis.enemy=newmis.goalentity=self.owner.enemy;
 			newmis.monster_awake=TRUE;
@@ -240,7 +240,7 @@ float okay;
 		thinktime self : 0;
 		return;
 	}
-	if(!visible(self.enemy)&&!self.enemy.effects&EF_NODRAW)
+	if(!visible(self.enemy)&&!(self.enemy.effects & EF_NODRAW))
 		self.enemy=world;
 	if(self.enemy)
 	{
@@ -267,7 +267,7 @@ float okay;
 			found=findradius(self.origin,1000);
 			while(found)
 			{
-				if(found.health&&found.flags2&FL_ALIVE&&!found.effects&EF_NODRAW&&found!=self.owner&&found!=self&&found.controller!=self.owner)
+				if(found.health&&(found.flags2 & FL_ALIVE)&&!(found.effects & EF_NODRAW)&&found!=self.owner&&found!=self&&found.controller!=self.owner)
 				{
 					if(coop&&found.classname=="player")
 						okay=FALSE;
@@ -537,10 +537,10 @@ void()Use_Fireball;
 
 void BreakChains()
 {
-	if(!self.flags2&FL_CHAINED)
+	if(!(self.flags2 & FL_CHAINED))
 		return;
 	self.flags2(-)FL_CHAINED;
-	if(!self.rings&RING_FLIGHT)
+	if(!(self.rings & RING_FLIGHT))
 		self.movetype=MOVETYPE_WALK;
 }
 
@@ -550,7 +550,7 @@ void UseInventoryItem (void)
 	if (self.health <= 0)
 		return;
 
-	if(self.flags2&FL_CHAINED&&self.inventory!=INV_TELEPORT&&self.inventory!=INV_BLAST)
+	if((self.flags2 & FL_CHAINED)&&self.inventory!=INV_TELEPORT&&self.inventory!=INV_BLAST)
 		return;
 
 	// Is it in the inventory
@@ -612,8 +612,8 @@ void UseInventoryItem (void)
 	}
 	else if ((self.inventory == INV_CUBEOFFORCE) && (self.cnt_cubeofforce))
 	{
-		if ((!self.artifact_flags & AFL_CUBE_LEFT) ||
-			(!self.artifact_flags & AFL_CUBE_RIGHT))
+		if ((!(self.artifact_flags & AFL_CUBE_LEFT)) ||
+			(!(self.artifact_flags & AFL_CUBE_RIGHT)))
 		{
 			UseCubeOfForce(FALSE);
 			self.flags (+) FL_ARTIFACTUSED;
@@ -738,8 +738,8 @@ void PanicButton ()
 	}
 	if (self.cnt_cubeofforce)
 	{
-		if ((!self.artifact_flags & AFL_CUBE_LEFT) ||
-			(!self.artifact_flags & AFL_CUBE_RIGHT))
+		if ((!(self.artifact_flags & AFL_CUBE_LEFT)) ||
+			(!(self.artifact_flags & AFL_CUBE_RIGHT)))
 		{
 			UseCubeOfForce(FALSE);
 			self.flags (+) FL_ARTIFACTUSED;

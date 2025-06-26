@@ -61,7 +61,7 @@ void() button_fire =
 		return;	
 	}
 
-	if(self.spawnflags&BUTTON_TOGGLE&&self.state==STATE_TOP)
+	if((self.spawnflags & BUTTON_TOGGLE)&&self.state==STATE_TOP)
 	{//Toggle button, done moving
 		button_return();
 		return;
@@ -84,7 +84,7 @@ void() button_use =
 
 void() button_touch =
 {	
-	if ((!other.flags&FL_PUSH)&&other.classname!="player")
+	if ((!(other.flags & FL_PUSH))&&other.classname!="player")
 		return;
 	
 //	if(self.inactive)
@@ -173,7 +173,7 @@ void() func_button =
 		self.takedamage = DAMAGE_NO_GRENADE;
 	}
 	
-	if (!self.spawnflags & 2)
+	if (!(self.spawnflags & 2))
 	{
 		if (!self.health) self.health = 10;
 		self.touch = button_touch;

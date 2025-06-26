@@ -531,7 +531,7 @@ void() fangel_deathframes =
 	if (self.frame == 26)
 		self.drop_time = time + .25;
 
-	if ((self.frame == 27) && (!self.flags & FL_ONGROUND))
+	if ((self.frame == 27) && (!(self.flags & FL_ONGROUND)))
 	{
 		self.frame = 26;
 		self.velocity_z = -20;
@@ -802,7 +802,7 @@ void() init_fangel =
 
 	self.monster_stage = FANGEL_STAGE_WAIT;
 
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!(self.flags2 & FL_SUMMONED)&&!(self.flags2 & FL2_RESPAWN))
 	{
 		precache_model4 ("models/fangel.mdl");//converted for MP
 		precache_model2 ("models/faspell.mdl");
@@ -836,13 +836,13 @@ void() init_fangel =
 	self.hull = HULL_SCORPION;//HULL_BIG;
 	if (self.classname == "monster_fallen_angel")
 	{
-		if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+		if (!(self.flags2 & FL_SUMMONED)&&!(self.flags2 & FL2_RESPAWN))
 			precache_sound2("fangel/ambi1.wav");
 		self.skin = 0;
 	}
 	else
 	{
-		if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+		if (!(self.flags2 & FL_SUMMONED)&&!(self.flags2 & FL2_RESPAWN))
 			precache_sound2("fangel/ambi2.wav");
 		self.skin = 1;
 	}
@@ -896,7 +896,7 @@ void() monster_fallen_angel =
 		self.th_init=monster_fallen_angel;
 		self.init_org=self.origin;
 	}
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!(self.flags2 & FL_SUMMONED)&&!(self.flags2 & FL2_RESPAWN))
 	{
 		precache_sound2("fangel/death.wav");
 		precache_sound2("fangel/pain.wav");
@@ -919,7 +919,7 @@ void() monster_fallen_angel_lord =
 		self.th_init=monster_fallen_angel_lord;
 		self.init_org=self.origin;
 	}
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!(self.flags2 & FL_SUMMONED)&&!(self.flags2 & FL2_RESPAWN))
 	{
 		precache_sound2("fangel/death2.wav");
 		precache_sound2("fangel/pain2.wav");

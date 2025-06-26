@@ -54,7 +54,7 @@ float(float AttackType, float ChanceModifier) CheckMonsterAttack =
 		traceline (trace_endpos, spot2, FALSE, trace_ent);
 
 	if (trace_ent != targ)
-		if(trace_ent.health>25||!trace_ent.takedamage||(trace_ent.flags&FL_MONSTER&&trace_ent.classname!="player_sheep"))
+		if(trace_ent.health>25||!trace_ent.takedamage||((trace_ent.flags & FL_MONSTER)&&trace_ent.classname!="player_sheep"))
 			return MA_BLOCKED;		// don't have a clear shot
 			
 	if (trace_inopen && trace_inwater)

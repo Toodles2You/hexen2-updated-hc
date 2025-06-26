@@ -722,7 +722,7 @@ void(float dist) ai_run =
 	
 	movedist = dist;
 // see if the enemy is dead
-	if (!self.enemy.flags2&FL_ALIVE||(self.enemy.artifact_active&ARTFLAG_STONED&&self.classname!="monster_medusa"))
+	if (!(self.enemy.flags2 & FL_ALIVE)||((self.enemy.artifact_active & ARTFLAG_STONED)&&self.classname!="monster_medusa"))
 	{
 		self.enemy = world;
 	// FIXME: look all around for other targets
@@ -788,7 +788,7 @@ void(float dist) ai_run =
 				SetNextWaypoint();
 	}
 
-	if(random()<0.5&&(!self.flags&FL_SWIM)&&(!self.flags&FL_FLY)&&(self.spawnflags&JUMP))
+	if(random()<0.5&&(!(self.flags&FL_SWIM))&&(!(self.flags&FL_FLY))&&(self.spawnflags&JUMP))
 		CheckJump(FALSE);
 
 // look for other coop players
@@ -1010,13 +1010,13 @@ vector org;
 	else
 		org=self.origin;
 
-	if(self.controller.spawnflags&ONDEATH&&(self.controller.goalentity.flags2&FL_ALIVE))
+	if((self.controller.spawnflags & ONDEATH)&&(self.controller.goalentity.flags2&FL_ALIVE))
 		return FALSE;
 
 	tracearea(org,org,self.mins,self.maxs,FALSE,self);
 	newmis = spawn();
 	if(trace_fraction<1)
-		if(trace_ent.flags2&FL_ALIVE&&!self.frags)
+		if((trace_ent.flags2 & FL_ALIVE)&&!self.frags)
 		{
 			remove(newmis);
 			return FALSE;
@@ -1102,7 +1102,7 @@ vector org;
 
 	self.controller.goalentity=newmis;
 	setorigin(newmis,org);
-	if(!self.controller.spawnflags&QUIET)
+	if(!(self.controller.spawnflags & QUIET))
 		spawn_tfog(org);
 	newmis.nextthink = time;
 	return TRUE;

@@ -1013,7 +1013,7 @@ void skullwiz_stand (void) [++ $skwait1..$skwait26]
 
 void skullwizard_init(void)
 {
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!(self.flags2 & FL_SUMMONED)&&!(self.flags2 & FL2_RESPAWN))
 	{
 		precache_model4("models/skullwiz.mdl");//converted for MP
 		precache_model("models/skulbook.mdl");

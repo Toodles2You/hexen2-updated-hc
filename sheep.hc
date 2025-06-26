@@ -168,7 +168,7 @@ vector best_yaw;
 void sheep_think (void)
 {
 	MonsterCheckContents();
-	if(!self.spawnflags&stationary&&(self.think==sheep_trot||self.think==sheep_gstep_a||self.think==sheep_gstep_b)&&random()<0.1)
+	if(!(self.spawnflags & stationary)&&(self.think==sheep_trot||self.think==sheep_gstep_a||self.think==sheep_gstep_b)&&random()<0.1)
 		sheep_turn();
 
 	if(random()<0.1&&random()<0.2&&self.pain_finished<time)
@@ -214,7 +214,7 @@ void()sheep_tranB = [++ $tranB1 .. $tranB12]
 void()sheep_graze_a = [++ $grazeA1 .. $grazeA40]
 {
 	sheep_think();
-	if(self.frame== $grazeA9 &&random()<0.5&&!self.spawnflags&1)
+	if(self.frame== $grazeA9 &&random()<0.5&&!(self.spawnflags & 1))
 		sheep_gstep_b();
 	else if(cycle_wrapped&&random()<0.5)
 		sheep_lookup();
@@ -223,7 +223,7 @@ void()sheep_graze_a = [++ $grazeA1 .. $grazeA40]
 void () sheep_graze_b = [++ $grazeB1 .. $grazeB40]
 {
 	sheep_think();
-	if(self.frame== $grazeB9 &&random()<0.5&&!self.spawnflags&1)
+	if(self.frame== $grazeB9 &&random()<0.5&&!(self.spawnflags & 1))
 		sheep_gstep_a();
 };
 
@@ -292,7 +292,7 @@ float r;
 		r=rint(random(2))+1;
 		if(r==1)
 			sheep_wait();
-		else if(r==2&&!self.spawnflags&1)
+		else if(r==2&&!(self.spawnflags & 1))
 			sheep_tranB();
 		else if(r==3)
 			sheep_lookdown();
@@ -308,7 +308,7 @@ float r;
 		r=rint(random(2))+1;
 		if(r==1)
 			sheep_wait();
-		else if(r==2&&!self.spawnflags&1)
+		else if(r==2&&!(self.spawnflags & 1))
 			sheep_tranB();
 		else if(r==3)
 			sheep_lookdown();
@@ -327,9 +327,9 @@ float r;
 			sheep_graze_a();
 		else if(r==2)
 			sheep_graze_b();
-		else if(r==3&&!self.spawnflags&1)
+		else if(r==3&&!(self.spawnflags & 1))
 			sheep_gstep_a();
-		else if(r==4&&!self.spawnflags&1)
+		else if(r==4&&!(self.spawnflags & 1))
 			sheep_gstep_b();
 		else
 			sheep_lookup();
@@ -345,7 +345,7 @@ float r;
 		r=rint(random(2))+1;
 		if(r==1)
 			sheep_wait();
-		else if(r==2&&!self.spawnflags&1)
+		else if(r==2&&!(self.spawnflags & 1))
 			sheep_tranB();
 		else if(r==3)
 			sheep_lookdown();
@@ -375,7 +375,7 @@ void monster_sheep_bite ()
 void monster_sheep_run () [++ $trot1 .. $trot10]
 {
 	MonsterCheckContents();
-	if(!self.enemy.flags2&FL_ALIVE||!visible(self.enemy))
+	if(!(self.enemy.flags2 & FL_ALIVE)||!visible(self.enemy))
 	{
 		self.think=sheep_trot;
 		thinktime self : 0;
@@ -460,23 +460,23 @@ float r;
 			self.think=sheep_graze_a;
 		else if(r==2)
 			self.think=sheep_graze_b;
-		else if(r==3&&!self.spawnflags&1)
+		else if(r==3&&!(self.spawnflags & 1))
 			self.think=sheep_gstep_a;
-		else if(r==4&&!self.spawnflags&1)
+		else if(r==4&&!(self.spawnflags & 1))
 			self.think=sheep_gstep_b;
 		else if(r==5)
 			self.think=sheep_look;
 		else if(r==6)
 			self.think=sheep_lookup;
-		else if(r==7&&!self.spawnflags&1)
+		else if(r==7&&!(self.spawnflags & 1))
 			self.think=sheep_trot;
 		else if(r==8)
 			self.think=sheep_wait;
 		else if(r==9)
 			self.think=sheep_lookdown;
-		else if(r==10&&!self.spawnflags&1)
+		else if(r==10&&!(self.spawnflags & 1))
 			self.think=sheep_tranA;
-		else if(!self.spawnflags&1)
+		else if(!(self.spawnflags & 1))
 			self.think=sheep_tranB;
 	}
 
@@ -636,7 +636,7 @@ void Polymorph (entity loser)
 
 	if(loser.classname=="player")
 	{
-		if(loser.effects&EF_BRIGHTLIGHT&&loser.playerclass==CLASS_CRUSADER)
+		if((loser.effects & EF_BRIGHTLIGHT)&&loser.playerclass==CLASS_CRUSADER)
 			loser.effects(-)EF_BRIGHTLIGHT;//Sunstaff
 
 		if (loser.artifact_active & ART_TOMEOFPOWER)
@@ -721,7 +721,7 @@ void poly_touch ()
 		self.velocity=normalize((self.owner.absmin+self.owner.absmax)*0.5-self.origin)*700;
 		self.owner=other;
 	}
-	else if(other.flags2&FL_ALIVE&&
+	else if((other.flags2 & FL_ALIVE)&&
 			other.model!="models/sheep.mdl"&&
 			other.classname!="monster_golem_crystal"&&
 			other.takedamage)

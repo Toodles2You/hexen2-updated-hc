@@ -442,11 +442,11 @@ void() Nec_Bon_Attack;
 void boneshard_fire (void)
 {
 	self.wfs = advanceweaponframe($fire1,$fire12);
-	if(self.button0&&self.weaponframe>$fire3 &&!self.artifact_active&ART_TOMEOFPOWER)
+	if(self.button0&&self.weaponframe>$fire3 &&!(self.artifact_active & ART_TOMEOFPOWER))
 		self.weaponframe=$fire3;
 	self.th_weapon=boneshard_fire;
 	self.last_attack=time;
-	if(self.wfs==WF_CYCLE_WRAPPED||self.greenmana<1||(self.greenmana<10&&self.artifact_active&ART_TOMEOFPOWER))
+	if(self.wfs==WF_CYCLE_WRAPPED||self.greenmana<1||(self.greenmana<10&&(self.artifact_active & ART_TOMEOFPOWER)))
 		boneshard_ready();
 	else if(self.weaponframe==$fire3)
 		if(self.artifact_active&ART_TOMEOFPOWER)
@@ -454,7 +454,7 @@ void boneshard_fire (void)
 		else
 			bone_normal();
 
-	if(random()<0.8&&!self.artifact_active&ART_TOMEOFPOWER&&self.weaponframe<=$fire6)
+	if(random()<0.8&&!(self.artifact_active & ART_TOMEOFPOWER)&&self.weaponframe<=$fire6)
 		bone_fire_once();
 }
 

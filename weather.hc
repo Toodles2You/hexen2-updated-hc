@@ -87,7 +87,7 @@ void rubble_touch ()
 
 void rubble_turn_on ()
 {
-	if(!self.spawnflags&2)
+	if(!(self.spawnflags & 2))
 		self.touch = rubble_touch;
 	self.use = rubble_touch;
 }
@@ -132,7 +132,7 @@ void trigger_rubble ()
 	        
 	if(!self.targetname)
 	{
-		if(!self.spawnflags&2)
+		if(!(self.spawnflags & 2))
 			self.touch = rubble_touch;
 		self.use = rubble_touch;
 	}
@@ -254,7 +254,7 @@ float splat_count;
 	else
 		sound (self, CHAN_VOICE, self.noise1, 1, ATTN_NORM);
 
-	if(!self.spawnflags&2)
+	if(!(self.spawnflags & 2))
 		splat_count=10;
 	while(splat_count)
 	{
@@ -435,7 +435,7 @@ void () weather_lightning_start =
 	if (!self.wait)	// Set wait to default
 		self.wait = 5;
 
-	if ((self.wait>-1) && (!self.spawnflags & 1))   // Constantly running lightning
+	if ((self.wait>-1) && (!(self.spawnflags & 1)))   // Constantly running lightning
 	{
 		thinktime self : self.wait;
 		self.lifetime = time + self.lifespan + self.wait;

@@ -35,7 +35,7 @@ Used as a positional target for spotlights, etc.
 */
 void info_null()
 {
-	if(!self.spawnflags&DONT_REMOVE)
+	if(!(self.spawnflags & DONT_REMOVE))
 		remove(self);
 }
 
@@ -445,7 +445,7 @@ void () trap_lightning_track =
 
 	if (len >= self.aflag || trace_fraction < 1)
 	{
-		if (self.wait == -1 || self.spawnflags & 2)
+		if (self.wait == -1 || (self.spawnflags & 2))
 			self.nextthink = -1;
 		else if (self.wait == 1)
 			thinktime self : random(self.wait,self.wait+2);
@@ -461,7 +461,7 @@ void () trap_lightning_track =
 
 	self.think = trap_lightning_track;
 	
-	if (self.wait == -1 || self.spawnflags & 2)
+	if (self.wait == -1 || (self.spawnflags & 2))
 		self.nextthink = -1;
 	else if (self.wait == 1)
 		thinktime self : random(self.wait,self.wait+2);
@@ -881,7 +881,7 @@ void rotate_slowdown (void)
 	if((self.dmg==-1||self.dmg==666)&&self.level<100)
 		self.touch=SUB_Null;
 
-	if(self.level<1||(self.level<=self.speed/self.anglespeed&&self.spawnflags&KEEP_START))
+	if(self.level<1||(self.level<=self.speed/self.anglespeed&&(self.spawnflags & KEEP_START)))
 	{
 		if(self.spawnflags&KEEP_START)
 		{
@@ -944,7 +944,7 @@ void rotating_use()
 {
 	if (self.avelocity != '0 0 0')
 	{
-		if(!self.spawnflags&GRADUAL)
+		if(!(self.spawnflags & GRADUAL))
 		{
 			self.avelocity='0 0 0';
 			rotate_reset();
@@ -964,7 +964,7 @@ void rotating_use()
 			self.pain_finished=time+self.lifetime;
 		if(self.spawnflags&TOGGLE_REVERSE)
 			self.movedir= self.movedir*-1;
-		if(!self.spawnflags&GRADUAL)
+		if(!(self.spawnflags & GRADUAL))
 		{
 			self.avelocity = self.movedir * self.speed;
 			self.think=rotating_use;
@@ -983,7 +983,7 @@ void rotating_damage (entity chopped_liver)
 {
 	if(self.dmg==666)
 	{
-		if(chopped_liver.classname=="player"&&chopped_liver.flags2&FL_ALIVE)
+		if(chopped_liver.classname=="player"&&(chopped_liver.flags2 & FL_ALIVE))
 		{
 			chopped_liver.decap=TRUE;
 			T_Damage (chopped_liver, self, self, chopped_liver.health+300);
@@ -1014,7 +1014,7 @@ void rotating_blocked (void)
 
 	rotating_damage(other);		
 
-	if(other.health>100&&!other.flags2&FL_ALIVE)//allow for blockage
+	if(other.health>100&&!(other.flags2 & FL_ALIVE))//allow for blockage
 	{
 		self.avelocity='0 0 0';
 		self.level=0;

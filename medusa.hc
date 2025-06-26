@@ -335,7 +335,7 @@ void MedusaGaze (vector org, vector destiny, entity loser) [++ $medusa1 .. $medu
 	WriteCoord (MSG_BROADCAST, destiny_y);
 	WriteCoord (MSG_BROADCAST, destiny_z);
 
-	if(loser.health<=10&&!loser.artifact_active&ART_INVINCIBILITY)
+	if(loser.health<=10&&!(loser.artifact_active & ART_INVINCIBILITY))
 	{
 		sound(loser,CHAN_BODY,"medusa/stoned.wav",1,ATTN_NORM);
 		if(skill>=4)
@@ -376,7 +376,7 @@ void MedusaGaze (vector org, vector destiny, entity loser) [++ $medusa1 .. $medu
 		}
 	}
 
-	if(lineofsight(self,loser)&&!loser.artifact_active&ARTFLAG_STONED)
+	if(lineofsight(self,loser)&&!(loser.artifact_active & ARTFLAG_STONED))
 	{
 		self.goalentity=loser;
 		self.think=MedusaGazeLoop;
@@ -497,7 +497,7 @@ float r, loscheck1,loscheck2;
 	loscheck2=lineofsight(self,self.enemy);
 	r=random();
 
-	if(!self.enemy.artifact_active&ARTFLAG_STONED&&loscheck1&& (loscheck2|| (r<0.1&&infront_of_ent(self,self.enemy)) ) )
+	if(!(self.enemy.artifact_active & ARTFLAG_STONED)&&loscheck1&& (loscheck2|| (r<0.1&&infront_of_ent(self,self.enemy)) ) )
 	{
 		MedusaGaze(org,destiny,self.enemy);
 		return TRUE;
@@ -525,7 +525,7 @@ float r, loscheck1,loscheck2;
 void()medusa_look_right;
 void MedusaHeadTouch ()
 {
-	if(self.velocity!='0 0 0'&&!other.flags2&FL_ALIVE)
+	if(self.velocity!='0 0 0'&&!(other.flags2 & FL_ALIVE))
 		sound(self,CHAN_AUTO,"weapons/hithurt2.wav",1,ATTN_NORM);
 }
 
@@ -909,7 +909,7 @@ void monster_medusa_green (void)
 	}
 
 	// TE_STREAM_GAZE
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!(self.flags2 & FL_SUMMONED)&&!(self.flags2 & FL2_RESPAWN))
 	{
 		precache_model("models/stmedgaz.mdl");	//Medusa's gaze
 

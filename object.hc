@@ -44,7 +44,7 @@ float magnitude,my_mass;
 	if(self.classname=="barrel"&&self.aflag)//rolling barrels are made for impacts!
 		magnitude*=3;
 
-	if(self.frozen>0&&magnitude<300&&self.flags&FL_ONGROUND&&loser==world&&self.velocity_z<-20&&self.last_onground+0.3<time)
+	if(self.frozen>0&&magnitude<300&&(self.flags & FL_ONGROUND)&&loser==world&&self.velocity_z<-20&&self.last_onground+0.3<time)
 		magnitude=300;
 /*
 dprint("\n");
@@ -92,7 +92,7 @@ dprint("\n");
 			if(pointcontents(loser.absmax)==CONTENT_WATER||(self.classname=="barrel"&&self.aflag))//FIXME: or other watertypes
 				force/=3;							//water absorbs 2/3 velocity
 
-			if(self.flags&FL_MONSTER&&loser==world)
+			if((self.flags & FL_MONSTER)&&loser==world)
 				force/=2;
 
 			if(self.frozen>0&&force>10)
@@ -121,7 +121,7 @@ dprint("\n");
 		if(self.classname!="monster_mezzoman"&&self.netname!="spider"&&loser.thingtype!=THINGTYPE_WEBS)//Cats always land on their feet, webs don't hurt
 			if((magnitude>=100+self.health&&self.classname!="player")||magnitude>=700)//health here is used to simulate structural integrity
 			{
-				if(self.classname=="player"&&self.flags&FL_ONGROUND&&magnitude<1000)
+				if(self.classname=="player"&&(self.flags & FL_ONGROUND)&&magnitude<1000)
 				{
 					//allow for some lenience on high falls
 					magnitude/=2;
@@ -139,7 +139,7 @@ dprint("\n");
 					dprint(ftos(magnitude));
 					dprint("\n");
 */
-					if(self.classname=="player_sheep"&&self.flags&FL_ONGROUND&&self.velocity_z>-50)
+					if(self.classname=="player_sheep"&&(self.flags & FL_ONGROUND)&&self.velocity_z>-50)
 						return;
 					T_Damage(self,world,world,magnitude);
 				}
@@ -160,7 +160,7 @@ float ontop,pushed,inertia,force,walkforce;
 	if(other.solid==SOLID_PHASE||other.movetype==MOVETYPE_FLYMISSILE||other.movetype==MOVETYPE_BOUNCEMISSILE)
 		return;
 
-	if(self.classname=="barrel"&&pointcontents(self.origin)!=CONTENT_EMPTY&&(!self.spawnflags&BARREL_SINK))
+	if(self.classname=="barrel"&&pointcontents(self.origin)!=CONTENT_EMPTY&&(!(self.spawnflags & BARREL_SINK)))
 	{
 		self.classname="barrel_floating";
 		self.think=float;
@@ -180,8 +180,8 @@ float ontop,pushed,inertia,force,walkforce;
 	{		
 		if(!other.frozen&&
 			(
-			 (!other.flags2&FL_ALIVE&&other.flags&FL_MONSTER)||
-			 (self.flags&FL_MONSTER&&self.model!="models/spider.mdl"&&self.model!="models/scorpion.mdl")
+			 (!(other.flags2 & FL_ALIVE)&&(other.flags & FL_MONSTER))||
+			 ((self.flags & FL_MONSTER)&&self.model!="models/spider.mdl"&&self.model!="models/scorpion.mdl")
 			)
 		  )
 		{
@@ -190,7 +190,7 @@ float ontop,pushed,inertia,force,walkforce;
 			other.velocity=v_forward*300;
 			other.flags(-)FL_ONGROUND;
 		}
-		if(other.flags&FL_CLIENT&&!other.frozen)
+		if((other.flags & FL_CLIENT)&&!other.frozen)
 			ontop = FALSE;
 		else
 		{
@@ -203,7 +203,7 @@ float ontop,pushed,inertia,force,walkforce;
 	{
 		if(other!=world&&self.absmin_z >= other.absmax_z - 3&&self.velocity_z<1&&other.movetype!=MOVETYPE_FLYMISSILE&&other.movetype!=MOVETYPE_BOUNCE&&other.movetype!=MOVETYPE_BOUNCEMISSILE)
 			self.flags(+)FL_ONGROUND;
-		if(self.frozen<=0&&!self.artifact_active&ARTFLAG_STONED)
+		if(self.frozen<=0&&!(self.artifact_active & ARTFLAG_STONED))
 			return;
 	}
 
@@ -794,7 +794,7 @@ void ballista_think()
 	float pitchmod,checklooped,bestdist,lastdist;
 	vector my_pitch, ideal_pitch;
 
-	if(!self.enemy||!visible(self.enemy)||!self.enemy.flags2&FL_ALIVE&&!self.enemy.artifact_active&ART_INVISIBILITY&&!self.enemy.artifact_active&ART_INVINCIBILITY)
+	if(!self.enemy||!visible(self.enemy)||!(self.enemy.flags2 & FL_ALIVE)&&!(self.enemy.artifact_active & ART_INVISIBILITY)&&!(self.enemy.artifact_active & ART_INVINCIBILITY))
 	{
 //		dprint("looking\n");
 		self.enemy=targ = world;
@@ -802,7 +802,7 @@ void ballista_think()
 		while(!checklooped)
 		{	
 			targ = find (targ, classname, "player");
-			if(visible(targ)&&targ.flags2&FL_ALIVE&&!targ.artifact_active&ART_INVISIBILITY&&!targ.artifact_active&ART_INVINCIBILITY)
+			if(visible(targ)&&(targ.flags2 & FL_ALIVE)&&!(targ.artifact_active & ART_INVISIBILITY)&&!(targ.artifact_active & ART_INVINCIBILITY))
 			{
 				lastdist=vlen(targ.origin-self.origin);
 				if(lastdist<bestdist)
@@ -939,7 +939,7 @@ void bell_attack(float anim)
 	{
 		sound (self, CHAN_WEAPON, "weapons/gauntht1.wav", 1, ATTN_NORM);
 
-		if (!trace_ent.movetype == MOVETYPE_NONE)
+		if (!(trace_ent.movetype == MOVETYPE_NONE))
 		{
 			if(trace_ent.flags&FL_ONGROUND)
 				trace_ent.flags = trace_ent.flags - FL_ONGROUND;
@@ -1423,7 +1423,7 @@ void webs_touch ()
 	if(!other.movetype||other.movetype==MOVETYPE_PUSHPULL||other.classname==self.classname)
 		return;
 
-	if(!other.flags&FL_ONGROUND)
+	if(!(other.flags & FL_ONGROUND))
 		other.flags+=FL_ONGROUND;
 }
 
@@ -1525,7 +1525,7 @@ void obj_webs (void)
 		setsize(self,'-25 -25 -2','25 25 2');
 	}
 
-	if(!self.spawnflags&32)
+	if(!(self.spawnflags & 32))
 		self.drawflags(+)DRF_TRANSLUCENT;
 
 	setorigin(self,self.origin);
@@ -1696,7 +1696,7 @@ void obj_ice (void)
 	if(!self.abslight)
 		self.abslight = 0.75;
 
-	if(!self.spawnflags&1)
+	if(!(self.spawnflags & 1))
 		self.drawflags+=DRF_TRANSLUCENT;
 
 	if(!self.health)

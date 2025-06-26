@@ -90,7 +90,7 @@ entity oself;
 		if(loser.team==forwhom.team)
 			return;
 
-	if(loser.flags&FL_MONSTER&&loser.monsterclass>=CLASS_BOSS)
+	if((loser.flags & FL_MONSTER)&&loser.monsterclass>=CLASS_BOSS)
 	{
         T_Damage(loser,self,forwhom,10);
 		return;
@@ -205,7 +205,7 @@ void() FreezeTouch=
 		}
 		if(other.flags2&FL2_COLDHEAL)//Had to take out cold heal, so cold resist
 	        T_Damage(other,self,self.owner,3);
-		else if((other.health<=10||(other.classname=="player"&&other.frozen<=-5&&other.health<200))&&other.solid!=SOLID_BSP&&!other.artifact_active&ART_INVINCIBILITY&&other.thingtype==THINGTYPE_FLESH&&other.health<100)
+		else if((other.health<=10||(other.classname=="player"&&other.frozen<=-5&&other.health<200))&&other.solid!=SOLID_BSP&&!((other.artifact_active & ART_INVINCIBILITY))&&other.thingtype==THINGTYPE_FLESH&&other.health<100)
 			SnowJob(other,self.owner);
 		else
 	        T_Damage(other,self,self.owner,10);
@@ -385,7 +385,7 @@ float beam_count;
 		if(trace_ent.takedamage&&trace_ent.frozen<=0&&trace_ent.solid!=SOLID_BSP)
 		{
 			trace_ent.frozen-=1;
-			if((trace_ent.frozen<-5||trace_ent.health<=10)&&!trace_ent.artifact_active&ART_INVINCIBILITY&&trace_ent.thingtype==THINGTYPE_FLESH&&trace_ent.health<100)
+			if((trace_ent.frozen<-5||trace_ent.health<=10)&&!(trace_ent.artifact_active & ART_INVINCIBILITY)&&trace_ent.thingtype==THINGTYPE_FLESH&&trace_ent.health<100)
 				SnowJob(trace_ent,self.owner);
 			else
 				T_Damage(trace_ent,self,self.owner,10);
@@ -406,7 +406,7 @@ float beam_count;
 			{
 				if(random()<0.1)
 					loser.frozen-=1;
-				if((loser.frozen<-5||loser.health<15)&&loser.classname!="mjolnir"&&!loser.artifact_active&ART_INVINCIBILITY&&loser.thingtype==THINGTYPE_FLESH&&loser.health<100)
+				if((loser.frozen<-5||loser.health<15)&&loser.classname!="mjolnir"&&!(loser.artifact_active & ART_INVINCIBILITY)&&loser.thingtype==THINGTYPE_FLESH&&loser.health<100)
 					SnowJob(loser,self.owner);
 				else
 					T_Damage(loser,self,self.owner,5);
@@ -427,13 +427,13 @@ void() make_blizzard =
 //Sound
 entity found;
 
-	if(other.frozen<=0&&!other.artifact_active&ART_INVINCIBILITY&&other.thingtype==THINGTYPE_FLESH&&other.health<100)
+	if(other.frozen<=0&&!(other.artifact_active & ART_INVINCIBILITY)&&other.thingtype==THINGTYPE_FLESH&&other.health<100)
 		SnowJob(other,self.owner);
 
 	found=findradius(self.origin,256);
 	while(found)
 	{
-		if(found.flags&FL_CLIENT&&found!=self.owner)
+		if((found.flags & FL_CLIENT)&&found!=self.owner)
 		{
 			found.artifact_active(+)ARTFLAG_DIVINE_INTERVENTION;
 			found.divine_time = time + HX_FRAME_TIME;
@@ -572,9 +572,9 @@ void icestaff_f1 (void)
 		else
 			icestaff_shard();
 	else if (self.attack_finished<=time&&self.weaponframe==$fire1a)
-		if(self.artifact_active&ART_TOMEOFPOWER&&self.bluemana>=10)
+		if((self.artifact_active & ART_TOMEOFPOWER)&&self.bluemana>=10)
 			icestaff_blizzard();
-		else if(!self.artifact_active&ART_TOMEOFPOWER&&self.bluemana>=1)
+		else if(!(self.artifact_active & ART_TOMEOFPOWER)&&self.bluemana>=1)
 			FireFreeze();
 		else
 			icestaff_idle();
@@ -590,9 +590,9 @@ void icestaff_f2 (void)
 		else
 			icestaff_shard();
 	else if (self.attack_finished<=time&&self.weaponframe==$fire2a)
-		if(self.artifact_active&ART_TOMEOFPOWER&&self.bluemana>=10)
+		if((self.artifact_active & ART_TOMEOFPOWER)&&self.bluemana>=10)
 			icestaff_blizzard();
-		else if(!self.artifact_active&ART_TOMEOFPOWER&&self.bluemana>=1)
+		else if(!(self.artifact_active & ART_TOMEOFPOWER)&&self.bluemana>=1)
 			FireFreeze();
 		else
 			icestaff_idle();
@@ -608,9 +608,9 @@ void icestaff_f3 (void)
 		else
 			icestaff_shard();
 	else if (self.attack_finished<=time&&self.weaponframe==$fire3a)
-		if(self.artifact_active&ART_TOMEOFPOWER&&self.bluemana>=10)
+		if((self.artifact_active & ART_TOMEOFPOWER)&&self.bluemana>=10)
 			icestaff_blizzard();
-		else if(!self.artifact_active&ART_TOMEOFPOWER&&self.bluemana>=1)
+		else if(!(self.artifact_active & ART_TOMEOFPOWER)&&self.bluemana>=1)
 			FireFreeze();
 		else
 			icestaff_idle();
@@ -626,9 +626,9 @@ void icestaff_f4 (void)
 		else
 			icestaff_shard();
 	else if (self.attack_finished<=time&&self.weaponframe==$fire4a)
-		if(self.artifact_active&ART_TOMEOFPOWER&&self.bluemana>=10)
+		if((self.artifact_active & ART_TOMEOFPOWER)&&self.bluemana>=10)
 			icestaff_blizzard();
-		else if(!self.artifact_active&ART_TOMEOFPOWER&&self.bluemana>=1)
+		else if(!(self.artifact_active & ART_TOMEOFPOWER)&&self.bluemana>=1)
 			FireFreeze();
 		else
 			icestaff_idle();
@@ -644,9 +644,9 @@ void icestaff_f5 (void)
 		else
 			icestaff_shard();
 	else if (self.attack_finished<=time&&self.weaponframe==$fire5a)
-		if(self.artifact_active&ART_TOMEOFPOWER&&self.bluemana>=10)
+		if((self.artifact_active & ART_TOMEOFPOWER)&&self.bluemana>=10)
 			icestaff_blizzard();
-		else if(!self.artifact_active&ART_TOMEOFPOWER&&self.bluemana>=1)
+		else if(!(self.artifact_active & ART_TOMEOFPOWER)&&self.bluemana>=1)
 			FireFreeze();
 		else
 			icestaff_idle();

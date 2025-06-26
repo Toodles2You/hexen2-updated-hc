@@ -42,7 +42,7 @@ float CheckExpAward (entity attacker,entity targ,float fatality,float damage)
 {
 float exp_bonus,health_mod,exp_base;
 entity lastleader,newking;
-	if(!attacker.flags&FL_CLIENT)
+	if(!(attacker.flags & FL_CLIENT))
 	{
 //		dprint("Attacker not a player!\n");
 		return FALSE;
@@ -266,7 +266,7 @@ void poison_think ()
 	T_Damage (self.enemy, self, self.owner, 1 );
 	if(self.enemy.flags&FL_CLIENT)
 		stuffcmd(self.enemy,"bf\n");
-	if(self.lifetime<time||self.enemy.health<=0||(!self.enemy.flags2&FL2_POISONED))
+	if(self.lifetime<time||self.enemy.health<=0||(!(self.enemy.flags2 & FL2_POISONED)))
 	{
 		self.enemy.flags2(-)FL2_POISONED;
 		self.think=SUB_Remove;
@@ -422,7 +422,7 @@ entity oself;
 	oself = self;
 	self = targ;
 
-	if(!self.flags2&FL_ALIVE)
+	if(!(self.flags2 & FL_ALIVE))
 		if (self.movetype == MOVETYPE_PUSH || self.movetype == MOVETYPE_NONE)
 		{	// doors, triggers, etc
 			if(self.th_die)
@@ -870,20 +870,20 @@ entity holdent,lastleader,newking;
 
 	damage_attacker = attacker;
 
-	if(attacker.flags&FL_CLIENT&&attacker==inflictor)
+	if((attacker.flags & FL_CLIENT)&&attacker==inflictor)
 	{//Damage mod for strength using melee weaps
 		if(attacker.weapon==IT_WEAPON1)
 		{
 			if(attacker.playerclass==CLASS_CRUSADER)
 			{
-				if(!attacker.artifact_active&ART_TOMEOFPOWER)
+				if(!(attacker.artifact_active & ART_TOMEOFPOWER))
 					do_mod=TRUE;
 			}
 			else
 				do_mod=TRUE;
 		}
 		else if(attacker.playerclass==CLASS_PALADIN)
-			if(attacker.weapon==IT_WEAPON2&&!attacker.artifact_active&ART_TOMEOFPOWER)
+			if(attacker.weapon==IT_WEAPON2&&!(attacker.artifact_active & ART_TOMEOFPOWER))
 				do_mod=TRUE;
 		if(do_mod)
 		{
@@ -892,7 +892,7 @@ entity holdent,lastleader,newking;
 		}
 	}
 
-	if(targ.flags&FL_MONSTER&&inflictor.flags2&FL2_ADJUST_MON_DAM)
+	if((targ.flags & FL_MONSTER)&&(inflictor.flags2 & FL2_ADJUST_MON_DAM))
 		damage*=2;//Special- more damage against monsters
 
 	if (attacker.super_damage)
@@ -1030,7 +1030,7 @@ entity holdent,lastleader,newking;
 
 	if ( (self.flags & FL_MONSTER) && attacker != world && !(attacker.flags & FL_NOTARGET)&&attacker!=self.controller&&(attacker.controller!=self.controller||attacker.controller==world))
 	{	// Monster's shouldn't attack each other (kin don't shoot kin)
-		if (self != attacker && attacker != self.enemy&&(self.enemy.classname!="player"||attacker.classname=="player"||(attacker.controller.classname=="player"&&attacker.flags2&FL_ALIVE)))// && attacker.flags & FL_CLIENT)
+		if (self != attacker && attacker != self.enemy&&(self.enemy.classname!="player"||attacker.classname=="player"||(attacker.controller.classname=="player"&&(attacker.flags2 & FL_ALIVE))))// && attacker.flags & FL_CLIENT)
 		{
 			if (self.classname != attacker.classname||random(100)<=5) //5% chance they'll turn on selves
 			{

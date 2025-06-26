@@ -663,7 +663,7 @@ float weapmod, startframe,endframe,framestate;
 	if(self.act_state==ACT_DEAD)
 	{
 		if(self.frame==startframe&&!deathmatch)
-			if(self.enemy.flags2&FL_ALIVE&&visible(self.enemy))
+			if((self.enemy.flags2 & FL_ALIVE)&&visible(self.enemy))
 				self.pausetime=time+3;
 
 		if(self.view_ofs_z - 2.5 >= 8)//Drop view

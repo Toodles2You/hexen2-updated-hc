@@ -352,7 +352,7 @@ void() train_next =
 	targ = find (world, targetname, self.target);
 	self.target = targ.target;
 
-	if (!self.decap && self.spawnflags & TRAIN_RETURN) 
+	if (!self.decap && (self.spawnflags & TRAIN_RETURN)) 
 		if (self.netname == targ.targetname) 
 			 self.decap = 2;
 
@@ -859,7 +859,7 @@ void() crusher_hit_bottom =
 {
 	sound (self, CHAN_VOICE, self.noise1, 1, ATTN_NORM);
 	self.state = STATE_BOTTOM;
-	if (self.level && self.spawnflags & CRUSH_ENDPOS) return;
+	if (self.level && (self.spawnflags & CRUSH_ENDPOS)) return;
 	self.think = crusher_go_up;
 	self.nextthink = self.ltime + 1;
 };
@@ -1110,7 +1110,7 @@ void func_rotating_movechain (void)
 	//dprint(vtos(self.avelocity));
 
 	self.owner.movechain=self;
-	if(!self.spawnflags&NOANGLECHAIN)
+	if(!(self.spawnflags & NOANGLECHAIN))
 		self.flags+=FL_MOVECHAIN_ANGLE;
 	
 	if(self.targetname)

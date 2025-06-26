@@ -129,7 +129,7 @@ float archer_check_shot(void)
 	if (trace_ent != self.enemy)
 	{
 		if ((trace_ent.thingtype!=THINGTYPE_GLASS) || !trace_ent.takedamage || 
-			(trace_ent.flags & FL_MONSTER && trace_ent.classname!="player_sheep"))
+			((trace_ent.flags & FL_MONSTER) && trace_ent.classname!="player_sheep"))
 		{
 			return FALSE;			
 		}
@@ -406,7 +406,7 @@ vector spot1, spot2;
 
 			if (trace_ent == self.enemy) 
 				ok=TRUE;
-			else if((trace_ent.health<=25||trace_ent.thingtype>=THINGTYPE_WEBS)&&trace_ent.takedamage&&(!trace_ent.flags&FL_MONSTER||trace_ent.classname=="player_sheep"))
+			else if((trace_ent.health<=25||trace_ent.thingtype>=THINGTYPE_WEBS)&&trace_ent.takedamage&&(!(trace_ent.flags & FL_MONSTER)||trace_ent.classname=="player_sheep"))
 				ok=TRUE;
 		}
 		else
@@ -518,7 +518,7 @@ float chance,startframe,endframe;
 	startframe=$waitB1;
 	endframe=$waitB12;
 
-	if (!self.spawnflags & ARCHER_STUCK)
+	if (!(self.spawnflags & ARCHER_STUCK))
 	{
 		if (vlen(self.enemy.origin - self.origin)<=200)
 		{
@@ -727,7 +727,7 @@ void monster_archer ()
 		self.th_init=monster_archer;
 		self.init_org=self.origin;
 	}
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!(self.flags2 & FL_SUMMONED)&&!(self.flags2 & FL2_RESPAWN))
 	{
 		precache_archer();
 	}
@@ -756,7 +756,7 @@ void monster_archer ()
 
 	self.headmodel = "models/archerhd.mdl";
 
-	if(!self.spawnflags&ARCHER_STUCK)
+	if(!(self.spawnflags & ARCHER_STUCK))
 		self.mintel = 7;
 
 	self.monsterclass = CLASS_GRUNT;
@@ -793,7 +793,7 @@ void monster_archer_lord ()
 		self.th_init=monster_archer_lord;
 		self.init_org=self.origin;
 	}
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!(self.flags2 & FL_SUMMONED)&&!(self.flags2 & FL2_RESPAWN))
 	{
 		precache_model("models/archer.mdl");
 		precache_model("models/archerhd.mdl");
@@ -826,7 +826,7 @@ void monster_archer_lord ()
 	self.th_pain = archer_pain;
 	self.decap = 0;
 	self.headmodel = "models/archerhd.mdl";
-	if(!self.spawnflags&ARCHER_STUCK)
+	if(!(self.spawnflags & ARCHER_STUCK))
 		self.mintel = 7;
 	
 	if(!self.speed)

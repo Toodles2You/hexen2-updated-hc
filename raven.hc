@@ -585,7 +585,7 @@ Scavenger black bird of ill portent.
 */
 void() monster_raven =
 {
-	if (!self.flags2&FL_SUMMONED)
+	if (!(self.flags2 & FL_SUMMONED))
 	{
 		precache_model4 ("models/raven.mdl");//converted for MP
 		precache_model2 ("models/fether.mdl");

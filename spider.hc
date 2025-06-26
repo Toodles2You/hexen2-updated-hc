@@ -293,7 +293,7 @@ void SpiderInit(float type)
 		return;
 	}
 
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!(self.flags2 & FL_SUMMONED)&&!(self.flags2 & FL2_RESPAWN))
 		precache_spider();
 
 	setmodel(self, "models/spider.mdl");
@@ -364,7 +364,7 @@ void SpiderDie(void) [++ $sdeath1..$sdeath20]
 	{
 		sound(self, CHAN_VOICE, "spider/death.wav", 1, ATTN_NORM);
 		self.flags(-)FL_FLY;
-		if(!self.flags&FL_ONGROUND)
+		if(!(self.flags & FL_ONGROUND))
 			self.movetype=MOVETYPE_BOUNCE;
 	}
 

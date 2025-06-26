@@ -139,7 +139,7 @@ void monster_golem_stone(void)
 		self.th_init=monster_golem_stone;
 		self.init_org=self.origin;
 	}
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!(self.flags2 & FL_SUMMONED)&&!(self.flags2 & FL2_RESPAWN))
 	{
 		precache_model4("models/golem_s.mdl");//converted for MP
 		
@@ -201,7 +201,7 @@ void monster_golem_iron(void)
 		self.init_org=self.origin;
 	}
 
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!(self.flags2 & FL_SUMMONED)&&!(self.flags2 & FL2_RESPAWN))
 	{
 		precache_model4("models/golem_i.mdl");//converted for MP
 
@@ -260,7 +260,7 @@ void monster_golem_bronze(void)
 		self.init_org=self.origin;
 	}
 	self.cnt = 0;
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!(self.flags2 & FL_SUMMONED)&&!(self.flags2 & FL2_RESPAWN))
 	{
 		precache_model4("models/golem_b.mdl");//converted for MP
 
@@ -364,7 +364,7 @@ void GolemInit(void)
 	self.th_walk = GolemWalk;
 	self.th_run = GolemRun;
 	self.th_die = GolemDie;
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!(self.flags2 & FL_SUMMONED)&&!(self.flags2 & FL2_RESPAWN))
 	{
 		precache_sound3("golem/awaken.wav");
 		precache_sound3("golem/step.wav");
@@ -545,7 +545,7 @@ float 	ldmg;
 			self.attack_finished = time + 1;
 	}
 	
-	if (self.enemy.health - ldmg <= 0 && critical&&self.enemy.flags2&FL_ALIVE)
+	if (self.enemy.health - ldmg <= 0 && critical&&(self.enemy.flags2 & FL_ALIVE))
 		self.enemy.decap = 2;
 
 	T_Damage (self.enemy, self, self, ldmg);
@@ -571,7 +571,7 @@ void GolemSMeleeDecide(void)
 
 void GolemIMissileTouch(void)
 {
-	if (other.health > 0 && other.flags & FL_ALIVE)
+	if (other.health > 0 && (other.flags & FL_ALIVE))
 		T_Damage(other, self, self.owner, random(13,17));
 
 	remove(self);
@@ -753,7 +753,7 @@ void GolemPunchRight(void) [++ $rpunch1..$rpunch24]
 		traceline(self.enemy.origin, checkPos, FALSE, self.enemy);
 
 		
-		if (trace_fraction < 1&&!trace_ent.flags2&FL_ALIVE)
+		if (trace_fraction < 1&&!(trace_ent.flags2 & FL_ALIVE))
 			GolemDoMelee(1);
 		else
 			GolemDoMelee(0);

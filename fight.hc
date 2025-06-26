@@ -54,7 +54,7 @@ float		chance;
 		traceline (trace_endpos, spot2, FALSE, trace_ent);
 
 	if (trace_ent != targ)
-		if(trace_ent.health>25||!trace_ent.takedamage||(trace_ent.flags&FL_MONSTER&&trace_ent.classname!="player_sheep"))
+		if(trace_ent.health>25||!trace_ent.takedamage||((trace_ent.flags & FL_MONSTER)&&trace_ent.classname!="player_sheep"))
 			return FALSE;//Don't have a clear shot, and don't want to shoot obstruction
 			
 //FIXME: check for translucent water?

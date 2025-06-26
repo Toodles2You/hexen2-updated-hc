@@ -213,7 +213,7 @@ void() multi_use =
 //	if (time < self.attack_finished)
 //		return;
 
-	if (self.spawnflags & SPAWNFLAG_ACTIVATED && self.touch==SUB_Null)
+	if ((self.spawnflags & SPAWNFLAG_ACTIVATED) && self.touch==SUB_Null)
 	{
 		self.touch = multi_touch;
 //		dprint("setting touch\n");
@@ -289,12 +289,12 @@ void() multi_touch =
 
 	if (self.spawnflags & SPAWNFLAG_MTOUCH)
 	{
-		if (!other.flags & FL_MONSTER)
+		if (!(other.flags & FL_MONSTER))
 		  return;
 	}
 	else if (self.spawnflags & SPAWNFLAG_PUSHTOUCH)
 	{
-	  if (!other.flags & FL_PUSH) 
+	  if (!(other.flags & FL_PUSH)) 
 		 return;
 	}
 	else if (other.classname != "player")
@@ -1007,7 +1007,7 @@ void quake_shake ()
 
 	SUB_UseTargets();
 
-	if(!self.spawnflags & SPAWNFLAG_QMULT)
+	if(!(self.spawnflags & SPAWNFLAG_QMULT))
 		self.wait = -1;
 }
 
@@ -1018,7 +1018,7 @@ void() quake_use =
    
 	self.think = quake_shake;
 	self.lifespan+=time;
-	if(!self.spawnflags&2)
+	if(!(self.spawnflags & 2))
 		self.use=SUB_Null;
 	thinktime self : self.wait;
 };
@@ -1116,7 +1116,7 @@ float force_frag;
 // frag anyone who teleports in on top of an invincible player
 	if(self.frags)
 	{
-		if(!other.takedamage||(other.classname=="player"&&(other.artifact_active&ART_INVINCIBILITY||other.flags&FL_GODMODE)))
+		if(!other.takedamage||(other.classname=="player"&&((other.artifact_active & ART_INVINCIBILITY)||(other.flags & FL_GODMODE))))
 			force_frag=FALSE;
 		else
 			force_frag=TRUE;
@@ -1208,7 +1208,7 @@ float poof_speed;
 	SUB_UseTargets ();
 
 // put a tfog where the player was UNLESS silent is checked (jweier)
-	if (!self.spawnflags & SILENT)	
+	if (!(self.spawnflags & SILENT))	
 		GenerateTeleportEffect(other.origin,0);
 
 	if (self.netname != "teleportcoin")
@@ -1228,9 +1228,9 @@ float poof_speed;
 	if(t.avelocity!='0 0 0')
 		t.mangle=t.angles;
 
-	if(!t.spawnflags&1&&self.netname != "teleportcoin")
+	if(!(t.spawnflags & 1)&&self.netname != "teleportcoin")
 	{
-		if(!t.spawnflags&2||other.classname!="player")
+		if(!(t.spawnflags & 2)||other.classname!="player")
 		{
 			makevectors (t.mangle);
 			org = t.origin + 32 * v_forward;
@@ -1245,17 +1245,17 @@ float poof_speed;
 	if (!other.health&&other.size!='0 0 0')
 	{//Exclude projectiles!
 		other.origin = t.origin;
-		if(!t.spawnflags&1&&self.netname != "teleportcoin")	//In case you don't want to push them in a certain dir
+		if(!(t.spawnflags & 1)&&self.netname != "teleportcoin")	//In case you don't want to push them in a certain dir
 			other.velocity = (v_forward * other.velocity_x) + (v_forward * other.velocity_y);
 		return;
 	}
 
-	if((t.spawnflags&2||self.spawnflags&16)&&other.classname=="player")
+	if(((t.spawnflags & 2)||(self.spawnflags & 16))&&other.classname=="player")
 		other.velocity='0 0 0';//Kill all player's velocity
 
 	setorigin (other, t.origin);
 
-	if (!self.spawnflags & SILENT) 
+	if (!(self.spawnflags & SILENT)) 
 	{
 		self.enemy=other;
 		self.think=teleport_effect_delay;
@@ -1263,9 +1263,9 @@ float poof_speed;
 	}
 	other.teleport_time = time + 0.7;
 
-	if(!t.spawnflags&1&&self.netname != "teleportcoin")
+	if(!(t.spawnflags & 1)&&self.netname != "teleportcoin")
 	{
-		if((!t.spawnflags&2||other.classname!="player")&&!self.spawnflags&16)
+		if((!(t.spawnflags & 2)||other.classname!="player")&&!(self.spawnflags & 16))
 		{
 			other.angles = t.mangle;
 			other.fixangle = 1;		// turn this way immediately
@@ -1331,11 +1331,11 @@ vector o;
 
 	self.touch = teleport_touch;
 	// find the destination 
-	if (!self.target&&!self.spawnflags&16)
+	if (!self.target&&!(self.spawnflags & 16))
 		objerror ("no target");
 	self.use = teleport_use;
 
-	if (!(self.spawnflags & SILENT))
+	if (!((self.spawnflags & SILENT)))
 	{
 		precache_sound ("ambience/newhum1.wav");
 		o = (self.mins + self.maxs)*0.5;
@@ -1447,7 +1447,7 @@ float damage;
 				return;
 
 	if(self.spawnflags&2)
-		if(!other.flags&FL_MONSTER)
+		if(!(other.flags & FL_MONSTER))
 				return;
 
 	if (other.takedamage)
@@ -1634,7 +1634,7 @@ void() trigger_monsterjump =
 	InitTrigger ();
 	if(world.spawnflags&MISSIONPACK)
 	{
-		if(!self.spawnflags&4)
+		if(!(self.spawnflags & 4))
 			self.touch = trigger_monsterjump_touch;
 		else
 			self.use = trigger_monsterjump_activate;
@@ -1931,7 +1931,7 @@ entity killent;
 			
 void trigger_deathtouch (void)
 {
-	if(!self.target&&!self.spawnflags&2)
+	if(!self.target&&!(self.spawnflags & 2))
 	{
 //		dprint("Trigger_deathtouch has no target!\n");
 		remove(self);
@@ -1942,7 +1942,7 @@ void trigger_deathtouch (void)
 	if(self.targetname)
 		self.use = trigger_deathtouch_use;
 
-	if(!self.spawnflags&1)
+	if(!(self.spawnflags & 1))
 		self.touch = trigger_deathtouch_touch;
 }
 
@@ -2110,7 +2110,7 @@ void puzzle_piece(void)
 		self.hull=HULL_POINT;
 		self.solid = SOLID_BBOX;
 		self.touch = puzzle_touch;
-		if(!self.spawnflags&8)
+		if(!(self.spawnflags & 8))
 		{
 			self.think=StartItem;
 			thinktime self : 0;
@@ -2553,7 +2553,7 @@ void trigger_stop(void)
 {
 	InitTrigger();
 	self.use=trigger_stop_use;
-	if(!self.spawnflags&1)
+	if(!(self.spawnflags & 1))
 		self.touch=trigger_stop_touch;
 }
 

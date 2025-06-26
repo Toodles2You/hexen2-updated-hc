@@ -47,7 +47,7 @@ void plaque_touch (void)
 			}
 		}
 
-		if(!self.spawnflags&4)
+		if(!(self.spawnflags & 4))
 		{
 			makevectors (other.v_angle);
 			spot1 = other.origin + other.view_ofs;

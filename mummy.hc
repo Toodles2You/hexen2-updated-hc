@@ -956,7 +956,7 @@ void monster_mummy (void)
 		self.th_init=monster_mummy;
 		self.init_org=self.origin;
 	}
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!(self.flags2 & FL_SUMMONED)&&!(self.flags2 & FL2_RESPAWN))
 	{
 		precache_model2("models/mummy.mdl");
 		precache_model2 ("models/larm.mdl");
@@ -1020,7 +1020,7 @@ void monster_mummy_lord (void)
 		self.th_init=monster_mummy_lord;
 		self.init_org=self.origin;
 	}
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!(self.flags2 & FL_SUMMONED)&&!(self.flags2 & FL2_RESPAWN))
 	{
 		precache_model2("models/mummy.mdl");
 		precache_model2("models/larm.mdl");

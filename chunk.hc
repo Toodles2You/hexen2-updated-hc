@@ -192,7 +192,7 @@ void CreateModelChunks (vector space,float scalemod, float numChunks)
 	//return;//Magical Network-Friendly Code!
 
 	chunk_vel = ChunkVelocity();
-	if(!self.flags&FL_ONGROUND&&self.movetype!=MOVETYPE_NONE)
+	if(!(self.flags & FL_ONGROUND)&&self.movetype!=MOVETYPE_NONE)
 		chunk_vel=self.velocity+chunk_vel;
 
 	if(deathmatch||coop)

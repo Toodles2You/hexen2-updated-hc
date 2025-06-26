@@ -42,7 +42,7 @@ float base, divider, attack_mod;
 
 //FIXME: .light_level gives a value of 0 if MLS_POWERMODE is on...
 //Temp fix for now...
-	if(targ.classname!="player"||targ.drawflags&MLS_POWERMODE)
+	if(targ.classname!="player"||(targ.drawflags & MLS_POWERMODE))
 	{
 		targ.visibility=1;
 		return;
@@ -54,7 +54,7 @@ float base, divider, attack_mod;
 		return;
 	}
 
-	if(targ.drawflags&DRF_TRANSLUCENT&&targ.frozen<=0)
+	if((targ.drawflags & DRF_TRANSLUCENT)&&targ.frozen<=0)
 	{
 		if(targ.model=="models/assassin.mdl")
 			divider=3+targ.level;//Bonus for hiding in shadows
@@ -64,7 +64,7 @@ float base, divider, attack_mod;
 	else
 		divider=1;
 
-	if(targ.drawflags&MLS_ABSLIGHT)//&&targ.frozen<=0)
+	if((targ.drawflags & MLS_ABSLIGHT))//&&targ.frozen<=0)
 		base=targ.abslight/2.5;
 	else
 		base=targ.light_level/75;//75 is semi-fullbright
@@ -128,7 +128,7 @@ float FindMonsterTarget ()
 {
 entity found;
 float okay;
-	if(self.controller.enemy!=world&&self.controller.enemy.flags2&FL_ALIVE&&visible(self.controller.enemy))
+	if(self.controller.enemy!=world&&(self.controller.enemy.flags2 & FL_ALIVE)&&visible(self.controller.enemy))
 	{
 		self.enemy=self.controller.enemy;
 		return TRUE;
@@ -236,13 +236,13 @@ float jump_height, jumpup, ignore_height;
 							dprint("not above goalentity, and not spider\n");
 	                    return FALSE;
 				}
-                else if(!self.flags&FL_ONGROUND)
+                else if(!(self.flags & FL_ONGROUND))
 				{
 						if(print_err)
 							dprint("not on ground\n");
                         return FALSE;
 				}
-                else if(!self.goalentity.flags&FL_ONGROUND&&self.goalentity.classname!="waypoint")
+                else if(!(self.goalentity.flags & FL_ONGROUND)&&self.goalentity.classname!="waypoint")
 				{
 						if(print_err)
 							dprint("goalentity in air\n");
@@ -506,10 +506,10 @@ entity oldtarget;
 		return;
 	}
 */
-	if(self.enemy.classname=="player"&&self.enemy.flags2&FL_ALIVE&&self.enemy!=self.controller)
+	if(self.enemy.classname=="player"&&(self.enemy.flags2 & FL_ALIVE)&&self.enemy!=self.controller)
 		return;
 
-	if (!self.enemy.flags2&FL_ALIVE||self.enemy==self.controller)
+	if (!(self.enemy.flags2 & FL_ALIVE)||self.enemy==self.controller)
 	{
 		if(self.controller.classname=="player")
 		{
@@ -674,7 +674,7 @@ vector destiny,org;
 	if(trace_ent.classname=="player"&&targ.classname=="player")
 		return TRUE;
 
-	if(trace_ent.health>25||!trace_ent.takedamage||(trace_ent.flags&FL_MONSTER&&trace_ent.classname!="player_sheep"))
+	if(trace_ent.health>25||!trace_ent.takedamage||((trace_ent.flags & FL_MONSTER)&&trace_ent.classname!="player_sheep"))
 	{//Don't have a clear shot, and don't want to shoot obstruction
 		self.attack_state = AS_SLIDING;
 		return FALSE;
@@ -1103,7 +1103,7 @@ float vert_size,horz_size;
 		org=self.origin+checkdir*horz_size;
 		traceline(org,org+v_forward*horz_size,FALSE,self);
 	}
-	if(self.flags&FL_FLY||self.flags&FL_SWIM)
+	if((self.flags & FL_FLY)||(self.flags & FL_SWIM))
 	{
 		if(trace_fraction==1&&!trace_allsolid)
 		{
@@ -1189,7 +1189,7 @@ vector p2,p3,targ_dir,vec1,vec2;
 		if(trace_ent.thingtype>=THINGTYPE_WEBS)
 			traceline (trace_endpos, p3, FALSE, trace_ent);
 		if(trace_fraction<1)	
-			if(trace_ent.health>25||!trace_ent.takedamage||(trace_ent.flags&FL_MONSTER&&trace_ent.classname!="player_sheep"))
+			if(trace_ent.health>25||!trace_ent.takedamage||((trace_ent.flags & FL_MONSTER)&&trace_ent.classname!="player_sheep"))
 			{//Don't have a clear shot, and don't want to shoot obstruction
 	//			dprint("No clear shot\n");
 				self.attack_state = AS_SLIDING;

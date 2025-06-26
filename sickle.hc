@@ -80,7 +80,7 @@ void sickle_fire ()
 		else
 			drain_ok=TRUE;
 
-		if  (drain_ok && (trace_ent.flags & FL_MONSTER || trace_ent.flags & FL_CLIENT) && (self.level >= 6))	
+		if  (drain_ok && ((trace_ent.flags & FL_MONSTER) || (trace_ent.flags & FL_CLIENT)) && (self.level >= 6))	
 		{
 //			msg_entity=self;
 //			WriteByte (MSG_ONE, SVC_SET_VIEW_TINT);

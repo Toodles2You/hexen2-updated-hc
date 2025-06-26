@@ -193,7 +193,7 @@ void raven_track (void)
 //	dprint(self.enemy.classname);
 
 	// The FL_MONSTER flag gets flipped when it becomes a head
-	if ((self.enemy.health <= 0) || (self.enemy == world) || (!self.enemy.flags & FL_MONSTER))
+	if ((self.enemy.health <= 0) || (self.enemy == world) || (!(self.enemy.flags & FL_MONSTER)))
 		raven_search();
 	else
 	{

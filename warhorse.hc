@@ -223,7 +223,7 @@ void waraxe_move(void)
 
 	thinktime self : 0.1;
 
-	if (!self.owner.flags2 & FL_ALIVE)
+	if (!(self.owner.flags2 & FL_ALIVE))
 	{
 		self.velocity_z -= 20;
 		return;
@@ -449,7 +449,7 @@ void warhorse_move(void)
 {
 	float retval;
 
-	if(!self.enemy.flags2&FL_ALIVE&&self.enemy!=world)
+	if(!(self.enemy.flags2 & FL_ALIVE)&&self.enemy!=world)
 	{
 		self.enemy=world;
 		sound(self,CHAN_VOICE,"war/laugh.wav",1,ATTN_NONE);

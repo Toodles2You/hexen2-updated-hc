@@ -29,7 +29,7 @@ float cube_find_target(void)
 					traceline (self.origin,(item.absmin+item.absmax)*0.5,TRUE,self);
 					if (trace_fraction==1.0)
 					{
-						if ((!item.effects & EF_NODRAW))
+						if ((!(item.effects & EF_NODRAW)))
 						{
 							self.attack_finished=time+random(0.5);
 							self.drawflags(+)MLS_POWERMODE;
@@ -187,7 +187,7 @@ void CubeThinkerB(void)
 	thinktime self : 0.05;
 
 	updateSoundPos(self,CHAN_VOICE);
-	if (!self.owner.flags2 & FL_ALIVE) 
+	if (!(self.owner.flags2 & FL_ALIVE)) 
 	{
 		CubeDie();
 		return;

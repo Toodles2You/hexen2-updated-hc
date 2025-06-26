@@ -8,7 +8,7 @@ void()BlowUp=
 		self.v_angle=RandomVector('180 180 180');
 		self.scale=self.dmg;
 		if(self.enemy)
-			if(self.enemy.health>0&&self.enemy.flags2&FL_ALIVE)//Stay with enemy;
+			if(self.enemy.health>0&&(self.enemy.flags2 & FL_ALIVE))//Stay with enemy;
 				setorigin(self,self.enemy.origin+self.view_ofs);
 	    T_RadiusDamage (self, self.owner, self.dmg*100, world);
 		self.dmg += 0.1;
