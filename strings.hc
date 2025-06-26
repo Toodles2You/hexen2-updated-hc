@@ -33,9 +33,6 @@ string STR_BONESHARD;
 string STR_SET1;
 string STR_SET2;
 
-string STR_LIGHTNING1;
-string STR_LIGHTNING2;
-
 string STR_NOCARRYWEAPON;
 string STR_NOTENOUGHMANA;
 string STR_NOROOM;
