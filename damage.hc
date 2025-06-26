@@ -1108,7 +1108,7 @@ vector	inflictor_org, org;
 				org = (head.absmax + head.absmin)*0.5;
 				if(inflictor.classname=="poison grenade")
 				{
-					if(head.flags2&FL_ALIVE&&head.thingtype==THINGTYPE_FLESH)
+					if((head.flags2 & FL_ALIVE)&&head.thingtype==THINGTYPE_FLESH)
 						points=0;
 					else
 						points=damage;
@@ -1151,9 +1151,9 @@ vector	inflictor_org, org;
 
 						if(inflictor.classname=="poison grenade")
 						{
-							if(!head.flags2&FL2_POISONED)
+							if(!(head.flags2 & FL2_POISONED))
 							{//Poison them
-								if(head.flags&FL_CLIENT&&(coop||teamplay==1))
+								if((head.flags & FL_CLIENT)&&(coop||teamplay==1))
 								{
 									if(head.team!=attacker.team&&!coop)
 									{

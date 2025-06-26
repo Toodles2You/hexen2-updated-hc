@@ -223,7 +223,7 @@ void() Suc_Blrn_Fire;
 
 void bloodrain_fire (void)
 {
-	if(self.button0&&self.weaponframe==$normal07 &&!self.artifact_active&ART_TOMEOFPOWER)
+	if(self.button0&&self.weaponframe==$normal07 &&!(self.artifact_active & ART_TOMEOFPOWER))
 		self.weaponframe=$normal07;
 	else
 		self.wfs = advanceweaponframe($normal02,$normal13);

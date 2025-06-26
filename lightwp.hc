@@ -278,7 +278,7 @@ entity loser, lastloser,firstloser;
 	firstloser=lastloser=loser;//trace_ent;
 	while(loser!=world)
 	{
-		if(loser.health&&loser.flags2&FL_ALIVE&&loser!=self)
+		if(loser.health&&(loser.flags2 & FL_ALIVE)&&loser!=self)
 		{
 			tospot=(loser.absmin+loser.absmax)*0.5;
 			traceline(org,tospot,TRUE,self);
@@ -424,7 +424,7 @@ void lightning_fire_power (void)
 	self.wfs = advanceweaponframe($power1,$power16);
 	self.th_weapon=lightning_fire_power;
 	self.last_attack=time;
-	if(!self.artifact_active&ART_TOMEOFPOWER)
+	if(!(self.artifact_active & ART_TOMEOFPOWER))
 		lightning_ready_normal();
 	else if(self.greenmana<2||self.bluemana<2||!self.button0)
 		lightning_ready_power();
@@ -462,7 +462,7 @@ void lightning_ready_power (void)
 		self.weaponframe=$pidle1;
 	//	self.wfs = advanceweaponframe($pidle1,$pidle16);
 	self.th_weapon=lightning_ready_power;
-	if(!self.artifact_active&ART_TOMEOFPOWER)
+	if(!(self.artifact_active & ART_TOMEOFPOWER))
 		lightning_ready_normal();
 }
 

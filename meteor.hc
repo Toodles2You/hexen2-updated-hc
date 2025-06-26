@@ -319,7 +319,7 @@ float pick_up;
 		{
 			pick_up=TRUE;
 			if(sucker.monsterclass>=CLASS_BOSS)
-				if(sucker.flags&FL_MONSTER||sucker.classname=="buddha_shield"||sucker.classname=="buddha_firewalker")
+				if((sucker.flags & FL_MONSTER)||sucker.classname=="buddha_shield"||sucker.classname=="buddha_firewalker")
 					pick_up=FALSE;
 			if(!sucker.solid||sucker.solid==SOLID_BSP)
 				pick_up=FALSE;
@@ -465,7 +465,7 @@ void tornato_merge (void)
 void funnal_touch (void)
 {
 //FIXME:  Ignore the controlling player's projectiles, leaving it in to test
-	if(other.monsterclass>=CLASS_BOSS&&(other.flags&FL_MONSTER||other.classname=="buddha_shield"||other.classname=="buddha_firewalker"))
+	if(other.monsterclass>=CLASS_BOSS&&((other.flags & FL_MONSTER)||other.classname=="buddha_shield"||other.classname=="buddha_firewalker"))
 	{
 		T_Damage(other,self,self.owner,7);
 		traceline((self.absmin+self.absmax)*0.5,(other.absmin+other.absmax)*0.5,FALSE,self);

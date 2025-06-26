@@ -537,7 +537,7 @@ entity found;
 			if(found.enemy.flags2&FL_ALIVE)
 				found=found.enemy;
 	}
-	if(found==world||!found.flags2&FL_ALIVE)
+	if(found==world||!(found.flags2 & FL_ALIVE))
 	{
 		if(!found.targetname)
 			self.target="";

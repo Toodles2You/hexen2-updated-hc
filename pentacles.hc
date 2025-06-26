@@ -555,7 +555,7 @@ float	chance,targ_range;
 		traceline (trace_endpos, spot2, FALSE, trace_ent);
 
 	if (trace_ent != targ)
-		if(trace_ent.health>25||!trace_ent.takedamage||(trace_ent.flags&FL_MONSTER&&trace_ent.classname!="player_sheep"))
+		if(trace_ent.health>25||!trace_ent.takedamage||((trace_ent.flags & FL_MONSTER)&&trace_ent.classname!="player_sheep"))
 			return FALSE;//Don't have a clear shot, and don't want to shoot obstruction
 			
 //FIXME: check for translucent water?
@@ -865,7 +865,7 @@ void pent_run () [++ $walk000 .. $walk015]
 		{
 //			self.pos1=self.origin;
 			ai_run(self.speed);
-			if(self.flags&FL_ONGROUND&&'0 0 -1'*self.walldir>0.75)
+			if((self.flags & FL_ONGROUND)&&'0 0 -1'*self.walldir>0.75)
 			{
 				traceline(self.origin,self.origin - '0 0 64',TRUE,self);
 				if(trace_plane_normal!='0 0 0')
@@ -901,7 +901,7 @@ void pent_walk () [++ $walk000 .. $walk015]
 		{
 //			self.pos1=self.origin;
 			ai_walk(self.speed/2);
-			if(self.flags&FL_ONGROUND&&'0 0 -1'*self.walldir>0.75)
+			if((self.flags & FL_ONGROUND)&&'0 0 -1'*self.walldir>0.75)
 			{
 				traceline(self.origin,self.origin - '0 0 64',TRUE,self);
 				if(trace_plane_normal!='0 0 0')
@@ -957,7 +957,7 @@ void() monster_pentacles =
 		self.init_org=self.origin;
 	}
 
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!(self.flags2 & FL_SUMMONED)&&!(self.flags2 & FL2_RESPAWN))
 	{
 		precache_model4 ("models/pent.mdl");
 		precache_model4 ("models/sucwp1p.mdl");

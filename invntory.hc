@@ -574,7 +574,7 @@ vector updir;
 		sound(self,CHAN_BODY,"succubus/gasss.wav",1,ATTN_NORM);
 		self.t_width=time+2;
 	}
-	else if((self.velocity=='0 0 0'||self.flags&FL_ONGROUND)&&self.t_width<time&&self.aflag==1)
+	else if((self.velocity=='0 0 0'||(self.flags & FL_ONGROUND))&&self.t_width<time&&self.aflag==1)
 	{
 		self.aflag=2;
 		sound(self,CHAN_BODY,"succubus/hisss.wav",1,ATTN_NORM);

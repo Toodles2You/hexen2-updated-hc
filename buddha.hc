@@ -937,9 +937,9 @@ void buddha_run (void) [++ $ready1 .. $ready20]
 		}
 	}
 
-	if (self.enemy.health <= 0 || self.enemy == world || !self.enemy.flags2 & FL_ALIVE)
+	if (self.enemy.health <= 0 || self.enemy == world || !(self.enemy.flags2 & FL_ALIVE))
 	{
-		if (self.oldenemy.health <=0 || self.oldenemy == world || !self.oldenemy.flags2 & FL_ALIVE)
+		if (self.oldenemy.health <=0 || self.oldenemy == world || !(self.oldenemy.flags2 & FL_ALIVE))
 		{
 			self.enemy = world;
 			self.think = buddha_get_new_target;
@@ -1008,7 +1008,7 @@ void buddha_get_new_target(void)[++ $ready1 .. $ready20]
 	if (enemy_proj != world)
 		self.enemy = enemy_proj.owner;
 
-	if (!self.enemy.flags2&FL_ALIVE||(self.enemy.artifact_active&ARTFLAG_STONED&&self.classname!="monster_medusa"))
+	if (!(self.enemy.flags2 & FL_ALIVE)||((self.enemy.artifact_active & ARTFLAG_STONED)&&self.classname!="monster_medusa"))
 	{
 		self.enemy = world;
 		if (self.oldenemy.health > 0 && self.oldenemy != world)
@@ -1272,7 +1272,7 @@ void shard_think(void)
 	if (self.velocity)
 		self.velocity = '0 0 0';
 
-	if ((self.frame == 0 || self.frame == 11 || self.frame == 22) && !self.attack_state & 1)
+	if ((self.frame == 0 || self.frame == 11 || self.frame == 22) && !(self.attack_state & 1))
 	{
 		self.lifetime = time + 1;
 		self.attack_state (+) 1;

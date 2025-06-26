@@ -197,7 +197,7 @@ vector rollangle;
 	{
 		self.cnt=0;
 		thinktime self : 0;
-		if(!self.flags&FL_ONGROUND)
+		if(!(self.flags & FL_ONGROUND))
 			self.think=yakman_in_air;
 		else
 			self.think=self.th_run;
@@ -239,7 +239,7 @@ vector rollangle;
 	{
 		self.cnt=0;
 		thinktime self : 0;
-		if(!self.flags&FL_ONGROUND)
+		if(!(self.flags & FL_ONGROUND))
 			self.think=yakman_in_air;
 		else
 			self.think=self.th_run;
@@ -546,7 +546,7 @@ void yakman_in_air ()
 //	dprint("in air\n");
 //	ai_face();
 	self.frame=$jump18;
-	if(!self.flags&FL_ONGROUND)
+	if(!(self.flags & FL_ONGROUND))
 	{
 		if(random()<0.1)
 		{
@@ -1058,7 +1058,7 @@ void yakman_run () [++ $walk1 .. $walk24]
 	if(random()<=0.07)
 		yakman_idle_sound();
 	yakman_check_defense();
-	if(!self.enemy.flags2&FL_ALIVE&&self.enemy!=world)
+	if(!(self.enemy.flags2 & FL_ALIVE)&&self.enemy!=world)
 	{
 		self.monster_awake=FALSE;
 		if(visible(self.enemy)&&infront(self.enemy))
@@ -1122,7 +1122,7 @@ void() monster_yakman =
 		self.init_org=self.origin;
 	}
 
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!(self.flags2 & FL_SUMMONED)&&!(self.flags2 & FL2_RESPAWN))
 	{
 		precache_model4 ("models/yakman.mdl");
 		precache_model4 ("models/yakball.mdl");

@@ -133,7 +133,7 @@ void acidblobTouch (void)
 		T_Damage(other,self,self.owner,self.dmg);
 		if(self.dmg>15)
 		{
-			if((other.flags&FL_CLIENT||other.flags&FL_MONSTER)&&other.mass<200)
+			if(((other.flags & FL_CLIENT)||(other.flags & FL_MONSTER))&&other.mass<200)
 			{
 			vector hitdir;
 				hitdir=self.o_angle*300;
@@ -328,7 +328,7 @@ void() Suc_Aorb_Fire;
 
 void acidorb_fire (void)
 {
-	if(self.button0&&self.weaponframe==$normal60 &&!self.artifact_active&ART_TOMEOFPOWER)
+	if(self.button0&&self.weaponframe==$normal60 &&!(self.artifact_active & ART_TOMEOFPOWER))
 		self.weaponframe=$normal58;
 	else
 		if(self.artifact_active&ART_TOMEOFPOWER)
@@ -422,7 +422,7 @@ void acidorb_ready_power (void)
 		self.th_weapon=acidorb_jellyfingers_power;
 	else
 		self.th_weapon=acidorb_ready_power;
-	if(!self.artifact_active&ART_TOMEOFPOWER)
+	if(!(self.artifact_active & ART_TOMEOFPOWER))
 	{
 		self.weaponframe=$tonrml149;
 		acidorb_to_normal();

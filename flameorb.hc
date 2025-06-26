@@ -616,11 +616,11 @@ void flameorb_fire (void)
 	
 	self.th_weapon=flameorb_fire;
 	self.last_attack=time;
-	if(self.wfs==WF_CYCLE_WRAPPED||self.greenmana<1||(self.greenmana<10&&self.artifact_active&ART_TOMEOFPOWER))
+	if(self.wfs==WF_CYCLE_WRAPPED||self.greenmana<1||(self.greenmana<10&&(self.artifact_active & ART_TOMEOFPOWER)))
 	{
 		self.t_width=-1;
 		self.weaponframe_cnt=0;
-		if(!self.artifact_active&ART_TOMEOFPOWER)
+		if(!(self.artifact_active & ART_TOMEOFPOWER))
 		{
 			self.aflag=FALSE;
 			self.attack_finished=time+0.2;
@@ -724,7 +724,7 @@ void flameorb_ready_power (void)
 		self.th_weapon=flameorb_jellyfingers_power;
 	else
 		self.th_weapon=flameorb_ready_power;
-	if(!self.artifact_active&ART_TOMEOFPOWER)
+	if(!(self.artifact_active & ART_TOMEOFPOWER))
 	{
 		self.weaponframe=$tonrml149;
 		flameorb_to_normal();

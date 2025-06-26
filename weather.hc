@@ -338,7 +338,7 @@ void() weather_snow =
 	if(!self.movedir)
 		self.movedir=randomv('-1 -1 -1','1 1 -0.5');
 
-	if(self.spawnflags&SFL_FLUFFY&&self.spawnflags&SFL_MIXED)
+	if((self.spawnflags & SFL_FLUFFY)&&(self.spawnflags & SFL_MIXED))
 		self.spawnflags(-)SFL_MIXED;//All fluffy overrides mixed
 
 	self.movedir_x *= self.anglespeed;

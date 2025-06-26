@@ -155,7 +155,7 @@ vector spread;
 		sound(newmis,CHAN_AUTO,"necro/mmfire.wav",1,ATTN_NORM);
 	}
 
-	if(self.artifact_active&ART_TOMEOFPOWER||self.playerclass==CLASS_SUCCUBUS)
+	if((self.artifact_active & ART_TOMEOFPOWER)||self.playerclass==CLASS_SUCCUBUS)
 	{
 		if(eidoball)
 		{

@@ -94,7 +94,7 @@ is alive and visible.  If so, changes back to it's last enemy.
 void checkenemy (void)
 {
 entity oldtarget;
-	if(self.enemy.classname=="player"&&self.enemy.flags2&FL_ALIVE)
+	if(self.enemy.classname=="player"&&(self.enemy.flags2 & FL_ALIVE))
 		return;
 
 	if(self.oldenemy.classname=="player"&&(self.oldenemy.flags2&FL_ALIVE)&&visible(self.oldenemy))
@@ -276,7 +276,7 @@ void imp_die ()
 		else
 			self.frame==$death7;
 	
-	if(self.flags & FL_ONGROUND&&!self.aflag)
+	if((self.flags & FL_ONGROUND)&&!self.aflag)
 	{
 	vector new_angles,new_angles2,old_forward,old_right;
 	float dot,mod;
@@ -313,7 +313,7 @@ void imp_die ()
 //		dprintf("New roll: %s\n",self.angles_z);
 	}
 
-	if(self.frame==$death14 &&self.flags&FL_ONGROUND)
+	if(self.frame==$death14 &&(self.flags & FL_ONGROUND))
 		MakeSolidCorpse();
 	else if(self.health<-40)
 		chunk_death();
@@ -543,7 +543,7 @@ float too_close;
 	if(!check_z_move())
 		imp_up_down();
 
-	if(vlen(self.enemy.origin+self.enemy.proj_ofs-self.origin)<20&&random()<0.2&&self.target!=""&&self.origin_z>self.enemy.absmax_z - 8&&self.spawnflags&PICKUP)
+	if(vlen(self.enemy.origin+self.enemy.proj_ofs-self.origin)<20&&random()<0.2&&self.target!=""&&self.origin_z>self.enemy.absmax_z - 8&&(self.spawnflags & PICKUP))
 		imp_pick_up();
 }
 
@@ -552,7 +552,7 @@ float imp_new_action ()
 float too_close;
 	enemy_vis=visible(self.enemy);
 	too_close=imp_check_too_close();
-	if((random()<0.7&&self.enemy.flags2&FL_ALIVE)||!enemy_vis||too_close)
+	if((random()<0.7&&(self.enemy.flags2 & FL_ALIVE))||!enemy_vis||too_close)
 	{
 		if(self.think!=imp_fly)
 		{
@@ -760,7 +760,7 @@ void imp_attack_anim() [++ $impfir1 .. $impfir21]
 	else if (cycle_wrapped)
 	{
 		self.think=imp_fly;
-		if(visible(self.enemy)&&self.enemy.flags2&FL_ALIVE)
+		if(visible(self.enemy)&&(self.enemy.flags2 & FL_ALIVE))
 			if(random()<0.2+skill/10)
 				self.think=imp_attack_anim;
 		self.attack_finished=time + 1;
@@ -831,7 +831,7 @@ vector dir,destiny,org;
 
 		self.count += 1;
 
-		if (self.flags & FL_ONGROUND || self.count > 30)
+		if ((self.flags & FL_ONGROUND) || self.count > 30)
 		{  // Didn't hit our target, so go back up
 			self.flags (-) FL_ONGROUND;
 			imp_abort_swoop();
@@ -1016,7 +1016,7 @@ vector destiny,org;
 //		dprint("Imp shot blocked by: ");
 //		dprint(trace_ent.classname);
 //		dprint("\n");
-		if(trace_ent.health>25||!trace_ent.takedamage||(trace_ent.flags&FL_MONSTER&&trace_ent.classname!="player_sheep"))
+		if(trace_ent.health>25||!trace_ent.takedamage||((trace_ent.flags & FL_MONSTER)&&trace_ent.classname!="player_sheep"))
 		{//Don't have a clear shot, and don't want to shoot obstruction
 //			dprint("\n");
 			self.attack_state = AS_SLIDING;
@@ -1028,7 +1028,7 @@ vector destiny,org;
 	if(random()<0.2+skill/10)
 		return FALSE;
 
-	if(!self.spawnflags & MONSTER_STAND_GROUND)
+	if(!(self.spawnflags & MONSTER_STAND_GROUND))
 	{
 	float swoop_no_drop;
 		swoop_no_drop=FALSE;
@@ -1294,7 +1294,7 @@ void init_imp (float which_skin)
 		return;
 	}
 
-	if(!self.flags2&FL_SUMMONED)
+	if(!(self.flags2 & FL_SUMMONED))
 	{
 		precache_model2 ("models/imp.mdl");
 		precache_model2 ("models/h_imp.mdl");//empty for now

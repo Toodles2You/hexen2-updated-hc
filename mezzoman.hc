@@ -1557,7 +1557,7 @@ void() monster_werejaguar =
 			self.health=475;
 		self.scale=0.8+random(0.2);
 		self.drawflags(+)SCALE_ORIGIN_BOTTOM;
-		if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+		if (!(self.flags2 & FL_SUMMONED)&&!(self.flags2 & FL2_RESPAWN))
 			precache_model4 ("models/snowleopard.mdl");
 		setmodel (self, "models/snowleopard.mdl");
 	}
@@ -1571,7 +1571,7 @@ void() monster_werejaguar =
 		self.skin=1;
 		self.scale=1+random(0.2);
 		self.drawflags(+)SCALE_ORIGIN_BOTTOM;
-		if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+		if (!(self.flags2 & FL_SUMMONED)&&!(self.flags2 & FL2_RESPAWN))
 		{
 			precache_model4 ("models/snowleopard.mdl");
 			precache_model4 ("models/h_mez2.mdl");
@@ -1581,7 +1581,7 @@ void() monster_werejaguar =
 	}
 	else
 	{
-		if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+		if (!(self.flags2 & FL_SUMMONED)&&!(self.flags2 & FL2_RESPAWN))
 		{
 			precache_model2 ("models/mezzoman.mdl");
 			precache_model2 ("models/h_mez.mdl");

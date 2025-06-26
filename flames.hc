@@ -81,7 +81,7 @@ local float damagemult;
 //        }
 		if(self.trigger_field.onfire>0.5)
 			self.trigger_field.onfire=0.5;//Max out damage at 0.5 per think
-        if (!self.trigger_field.flags2&FL2_FIRERESIST)
+        if (!(self.trigger_field.flags2 & FL2_FIRERESIST))
         {
 				if(self.aflag>0.1)
 					damagemult=self.aflag;
@@ -297,7 +297,7 @@ void () FlameTouch =
 	{
 		if(other.flags2&FL2_FIREHEAL)
 			other.health=other.health+1;
-		else if (!other.flags2&FL2_FIRERESIST)
+		else if (!(other.flags2 & FL2_FIRERESIST))
 			T_Damage(other,self,self.owner,5);
 		if(other.thingtype==THINGTYPE_FLESH||other.thingtype==THINGTYPE_WOOD)
         {
