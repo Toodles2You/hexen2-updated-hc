@@ -98,9 +98,9 @@ void GolemSRushBegin(void);
 void GolemSRushSlide(void);
 void GolemSRushEnd(void);
 float GolemFlinch(float firstFrame, float lastFrame);
-void GolemSPain(void);
-void GolemIPain(void);
-void GolemBPain(void);
+void GolemSPain(entity attacker, float damage);
+void GolemIPain(entity attacker, float damage);
+void GolemBPain(entity attacker, float damage);
 void GolemDie(void);
 void GolemBBeamBegin(void);
 void GolemBStomp(void);
@@ -1230,7 +1230,7 @@ float GolemFlinch(float firstFrame, float lastFrame)
 //
 //==========================================================================
 
-void GolemSPain(void)
+void GolemSPain(entity attacker, float damage)
 {
 	if(self.pain_finished > time)
 	{
@@ -1249,7 +1249,7 @@ void GolemSPain(void)
 //
 //==========================================================================
 
-void GolemIPain(void)
+void GolemIPain(entity attacker, float damage)
 {
 	if(self.pain_finished > time)
 	{
@@ -1268,7 +1268,7 @@ void GolemIPain(void)
 //
 //==========================================================================
 
-void GolemBPain(void)
+void GolemBPain(entity attacker, float damage)
 {
 	if(self.pain_finished > time)
 	{

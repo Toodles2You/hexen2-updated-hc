@@ -852,7 +852,7 @@ void skullwiz_blink(void) [++ $sktele2..$sktele30]
 		self.scale = 1;
 		self.drawflags = (self.drawflags & SCALE_TYPE_MASKOUT) | SCALE_TYPE_XYONLY;
 		self.solid = SOLID_NOT;
-		self.th_pain=SUB_Null;
+		self.th_pain=SUB_null_pain;
 		skullwiz_blinkout();	
 	}
 }

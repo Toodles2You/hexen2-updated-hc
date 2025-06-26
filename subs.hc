@@ -7,6 +7,8 @@ float SPAWNFLAG_ACTIVATED	= 8;
 
 void SUB_Null() {}
 
+void SUB_null_pain (entity attacker, float damage) {}
+
 void SUB_Remove() {stopSound(self,0); remove(self); }
 
 void obj_barrel_explode (void);	//ref from barrel.hc

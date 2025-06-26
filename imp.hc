@@ -967,6 +967,8 @@ void imp_straight_swoop () [-- $swpout15 .. $swpout1]
 	}
 }
 
+void imp_pain_think (void);
+
 void() imp_touch =
 {
 float damg,damg_plus;
@@ -1026,7 +1028,7 @@ vector punch,dir;
 			makevectors(self.angles);
 			SpawnPuff(self.origin+self.proj_ofs+v_forward*self.absmax_x,'0 0 0',10,self);
 			self.pain_finished=-666;
-			self.think=self.th_pain;
+			self.think=imp_pain_think;
 		}
 		self.velocity=other.velocity;//??
 	}
@@ -1312,6 +1314,11 @@ void(entity attacker, float damage) imp_pain =
 	}
 	thinktime self : 0;
 };
+
+void imp_pain_think (void)
+{
+	imp_pain (world, 0);
+}
 
 void imp_use (void)
 {

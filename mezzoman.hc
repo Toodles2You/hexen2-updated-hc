@@ -906,7 +906,7 @@ void mezzo_pain (entity attacker, float damage)
 
 	if(self.health<=100)
 	{
-		self.th_pain=SUB_Null;
+		self.th_pain=SUB_null_pain;
 		if(self.health<=100)
 		{
 			if(random()<0.5)
@@ -1165,7 +1165,7 @@ void mezzo_block () [++ $block1 .. $block6]
 //		dprint("what the?\n");
 	if(cycle_wrapped)
 	{
-		if(self.th_pain==SUB_Null&&self.health>77)
+		if(self.th_pain==SUB_null_pain&&self.health>77)
 			self.th_pain=mezzo_pain;
 		self.t_width=time+1;
 		thinktime self : 0;
@@ -1238,7 +1238,7 @@ void mezzo_roar () [++ $roar1 .. $roar30]
 		self.monster_awake=TRUE;
 		if(self.health<100)
 		{
-			self.th_pain=SUB_Null;
+			self.th_pain=SUB_null_pain;
 			self.takedamage=DAMAGE_NO;
 		}
 		sound(self,CHAN_VOICE,"mezzo/roar.wav",1,ATTN_NORM);

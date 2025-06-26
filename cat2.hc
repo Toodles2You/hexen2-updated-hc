@@ -145,7 +145,7 @@ void catapult_fire (void)
 	}
 }
 
-void catapult_pain (void)
+void catapult_pain (entity attacker, float damage)
 {
 	if(!(self.enemy.flags2 & FL_ALIVE))
 		return;

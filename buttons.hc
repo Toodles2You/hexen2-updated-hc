@@ -82,6 +82,11 @@ void() button_use =
 	button_fire ();
 };
 
+void button_pain (entity attacker, float damage)
+{
+	button_use ();
+}
+
 void() button_touch =
 {	
 	if ((!(other.flags & FL_PUSH))&&other.classname!="player")
@@ -168,7 +173,7 @@ void() func_button =
 	{
 		self.max_health = self.health;
 		if(self.spawnflags&FIRE_MULTIPLE)
-			self.th_pain = button_use;//for multiple uses
+			self.th_pain = button_pain;//for multiple uses
 		self.th_die = button_killed;
 		self.takedamage = DAMAGE_NO_GRENADE;
 	}

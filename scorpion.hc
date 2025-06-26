@@ -82,7 +82,7 @@ void ScorpionWake(void);
 void ScorpionWalk(void);
 void ScorpionRun(void);
 void ScorpionRunBlack(void);
-void ScorpionPainDecide(void);
+void ScorpionPainDecide(entity attacker, float damage);
 void ScorpionPain(void);
 void ScorpionMeleeDecide(void);
 void ScorpionMelee1(void);
@@ -418,7 +418,7 @@ void ScorpionRun(void) [++ $ScWalk1..$ScWalk16]
 //
 //==========================================================================
 
-void ScorpionPainDecide(void)
+void ScorpionPainDecide(entity attacker, float damage)
 {
 	if(random() < 0.3)
 	{

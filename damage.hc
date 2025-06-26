@@ -432,7 +432,8 @@ entity oself;
 		}
 
 	self.flags2(-)FL_ALIVE;
-	self.touch = self.th_pain = SUB_Null;
+	self.touch = SUB_Null;
+	self.th_pain = SUB_null_pain;
 
 	if (attacker.classname == "player")
 	{
@@ -573,7 +574,8 @@ entity oself;
 		if(self.target)
 			SUB_UseTargets();
 
-	self.th_stand=self.th_walk=self.th_run=self.th_pain=self.oldthink=self.think=self.th_melee=self.th_missile=SUB_Null;
+	self.th_stand=self.th_walk=self.th_run=self.oldthink=self.think=self.th_melee=self.th_missile=SUB_Null;
+	self.th_pain = SUB_null_pain;
 	
 	if(pointcontents(self.origin+self.view_ofs)==CONTENT_WATER)
 		DeathBubbles(20);
@@ -972,7 +974,7 @@ entity holdent,lastleader,newking;
 			inflictor=attacker;
 			attacker=attacker.controller;
 		}
-		targ.th_pain=SUB_Null;	//Should prevents interruption of death sequence
+		targ.th_pain=SUB_null_pain;	//Should prevents interruption of death sequence
 		Killed (targ, attacker,inflictor,total_damage);
 		return;
 	}
@@ -1046,7 +1048,7 @@ entity holdent,lastleader,newking;
 	}
 
 	if (self.th_pain)
-		if(self.th_pain!=SUB_Null)
+		if(self.th_pain!=SUB_null_pain)
 		{
 			if(self.classname=="player"&&self.model!="models/sheep.mdl")
 				player_pain(attacker, total_damage);

@@ -328,7 +328,7 @@ void waraxe(entity new_target, vector offset, float horizontal)
 	axe.lifetime = time + 5;
 }
 
-void war_pain ()
+void war_pain (entity attacker, float damage)
 {
 	if(self.pain_finished>time)
 		return;

@@ -441,7 +441,7 @@ void mummy_throw_leftarm()
 //	bloodspew_create('0 -10 40');
 }
 
-void mummy_pain(void)
+void mummy_pain(entity attacker, float damage)
 {
 	float hold_parts;
 

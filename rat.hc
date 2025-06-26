@@ -164,6 +164,11 @@ void rat_noise (void)
 	sound(self,CHAN_VOICE,"misc/squeak.wav",1,ATTN_NORM);
 }
 
+void rat_pain (entity attacker, float damage)
+{
+	rat_noise ();
+}
+
 void rat_touch (void)
 {
 	return;
@@ -251,7 +256,7 @@ void monster_rat (void)
 	self.th_run = ratrun;
 	self.th_melee = ratrun;
 	self.th_missile = ratrun;
-	self.th_pain = rat_noise;
+	self.th_pain = rat_pain;
 	self.th_die = rat_death;
 
 	self.flags(+)FL_MONSTER;

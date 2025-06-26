@@ -343,7 +343,8 @@ void MedusaGaze (vector org, vector destiny, entity loser) [++ $medusa1 .. $medu
 		else
 			self.attack_finished=time+7;
 		loser.skin = GLOBAL_SKIN_STONE;
-		loser.think=loser.th_pain=loser.th_run=SUB_Null;
+		loser.think=loser.th_run=SUB_Null;
+		loser.th_pain = SUB_null_pain;
 		loser.attack_finished=loser.teleport_time=loser.pausetime = time+10000000000;
 		loser.nextthink=-1;
 		loser.th_die = chunk_death;
