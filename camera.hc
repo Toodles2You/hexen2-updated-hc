@@ -46,11 +46,13 @@ void() play_camera =
 	remove (self);
 };
 
+/*
 void() play_rejoice =
 {
 	sound (self, CHAN_VOICE, "fx/rejoice.wav", 1, ATTN_NONE);
 	remove (self);
 };
+*/
 
 /*-----------------------------------------
 	camera_track - camera tracks its target
