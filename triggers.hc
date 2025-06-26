@@ -2241,7 +2241,7 @@ float fire_range;
 	}
 
 	other.attack_finished=time+0.1;
-	if(other.weaponmodel!="models/xhair.mdl");
+	if(other.weaponmodel!="models/xhair.mdl")
 	{
 		other.weaponmodel="models/xhair.mdl";
 		other.weaponframe = 0;

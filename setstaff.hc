@@ -349,7 +349,7 @@ void scarab_die ()
 		self.dmg=75;
 		T_Damage(self.lockentity,self,self.owner,self.dmg);
 	}
-	if(self.movechain!=world);
+	if(self.movechain!=world)
 		remove(self.movechain);
 	MultiExplode();
 }

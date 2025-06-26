@@ -159,7 +159,7 @@ vector spread;
 	{
 		if(eidoball)
 		{
-			if(self.classname=="monster_eidolon");
+			if(self.classname=="monster_eidolon")
 				newmis.enemy=self.enemy;
 			newmis.classname = "eidolon spell";
 			newmis.turn_time=3;
