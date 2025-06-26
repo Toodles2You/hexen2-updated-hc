@@ -241,7 +241,7 @@ float r;
 		r=rint(random())+1;
 		if(r==1)
 		{
-			self.frame==$grazeA31;
+			self.frame=$grazeA31;
 			sheep_graze_a();
 		}
 		else
@@ -263,7 +263,7 @@ float r;
 		r=rint(random())+1;
 		if(r==1)
 		{
-			self.frame==$grazeB31;
+			self.frame=$grazeB31;
 			sheep_graze_b();
 		}
 		else

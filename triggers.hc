@@ -1595,7 +1595,7 @@ void() trigger_monsterjump_touch =
 
 	other.velocity_z = self.height;
 
-	if(self.wait=-1)
+	if(self.wait==-1)
 		self.touch=SUB_Null;
 
 	if(other.th_jump)
@@ -2241,7 +2241,7 @@ float fire_range;
 	}
 
 	other.attack_finished=time+0.1;
-	if(other.weaponmodel!="models/xhair.mdl");
+	if(other.weaponmodel!="models/xhair.mdl")
 	{
 		other.weaponmodel="models/xhair.mdl";
 		other.weaponframe = 0;

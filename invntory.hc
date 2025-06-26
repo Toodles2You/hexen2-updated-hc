@@ -340,7 +340,7 @@ void TimeBombTouch()
 void Use_TimeBomb()
 {
 	newmis=spawn();
-	newmis.owner=self;;
+	newmis.owner=self;
 	newmis.classname="timebomb";
 	newmis.solid=SOLID_BBOX;
 	if(deathmatch&&!coop)

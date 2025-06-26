@@ -444,7 +444,7 @@ purifier_deselect - purifier was just unchosen. Remove from view
 */
 void purifier_deselect (void)
 {
-	self.wfs = advanceweaponframe($Select12,$Select1);
+	self.wfs = advanceweaponframe($select12,$select1);
 	self.th_weapon=purifier_deselect;
 	self.oldweapon = IT_WEAPON4;
 

@@ -485,11 +485,11 @@ float r, loscheck1,loscheck2;
 	if (trace_ent != self.enemy)
 	{	// don't have a clear shot, so move to a side
 		if (self.attack_state != AS_SLIDING)
-			self.attack_state == AS_SLIDING;
+			self.attack_state = AS_SLIDING;
 		return FALSE;
 	}
 	else
-		self.attack_state == AS_STRAIGHT;
+		self.attack_state = AS_STRAIGHT;
 			
 	destiny = self.enemy.origin+self.enemy.view_ofs;
 //FIXME: account for z difference
