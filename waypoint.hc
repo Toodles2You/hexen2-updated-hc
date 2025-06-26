@@ -140,7 +140,7 @@ void() SetNextWaypoint =
 //						dprint("Owner's enemy has changed or died or owner died\n");
                         ResetWaypoints();
 				}
-                if(visible2ent(self.controller.enemy,self.controller))//||self.controller.enemy==self.controller.goalentity)//Check also for self.controller.goalentity=self.enemy since it would only do this if they see him
+                else if(visible2ent(self.controller.enemy,self.controller))//||self.controller.enemy==self.controller.goalentity)//Check also for self.controller.goalentity=self.enemy since it would only do this if they see him
 				{
 //						dprint("Owner sees his enemy or his goalentity is his enemy\n");
 //						dprint(self.controller.enemy.classname);
@@ -148,7 +148,7 @@ void() SetNextWaypoint =
 //						dprint("\n");
                         ResetWaypoints();
 				}
-                if(self.lockentity.goalentity!=self&&self.lockentity.trigger_field!=self)//if previous waypoint can see him (backtracked), remove self
+                else if(self.lockentity.goalentity!=self&&self.lockentity.trigger_field!=self)//if previous waypoint can see him (backtracked), remove self
 				{
 //					dprint("Previous waypoint changed direction\n");
 					remove(self);
@@ -166,14 +166,16 @@ void() SetNextWaypoint =
 //					dprint("Owner close enough and can see me\n");
 					TransferWaypoint();
 				}
-
-                self.think=SetNextWaypoint;
-				if(self.lifetime<time)
-				{
-					self.think=RemoveWaypoint;
-					thinktime self : 30;
-				}
 				else
-	                thinktime self : 0.2;//maybe 1? don't keep too much of a track on him
+				{
+					self.think=SetNextWaypoint;
+					if(self.lifetime<time)
+					{
+						self.think=RemoveWaypoint;
+						thinktime self : 30;
+					}
+					else
+						thinktime self : 0.2;//maybe 1? don't keep too much of a track on him
+				}
         }
 };
