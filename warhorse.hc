@@ -778,6 +778,7 @@ void rider_quake_center_think(void)
 
 void rider_quake_center_use(void)
 {
+/*
 	entity item;
 	vector real_origin;
 
@@ -811,6 +812,7 @@ void rider_quake_center_use(void)
 
 		item = item.chain;
 	}
+*/
 }
 
 /*QUAKED rider_quake_center (1 0 0) (-8 -8 -8) (8 8 8)
