@@ -1595,7 +1595,7 @@ void() trigger_monsterjump_touch =
 
 	other.velocity_z = self.height;
 
-	if(self.wait=-1)
+	if(self.wait==-1)
 		self.touch=SUB_Null;
 
 	if(other.th_jump)

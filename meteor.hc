@@ -278,7 +278,7 @@ float pick_up;
 		else
 		{
 			if(!let_go)
-				if(self.pain_finished=-1)		//Throw it at my goal!
+				if(self.pain_finished==-1)		//Throw it at my goal!
 					self.enemy.velocity=dir*350*self.scale;
 				else
 				{
