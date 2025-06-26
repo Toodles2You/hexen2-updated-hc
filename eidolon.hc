@@ -796,7 +796,7 @@ float pain_chance;
 
 	if(self.dmg>=2000&&self.scale<1)
 	{
-		self.th_pain=SUB_Null;
+		self.th_pain=SUB_null_pain;
 		if(attacker.classname=="player")
 			AwardExperience(attacker,self,self.experience_value);
 		sound(self,CHAN_VOICE,"eidolon/fakedie.wav",1,ATTN_NONE);

@@ -985,7 +985,7 @@ void bell_bigring (void) [++ 0 .. 30]
 	}
 }
 
-void bell_ring (void)
+void bell_ring (entity attacker, float damage)
 {
 
 	if (self.frame != 0)

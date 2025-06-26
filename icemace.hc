@@ -121,7 +121,7 @@ entity oself;
         loser.think=IceCubeThink;
         thinktime loser : 0;
         loser.touch=SUB_Null;
-		loser.th_pain=SUB_Null;
+		loser.th_pain=SUB_null_pain;
 		loser.wait = time + 3;
 		if(loser.angles_x==0&&loser.angles_z==0)
 			loser.drawflags(+)SCALE_ORIGIN_BOTTOM;

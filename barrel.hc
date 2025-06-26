@@ -327,7 +327,7 @@ void obj_barrel_roll (void)
 /*
  * obj_barrel_shoot() -- Called when a barrel is shot.
  */
-void obj_barrel_shoot()
+void obj_barrel_shoot(entity attacker, float damage)
 {
 	sound(self,CHAN_AUTO,"fx/thngland.wav",1,ATTN_NORM);		// landing thud
 

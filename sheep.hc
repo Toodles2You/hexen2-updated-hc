@@ -108,7 +108,7 @@ void()sheep_gstep_a;
 void()sheep_gstep_b;
 void()sheep_trot;
 void()sheep_wait;
-void()sheep_pain;
+void(entity attacker, float damage)sheep_pain;
 void()sheep_lookdown;
 void()sheep_look;
 void()sheep_lookup;
@@ -299,7 +299,7 @@ float r;
 	}
 };
 
-void()sheep_pain = [++ $pain1 .. $pain8]
+void()sheep_pain_anim = [++ $pain1 .. $pain8]
 {
 float r;
 	ai_pain(1);
@@ -316,6 +316,11 @@ float r;
 	else if(self.frame==$pain1)
 		sheep_sound(1);
 };
+
+void sheep_pain (entity attacker, float damage)
+{
+	sheep_pain_anim ();
+}
 
 void()sheep_lookdown = [-- $lookup12 .. $lookup1]
 {
@@ -595,7 +600,7 @@ void player_sheep_baa ()
 	thinktime self : 0;
 }
 
-void()	player_sheep_pain=[++$pain1..$pain8]
+void()	player_sheep_pain_anim=[++$pain1..$pain8]
 {
 	if(self.pain_finished<time)
 		if(random()<0.5)
@@ -613,6 +618,11 @@ void()	player_sheep_pain=[++$pain1..$pain8]
 	else if(self.frame==$pain1)
 		sheep_sound(1);
 };
+
+void player_sheep_pain (entity attacker, float damage)
+{
+	player_sheep_pain_anim ();
+}
 
 void()	player_sheep_jump=[++$trot1..$trot10]//[++$jump1..$jump10]
 {

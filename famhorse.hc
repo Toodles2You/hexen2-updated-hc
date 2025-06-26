@@ -156,7 +156,7 @@ void do_fambeam (entity lowner,float tag, float lflags, float duration, vector s
 	WriteCoord (MSG_BROADCAST, spot2_z);
 }
 
-void famine_pain(void)
+void famine_pain(entity attacker, float damage)
 {
 	float chance,rear_chance;
 
