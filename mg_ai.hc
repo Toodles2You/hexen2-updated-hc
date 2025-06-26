@@ -33,6 +33,8 @@ NOTE: This only works on players since light_level info
 	is taken from player's weaponmodel lighting (0-255)
 =============
 */
+
+
 void get_visibility (entity targ , float range_mod)
 {
 //NOTE: incorporate distance?
@@ -52,7 +54,7 @@ float base, divider, attack_mod;
 		return;
 	}
 
-	if(targ.drawflags&DRF_TRANSLUCENT)
+	if(targ.drawflags&DRF_TRANSLUCENT&&targ.frozen<=0)
 	{
 		if(targ.model=="models/assassin.mdl")
 			divider=3+targ.level;//Bonus for hiding in shadows
@@ -62,7 +64,7 @@ float base, divider, attack_mod;
 	else
 		divider=1;
 
-	if(targ.drawflags&MLS_ABSLIGHT)
+	if(targ.drawflags&MLS_ABSLIGHT)//&&targ.frozen<=0)
 		base=targ.abslight/2.5;
 	else
 		base=targ.light_level/75;//75 is semi-fullbright
@@ -92,7 +94,18 @@ float visibility_good (entity targ,float chance_mod)
 {
 	if(!targ)
 		return FALSE;
+
+	if(targ.frozen>0)
+		return TRUE;
+
 	get_visibility(targ,TRUE);
+
+	if(self.classname=="monster_mezzoman")
+		if(targ.velocity=='0 0 0')
+			chance_mod/=2;//Night vision!
+		else
+			chance_mod/=5;//Night vision and cats are beter at seeing slight movement
+
 	if(random(chance_mod)<targ.visibility)
 		return TRUE;
 
@@ -163,20 +176,25 @@ MG
 Checks to see if the enemy is not at the same level as monster
 or something is blocking the path of the monster.  If there is 
 a clear jump arc to the enemy and the monster will not land in
-water or lava, the monster will attampt to jump the distance.
+water or lava, the monster will attempt to jump the distance.
 ==================================================================
 */
-float CheckJump ()
+float CheckJump (float print_err)
 {
 local vector spot1, spot2, jumpdir;
 float jump_height, jumpup, ignore_height;
 
+		print_err=FALSE;
 		makevectors(self.angles);
 		jumpdir=normalize(self.goalentity.origin-self.origin);
 		jumpdir_z=0;
 		jump_height=jumpdir*v_forward;
 		if(jump_height<0.3)
+		{
+			if(print_err)
+				dprint("jump direction more than 60 degrees off of forward\n");
 			return FALSE;
+		}
 
         spot1=self.origin;
         spot2=self.enemy.origin;
@@ -196,47 +214,56 @@ float jump_height, jumpup, ignore_height;
 //also check to make sure you can't walkmove forward
                 if(self.jump_flag>time)            //Don't jump too many times in a row
 				{
-//						dprint("just jumped\n");
+						if(print_err)
+							dprint("just jumped\n");
                         return FALSE;
 				}
                 else if(pointcontents(self.goalentity.origin)!=CONTENT_EMPTY)
 				{
-//						dprint("goalentity in water or lava\n");
+						if(print_err)
+							dprint("goalentity in water or lava\n");
                         return FALSE;
 				}
                 else if(!visible(self.goalentity))
 				{
-//						dprint("can't see goalentity\n");
+						if(print_err)
+							dprint("can't see goalentity\n");
                         return FALSE;
 				}
                 else if(!ignore_height&&self.goalentity.absmin_z+36>=self.absmin_z&&self.think!=SpiderJumpBegin&&self.classname!="monster_mezzoman")
 				{
-//						dprint("not above goalentity, and not spider\n");
+						if(print_err)
+							dprint("not above goalentity, and not spider\n");
 	                    return FALSE;
 				}
                 else if(!self.flags&FL_ONGROUND)
 				{
-//						dprint("not on ground\n");
+						if(print_err)
+							dprint("not on ground\n");
                         return FALSE;
 				}
                 else if(!self.goalentity.flags&FL_ONGROUND&&self.goalentity.classname!="waypoint")
 				{
-//						dprint("goalentity in air\n");
+						if(print_err)
+							dprint("goalentity in air\n");
                         return FALSE;
 				}
                 else if(!infront(self.goalentity))
 				{
-//						dprint("goalentity not in front\n");
+						if(print_err)
+							dprint("goalentity not in front\n");
                         return FALSE;
 				}
                 else if(vlen(spot1-spot2)>777&&!ignore_height)
 				{
-//						dprint("too far away\n");
+						if(print_err)
+							dprint("too far away\n");
                         return FALSE;
 				}
                 else if(vlen(spot1-spot2)<=100)//&&self.think!=SpiderMeleeBegin)
 				{
-//						dprint("too close & not spider\n");
+						if(print_err)
+							dprint("too close & not spider\n");
                         return FALSE;
 				}
 
@@ -253,8 +280,11 @@ float jump_height, jumpup, ignore_height;
 				if(ignore_height)
 					jump_height=vlen((self.goalentity.absmax+self.goalentity.absmin)*0.5-self.origin)/13;
 				else
-//					dprint("Mezzo: Goal not above and not below\n");
+				{
+					if(print_err)
+						dprint("Mez: Goal not above and not below\n");
 					return FALSE;
+				}
 			}
 
         spot1=self.origin;
@@ -266,7 +296,8 @@ float jump_height, jumpup, ignore_height;
 
         if(trace_fraction<1)
 		{
-//			dprint("not enough room above\n");
+			if(print_err)
+				dprint("not enough room above\n");
 			return FALSE;
 		}
 
@@ -279,15 +310,18 @@ float jump_height, jumpup, ignore_height;
 
 	        if(trace_fraction<1)
 			{
-//				dprint("not enough room in front\n");
+				if(print_err)
+					dprint("not enough room in front\n");
 				return FALSE;
 			}
 
-	        traceline(spot1,spot1+jumpdir*64 - '0 0 500',FALSE,self);
+	        tracearea(spot1,spot1+jumpdir*64 - '0 0 500','-8 -8 0','8 8 4',FALSE,self);
+//	        traceline(spot1,spot1+jumpdir*64 - '0 0 500',FALSE,self);
 
 		    if(pointcontents(trace_endpos)==CONTENT_WATER||pointcontents(trace_endpos)==CONTENT_SLIME||pointcontents(trace_endpos)==CONTENT_LAVA)
 			{
-//				dprint("won't jump in water\n");
+				if(print_err)
+					dprint("won't jump in water\n");
 				return FALSE;
 			}
 		}
@@ -301,17 +335,21 @@ float jump_height, jumpup, ignore_height;
 			SightSound();
 			if(!jumpup)
 			{
-			    self.velocity=jumpdir*jump_height*17*self.scale;
-			    self.velocity_z = jump_height*12*self.scale;
+			    self.velocity=jumpdir*jump_height*18*self.scale;//was 18
+			    self.velocity_z = jump_height*14*self.scale;//was 12
 			}
 			else
 			{
-			    self.velocity=jumpdir*jump_height*10*self.scale;
-			    self.velocity_z = jump_height*14*self.scale;
+			    self.velocity=jumpdir*jump_height*14*self.scale;//was 10
+			    self.velocity_z = jump_height*17*self.scale;//was 14
 			}
 			self.flags(-)FL_ONGROUND;
+
 			if(self.th_jump)
-				self.th_jump();
+			{
+				self.think=self.th_jump;
+				thinktime self : 0;
+			}
 			else
 				thinktime self : 0.3;
 		}
@@ -352,7 +390,7 @@ void MonsterCheckContents ()
 
 	if(pointcontents(self.origin)==CONTENT_LAVA)
 	{
-		if(self.flags&FL_FIREHEAL)
+		if(self.flags2&FL2_FIREHEAL)
 		{
 			if(self.health<self.max_health)
 				self.health+=1;
@@ -386,7 +424,7 @@ void MonsterCheckContents ()
 
 /*
 ====================================================================
-void pitch_roll_for_slope (vector slope)
+void pitch_roll_for_slope (vector slope, entity forwhom)
 (My personal favorite!)
 MG
 This will adjust the pitch and roll of a monster to match
@@ -396,23 +434,26 @@ the monster.  If it doesn't find a surface, it does nothinh\g
 and returns.
 ====================================================================
 */
-void pitch_roll_for_slope (vector slope)
+void pitch_roll_for_slope (vector slope, entity forwhom)
 {
-vector new_angles,new_angles2,old_forward,old_right;
-float dot,mod;
-	makevectors(self.angles);
-	old_forward=v_forward;
-	old_right=v_right;
-
+//vector new_angles,new_angles2,old_forward,old_right;
+//float dot,mod;
 	if(slope=='0 0 0')
 	{
-		traceline(self.origin,self.origin-'0 0 300',TRUE,self);
-		if(trace_fraction>0.05&&self.movetype==MOVETYPE_STEP)
-			self.flags(-)FL_ONGROUND;
+		traceline(forwhom.origin,forwhom.origin-'0 0 300',TRUE,forwhom);
+		if(trace_fraction>0.05&&forwhom.movetype==MOVETYPE_STEP)
+			forwhom.flags(-)FL_ONGROUND;
 		if(trace_fraction==1)
 			return;
 		slope=trace_plane_normal;
 	}
+
+	matchAngleToSlope(slope, forwhom);//Done in C
+/*
+	makevectors(forwhom.angles);
+	old_forward=v_forward;
+	old_right=v_right;
+
 	new_angles=vectoangles(slope);
 	new_angles_x=(90-new_angles_x)*-1;//Gets actual slope
 	new_angles2='0 0 0';
@@ -427,8 +468,9 @@ float dot,mod;
 		mod=-1;
 
 	dot=v_forward*old_forward;
-	self.angles_x=dot*new_angles_x;
-	self.angles_z=(1-fabs(dot))*new_angles_x*mod;
+	forwhom.angles_x=dot*new_angles_x;
+	forwhom.angles_z=(1-fabs(dot))*new_angles_x*mod;
+*/
 }
 /*
 ==============================================
@@ -523,7 +565,7 @@ entity oldtarget;
 
 /*
 ================================================================
-fov()
+float fov(entity targ,entity from,float scope)
 
 Field-Of-View
 
@@ -596,6 +638,9 @@ and "targ".  "whole_body" TRUE will check for a path.
 float clear_path (entity targ,float whole_body)
 {
 vector destiny,org;
+	if(targ==world)
+		return FALSE;
+
 	destiny=targ.origin+targ.proj_ofs;
 
 	if(self.attack_state!=AS_FERRY)
@@ -625,6 +670,9 @@ vector destiny,org;
 			self.attack_state = AS_SLIDING;
 		return FALSE;
 	}
+
+	if(trace_ent.classname=="player"&&targ.classname=="player")
+		return TRUE;
 
 	if(trace_ent.health>25||!trace_ent.takedamage||(trace_ent.flags&FL_MONSTER&&trace_ent.classname!="player_sheep"))
 	{//Don't have a clear shot, and don't want to shoot obstruction
@@ -769,9 +817,9 @@ float lineofsight(entity targ, entity from)
 vector org,dir;
 	if(from.classname=="player")
 		makevectors(from.v_angle);
-/*	else if(from.classname=="monster_medusa")
+	else if(from.classname=="monster_medusa")
 		makevectors(from.angles+from.angle_ofs);
-*/	else
+	else
 		makevectors(from.angles);
 
 	org=from.origin+from.view_ofs;
@@ -1007,7 +1055,7 @@ float dot, rng, reverse;
 	if(object.classname=="player"&&!self.monster_awake)
 	{
 		self.monster_awake=TRUE;
-		sound(self,CHAN_VOICE,"mezzo/attack.wav",1,ATTN_NORM);
+		sound(self,CHAN_VOICE,self.noise,1,ATTN_NORM);
 		reverse=-1;
 	}
 	else
@@ -1185,7 +1233,7 @@ vector p2,p3,targ_dir,vec1,vec2;
 =============================================================
 vector aim_adjust (entity targ)
 MG
-Will return a nprmalized offset vector based on the targ's 
+Will return a normalized offset vector based on the targ's 
 light level, used for monster aiming at shadow-hiding players.
 =============================================================
 */

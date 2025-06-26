@@ -394,6 +394,7 @@ $frame stdxbw6      stdxbw7      stdxbw8      stdxbw9      stdxbw10
 $frame stdxbw11     stdxbw12     stdxbw13     
 
 
+
 /*
 ==============================
 CONSTANTS: (in constants.hc)
@@ -519,12 +520,12 @@ float player_end_frames[160] =
 	$stdgnt13,$stdswd13,$stdswd13,$pstdstf13,	//Paladin
 	$stdham13,$stdice13,$cstdstf13,$cstdstf13,	//Crusader
 	$stdsic12,$stdhan12,$stdhan12,$nstdstf12,	//Necromancer
-	$stddag13,$stdxbw13,$stddag13,$astdstf13,		//Assassin
+	$stddag13,$stdxbw13,$stddag13,$astdstf13,	//Assassin
 //Run
 	$rungnt12,$runswd12,$runswd12,$prunstf12,	//Paladin
 	$runham12,$runice12,$crunstf12,$crunstf12,	//Crusader
 	$runsic12,$runhan12,$runhan12,$nrunstf12,	//Necromancer
-	$rundag12,$runxbw12,$rundag12,$arunstf12,		//Assassin
+	$rundag12,$runxbw12,$rundag12,$arunstf12,	//Assassin
 //Swim/fly
 	$flygnt15,$flyswd15,$flyswd15,$pflystf15,	//Paladin
 	$flyham15,$flyice15,$cflystf14,$cflystf14,	//Crusader
@@ -532,7 +533,7 @@ float player_end_frames[160] =
 	$flydag15,$flyxbw15,$flydag15,$aflystf15,	//Assassin
 //Attack
 	$attgnt11,$attswd12,$attswd12,$pattstf4,	//Paladin
-	$attham10,$attice4,$cattstf5,$cattstf5,	//Crusader
+	$attham10,$attice4,$cattstf5,$cattstf5,		//Crusader
 	$attsic12,$atthan8,$atthan8,$nattstf8,		//Necromancer
 	$attdag11,$attxbw4,$attdag11,$aattstf4,		//Assassin
 //pain
@@ -564,12 +565,13 @@ float player_end_frames[160] =
 	$pdecap28,0,0,0,							//Paladin
 	$cdecap28,0,0,0,							//Crusader
 	$ndecap20,0,0,0,							//Necromancer
-	$adecap28,0,0,0							//Assassin
+	$adecap28,0,0,0								//Assassin
 };
 
 void player_frames ()
 {
 float weapmod, startframe,endframe,framestate;
+
 	if(self.deadflag)
 		self.act_state=ACT_DEAD;
 
@@ -588,8 +590,11 @@ float weapmod, startframe,endframe,framestate;
 		weapmod=0;
 
 	startframe = player_start_frames	[(self.playerclass - 1) * 4 + self.act_state*16 + weapmod];
+	
 	if(self.waterlevel<3&&self.movetype==MOVETYPE_FLY)
+	{
 		endframe=startframe;
+	}
 	else
 		endframe = player_end_frames	[(self.playerclass - 1) * 4 + self.act_state*16 + weapmod];
 
@@ -600,7 +605,7 @@ float weapmod, startframe,endframe,framestate;
 	thinktime self : HX_FRAME_TIME;
 
 	if(self.act_state!=ACT_DEAD)
-		if(self.viewentity==self||self.viewentity.classname=="chasecam")
+		if((self.viewentity==self||self.viewentity.classname=="chasecam")&&self.camera_time<time)
 			self.th_weapon();
 
 	if(self.act_state==ACT_SWIM_FLY)
@@ -645,6 +650,7 @@ float weapmod, startframe,endframe,framestate;
 	{
 //		if(self.act_state==ACT_PAIN&&self.frame==startframe)
 //			PainSound();
+
 		if(framestate==AF_END&&!self.button0)
 		{
 			if(!self.velocity_x && !self.velocity_y)
@@ -674,11 +680,11 @@ float weapmod, startframe,endframe,framestate;
 		self.act_state=ACT_SWIM_FLY;
 }
 
-void()	player_frames_behead =
+void player_frames_behead ()
 {//Note: give playerclass!
 	self.level=player_start_frames[ACT_DECAP * 16 + (self.playerclass - 1) * 4];
 	self.dmg=player_end_frames[ACT_DECAP * 16 + (self.playerclass - 1) * 4];
 	self.cnt=0;
 	player_behead();
-};
+}
 

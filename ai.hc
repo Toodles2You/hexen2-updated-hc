@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/Ai.hc 114   9/25/97 12:15p Mgummelt $
+ * $Header: /H2 Mission Pack/HCode/Ai.hc 35    3/19/98 2:26p Mgummelt $
  */
 void(entity etemp, entity stemp, entity stemp, float dmg) T_Damage;
 /*
@@ -28,14 +28,20 @@ time > .pausetime.
 walkmove(angle, speed) primitive is all or nothing
 */
 
-float ArcherCheckAttack (void);
+//float ArcherCheckAttack (void);
 float MedusaCheckAttack (void);
 void()SetNextWaypoint;
 void()SpiderMeleeBegin;
 void()spider_onwall_wait;
 float(entity targ , entity from)infront_of_ent;
 void(entity proj)mezzo_choose_roll;
+void()multiplayer_health;
+void()riderpath_init;
+void(float move_speed)riderpath_move;
+float(float move_speed)eidolon_riderpath_move;
+void() eidolon_guarding;
 void()hive_die;
+float()eidolon_check_attack;
 
 //void()check_climb;
 
@@ -91,6 +97,8 @@ float		r,melee;
 
 	if (self.classname=="monster_mummy")
 		melee = 50;
+	else if (self.netname=="golem")//longer reach
+		melee = 150;
 	else
 		melee = 100;
 
@@ -110,9 +118,26 @@ visible2ent
 returns 1 if the entity is visible to self, even if not infront ()
 =============
 */
+void spawntestmarker(vector org, float life, float skincolor)
+{
+	newmis=spawn_temp();
+	newmis.drawflags=MLS_ABSLIGHT;
+	newmis.abslight=1;
+	newmis.frame=1;
+	newmis.skin=skincolor;
+	setmodel(newmis,"models/test.mdl");
+	setorigin(newmis,org);
+	newmis.think=SUB_Remove;
+	if(life==-1)
+		self.nextthink=-1;
+	else
+		thinktime newmis : life;
+}
+
 float visible2ent (entity targ, entity forent)
 {
 vector	spot1, spot2;
+entity oself;
 	if((forent.solid==SOLID_BSP||forent.solid==SOLID_TRIGGER)&&forent.origin=='0 0 0')
 		spot1=(forent.absmax+forent.absmin)*0.5;
 	else
@@ -125,20 +150,59 @@ vector	spot1, spot2;
 
     traceline (spot1, spot2, TRUE, forent);   // see through other monsters
 
+/*
+	if(forent.classname=="monster_skull_wizard"&&trace_fraction==1&&self.think==self.th_stand)
+	{
+		dprint("Skullwizard awakened by: ");
+		dprint(targ.classname);
+		dprint("\n");
+		forent.nextthink=-1;
+		forent.think=SUB_Null;
+		forent.th_run=self.th_stand;
+		forent.effects=EF_BRIGHTLIGHT;
+		if(targ.classname!="player")
+		{
+			targ.nextthink=-1;
+			targ.think=SUB_Null;
+			targ.th_run=targ.th_stand;
+			targ.effects=EF_BRIGHTLIGHT;
+		}
+	}
+*/
+
 	if(trace_ent.thingtype>=THINGTYPE_WEBS)
 		traceline (trace_endpos, spot2, TRUE, trace_ent);
 //	else if (trace_inopen && trace_inwater)//FIXME?  Translucent water?
 //		return FALSE;			// sight line crossed contents
 
+//	if (trace_allsolid)
+//		dprint("trace all solid\n");
+
+//	dprint(targ.classname);
+
 	if (trace_fraction == 1)
 	{
 		if(forent.flags&FL_MONSTER)
 		{
+			oself=self;
+			self=forent;
 			if(visibility_good(targ,0.15 - skill/20))
+			{
+//				dprint("a monster, with good visible\n");
+				self=oself;
 				return TRUE;
+			}
+			self=oself;
 		}
 		else
+		{
+/*			spawntestmarker(spot1, -1, 0);
+			dprintv("spot1%s\n", spot1);
+			spawntestmarker(spot2, -1, 0);
+			dprintv("spot2%s\n", spot2);
+			dprint("not a monster, but visible\n");*/
 			return TRUE;
+		}
 	}
 
 	return FALSE;
@@ -158,9 +222,9 @@ float infront_of_ent (entity targ , entity from)
 
 	if(from.classname=="player")
 	    makevectors (from.v_angle);
-/*	else if(from.classname=="monster_medusa")
+	else if(from.classname=="monster_medusa")
 		makevectors (from.angles+from.angle_ofs);
-*/	else
+	else
 	    makevectors (from.angles);
 
 	if((from.solid==SOLID_BSP||from.solid==SOLID_TRIGGER)&&from.origin=='0 0 0')
@@ -267,14 +331,7 @@ float		ideal, move;
 void() HuntTarget =
 {
 	self.goalentity = self.enemy;
-	if(self.spawnflags&PLAY_DEAD)
-	{
-//		dprint("getting up!!!\n");
-		self.think=self.th_possum_up;
-		self.spawnflags(-)PLAY_DEAD;
-	}
-	else
-		self.think = self.th_run;
+	self.think = self.th_run;
 //	self.ideal_yaw = vectoyaw(self.enemy.origin - self.origin);
 	self.ideal_yaw = vectoyaw(self.goalentity.origin - self.origin);
 	thinktime self : 0.1;
@@ -353,6 +410,9 @@ float		r;
 			return FALSE;	// current check entity isn't in PVS
 	}
 
+	if(self.classname=="monster_imp_lord"&&client==self.controller)
+		return FALSE;
+
 	if (client == self.enemy)
 		return FALSE;
 
@@ -392,36 +452,19 @@ float		r;
 	self.enemy = client;
 
 	if (self.enemy.classname != "player")
-	{
+	{//If this check fails, do not let this entity set self as
+	 //sight_ent- avoids daisy-chaining of enemy sight
 		self.enemy = self.enemy.enemy;
 		if (self.enemy.classname != "player")
 		{
 			self.enemy = world;
 			return FALSE;
 		}
+		SightSound ();
+		HuntTarget ();
+		return TRUE;
 	}
 
-/*	if(self.spawnflags&PLAY_DEAD)
-	{
-		if(r==RANGE_MELEE)
-		{
-			if(!dont_hunt)
-				FoundTarget ();
-			return TRUE;
-		}
-		else if(!infront_of_ent(self,self.enemy)&&random()<0.1&&random()<0.1)
-		{
-			if(!dont_hunt)
-				FoundTarget ();
-			return TRUE;
-		}
-		else
-		{
-			self.enemy=world;
-			return FALSE;
-		}
-	}
-*/
 	if(!dont_hunt)
 		FoundTarget ();
 	return TRUE;
@@ -429,12 +472,12 @@ float		r;
 
 void()SpiderJumpBegin;
 //=============================================================================
-
+/*
 void(float dist) ai_forward =
 {
 	walkmove (self.angles_y, dist, FALSE);
 };
-
+*/
 void(float dist) ai_back =
 {
 	walkmove ( (self.angles_y+180), dist, FALSE);
@@ -465,10 +508,12 @@ ai_painforward
 stagger back a bit
 =============
 */
+/*
 void(float dist) ai_painforward =
 {
 	walkmove (self.ideal_yaw, dist, FALSE);
 };
+*/
 
 /*
 =============
@@ -479,16 +524,23 @@ The monster is walking it's beat
 */
 void(float dist) ai_walk =
 {
-	
 	MonsterCheckContents();
 
 	movedist = dist;
 	
 	// check for noticing a player
+
 	if (FindTarget (FALSE))
 		return;
 
-	movetogoal (dist);
+	if(!movetogoal(dist))
+	{
+		if(trace_ent.solid==SOLID_BSP&&trace_fraction<1)
+		{
+			if(trace_plane_normal!='0 0 0')
+				self.walldir='0 0 0' - trace_plane_normal;
+		}
+	}
 };
 
 
@@ -506,9 +558,6 @@ void() ai_stand =
 	if (FindTarget (FALSE))
 		return;
 	
-	if(self.spawnflags&PLAY_DEAD)
-		return;
-
 	if (time > self.pausetime)
 	{
 		self.th_walk ();
@@ -525,6 +574,7 @@ ai_turn
 don't move, but turn towards ideal_yaw
 =============
 */
+/*
 void() ai_turn =
 {
 	if (FindTarget (FALSE))
@@ -532,6 +582,7 @@ void() ai_turn =
 	
 	ChangeYaw ();
 };
+*/
 
 //=============================================================================
 
@@ -540,6 +591,7 @@ void() ai_turn =
 ChooseTurn
 =============
 */
+/*
 void(vector dest3) ChooseTurn =
 {
 	local vector	dir, newdir;
@@ -564,6 +616,7 @@ void(vector dest3) ChooseTurn =
 	dir_z = 0;
 	self.ideal_yaw = vectoyaw(dir);	
 };
+*/
 
 /*
 ============
@@ -587,17 +640,20 @@ float() FacingIdeal =
 
 float() CheckAnyAttack =
 {
-	if (self.model=="models/medusa.mdl"||self.model=="models/medusa2.mdl")
-			return(MedusaCheckAttack ());
-
 	if (!enemy_vis)
 		return FALSE;
 
-	if (self.model=="models/archer.mdl")
-		return(ArcherCheckAttack ());
+	if(self.classname=="monster_eidolon")
+		if(self.goalentity==self.controller)
+			return FALSE;
+		else
+			return eidolon_check_attack();
 
-	if(self.goalentity==self.controller)
-		return FALSE;
+	if(self.classname=="monster_medusa")
+	{
+		dprint("medusa checking\n");
+		return MedusaCheckAttack();
+	}
 
 	return CheckAttack ();
 };
@@ -659,6 +715,7 @@ ai_run
 The monster has an enemy it is trying to kill
 =============
 */
+
 void(float dist) ai_run =
 {
 	
@@ -733,7 +790,7 @@ void(float dist) ai_run =
 	}
 
 	if(random()<0.5&&(!self.flags&FL_SWIM)&&(!self.flags&FL_FLY)&&(self.spawnflags&JUMP))
-		CheckJump();
+		CheckJump(FALSE);
 
 // look for other coop players
 	if (coop && self.search_time < time)
@@ -744,11 +801,13 @@ void(float dist) ai_run =
 
 	enemy_infront = infront(self.enemy);
 	enemy_range = range(self.enemy);
-	enemy_yaw = vectoyaw(self.goalentity.origin - self.origin);
+	if(self.classname!="monster_eidolon")
+		enemy_yaw = vectoyaw(self.goalentity.origin - self.origin);
 	
 	if ((self.attack_state == AS_MISSILE) || (self.attack_state == AS_MELEE))  // turning to attack
 	{
-		ai_attack_face ();
+		if(self.classname!="monster_eidolon")
+			ai_attack_face ();
 		return;
 	}
 
@@ -764,7 +823,56 @@ void(float dist) ai_run =
 // head straight in
 //	if(self.netname=="spider")
 //		check_climb();
-	movetogoal (dist);		// done in C code...
+	if(self.classname=="monster_eidolon")
+	{
+		if(!self.path_current)
+			riderpath_init();
+		if(!eidolon_riderpath_move(dist))
+		{
+			if(self.think==self.th_run)
+				eidolon_guarding();
+		}
+		else if(self.think==eidolon_guarding)
+			self.th_run();
+	}
+	else if(!movetogoal(dist))
+	{
+		if(trace_ent.solid==SOLID_BSP&&trace_fraction<1)
+		{
+		vector movdir;
+/*			dprint("RUNNING\n");
+			dprintv("Pent hit wall - normal = %s\n",trace_plane_normal);
+			dprintv("Origin = %s\n",self.origin);
+			dprintv("End_pos = %s\n",trace_endpos);*/
+			movdir=normalize(trace_endpos - self.origin);
+//			dprintv("Move dir = %s\n",movdir);
+			if(trace_plane_normal=='0 0 0')
+			{
+				traceline(self.origin,self.origin+movdir*64,TRUE,self);
+//				dprintv("New normal = %s\n",trace_plane_normal);
+			}
+			if(trace_plane_normal!='0 0 0')
+			{
+				self.walldir='0 0 0' - trace_plane_normal;
+//				dprintv("New walldir = %s\n",self.walldir);
+			}
+/*			else
+			{
+				dprintf("Trace fraction	= %s\n", trace_fraction);
+				if(trace_startsolid)
+					dprint("Trace started in wall\n");
+				else if(trace_allsolid)
+					dprint("Trace completely in wall\n");
+				else if(trace_ent.solid==SOLID_BSP)
+					dprint("Wall in my way\n");
+				else
+				{
+					dprint(trace_ent.classname);
+					dprint(" in my way\n");
+				}
+			}
+*/		}
+	}
 };
 
 
@@ -790,7 +898,7 @@ float monster_spawn_precache (void)
 float have_monsters;
 	if (self.spawnflags & IMP)
 	{
-		precache_model3 ("models/imp.mdl");
+		precache_model4 ("models/imp.mdl");//converted for MP
 		precache_model3 ("models/h_imp.mdl");//empty for now
 		precache_sound3("imp/up.wav");
 		precache_sound3("imp/die.wav");
@@ -811,7 +919,7 @@ float have_monsters;
 	}
 	if (self.spawnflags & WIZARD)
 	{
-		precache_model("models/skullwiz.mdl");
+		precache_model4("models/skullwiz.mdl");//converted for MP
 		precache_model("models/skulbook.mdl");
 		precache_model("models/skulhead.mdl");
 		precache_model("models/skulshot.mdl");
@@ -847,6 +955,11 @@ float have_monsters;
 	}
 	return have_monsters;
 }
+
+float byte_for_num[10] =
+{
+	1,2,4,8,16,32,128,256,512,1024
+};
 
 float check_monsterspawn_ok (void)
 {
@@ -904,7 +1017,7 @@ vector org;
 	tracearea(org,org,self.mins,self.maxs,FALSE,self);
 	newmis = spawn();
 	if(trace_fraction<1)
-		if(trace_ent.flags2&FL_ALIVE)
+		if(trace_ent.flags2&FL_ALIVE&&!self.frags)
 		{
 			remove(newmis);
 			return FALSE;
@@ -921,7 +1034,7 @@ vector org;
 	while(!foundthink)
 	{
 		rnd=rint(random(1,5));
-		rnd=byte_me(rnd);
+		rnd=byte_for_num[rnd - 1];//byte_me(rnd);
 		if(self.controller.spawnflags&rnd)
 			foundthink=TRUE;
 	}
@@ -987,6 +1100,7 @@ vector org;
 		}
 	}
 
+
 	self.controller.goalentity=newmis;
 	setorigin(newmis,org);
 	if(!self.controller.spawnflags&QUIET)
@@ -996,7 +1110,7 @@ vector org;
 }
 
 void monsterspawn_active (void)
-{
+{//fixme: option to make spawned monster angry at activator?
 	self.think=monsterspawn_active;
 	if(check_monsterspawn_ok())
 	{
@@ -1010,9 +1124,17 @@ void monsterspawn_active (void)
 			self.controller.nextthink=time+self.controller.wait;
 		}
 		if(self.controller.frags>=self.controller.cnt)
+		{
+			if(self.controller.goalentity!=world)
+				self.controller.goalentity.target=self.controller.target;
 			remove(self.controller);
+		}
 		if(self.frags>=self.cnt)
+		{
+			if(self.goalentity!=world)
+				self.goalentity.target=self.target;
 			remove(self);
+		}
 		if(self.spawnflags&TRIGGERONLY)
 			self.nextthink=-1;
 		else
@@ -1020,11 +1142,13 @@ void monsterspawn_active (void)
 	}
 	else if(self.spawnflags&TRIGGERONLY)//Don't keep trying
 		self.nextthink=-1;
+	else if(self.dflags)
+		self.nextthink=time+self.wait;
 	else
 		self.nextthink=time+0.1;
 }
 
-/*QUAKED func_monsterspawner (1 .8 0) (-16 -16 0) (16 16 56) IMP ARCHER WIZARD SCORPION SPIDER ONDEATH QUIET TRIGGERONLY 
+/*QUAKED func_monsterspawner (1 .8 0) (-16 -16 0) (16 16 56) IMP ARCHER WIZARD SCORPION SPIDER ONDEATH QUIET TRIGGERONLY
 If something is blocking the spawnspot, this will telefrag it as long as it's not a living entity (flags2&FL_ALIVE)
 
 You can set up as many spots as you want for it to spawn at and it will cycle
@@ -1043,11 +1167,12 @@ The Monsters will be spawned at the origin of the spawner (and/or spawnspots), s
 
 ONDEATH = only spawn the new monster after the last has died, defaults to FALSE (doesn't wait)
 TRIGGERONLY = Will only spawn a monster when it's been used by a trigger.  The default is continous spawning.
-wait = time to wait after spawning a monster until the next monster is spawned, defaults to 0.5 seconds. If there are multiple spawn spots, this will be the time between cycles (default 0.5)
+wait = time to wait after spawning a monster until the next monster is spawned, defaults to 0.5 seconds. If there are multiple spawn spots, this will be the time between cycles (default 0.5)- this is a minimum wait, after a faield spawn, it will wait 0.1 seconds to try again
 cnt = number of monsters, max to spawn, defaults to 17 (no reason, just like that number!)	If there are multiple spots, this should be the total off ALL the spots, including the spawner itself.
 aflag = order in the spawning cycle
 spawnername = spawnspots to look for- be sure to make spawnspots!
 targetname = not needed unless you plan to activate this with a trigger
+dflags = If dflags is set to "1", the spawner will wait it's "wait" value every time it fails to spawn a monster.
 
 There will be a test on this on Thursday.  Interns are NOT exempt.
 */
@@ -1107,7 +1232,7 @@ void func_monsterspawn_spot (void)
 
 	if(!self.aflag)
 	{
-		dprint("Ooo!  You didn't include me in the spawn cycle!  FIX ME!\n");
+//		dprint("Ooo!  You didn't include me in the spawn cycle!  FIX ME!\n");
 		remove(self);
 	}
 	if(!self.cnt)
@@ -1116,7 +1241,7 @@ void func_monsterspawn_spot (void)
 
 	if(!monster_spawn_precache())
 	{
-		dprint("You didn't give me any monsters to spawn!!!\n");
+//		dprint("You didn't give me any monsters to spawn!!!\n");
 		remove(self);
 	}
 
@@ -1129,6 +1254,322 @@ void func_monsterspawn_spot (void)
 		self.use=spawnspot_activate;
 }
 
+/*
+//Uncomment these to remove all riders and eidolon from code.
 void hive_die(){}
 void spawn_ghost (entity attacker){}
+void multiplayer_health(){}
+void riderpath_init(){}
+void riderpath_move(float move_speed){}
+float eidolon_riderpath_move(float move_speed){return FALSE;}
+void eidolon_guarding(){}
+float eidolon_check_attack(){return FALSE;}
+*/
+/*
+ * $Log: /H2 Mission Pack/HCode/Ai.hc $
+ * 
+ * 35    3/19/98 2:26p Mgummelt
+ * 
+ * 34    3/16/98 6:38a Mgummelt
+ * 
+ * 33    3/16/98 2:19a Mgummelt
+ * 
+ * 32    3/14/98 5:52p Mgummelt
+ * changed precaches to precache 4 for old models converted for MP
+ * 
+ * 31    3/12/98 4:02p Mgummelt
+ * 
+ * 30    3/09/98 3:05p Mgummelt
+ * 
+ * 29    3/05/98 2:38p Jmonroe
+ * 
+ * 28    3/03/98 4:36p Jmonroe
+ * changed over to precache 4 to build my pak
+ * 
+ * 27    3/01/98 3:12p Mgummelt
+ * 
+ * 26    2/27/98 4:37p Mgummelt
+ * 
+ * 25    2/27/98 1:15p Jmonroe
+ * 
+ * 24    2/27/98 11:52a Mgummelt
+ * 
+ * 23    2/26/98 5:10p Mgummelt
+ * 
+ * 22    2/26/98 2:39p Mgummelt
+ * 
+ * 21    2/24/98 6:39p Mgummelt
+ * 
+ * 20    2/23/98 4:28p Mgummelt
+ * 
+ * 19    2/21/98 4:01p Mgummelt
+ * 
+ * 18    2/18/98 4:59p Mgummelt
+ * 
+ * 17    2/17/98 5:31p Mgummelt
+ * 
+ * 16    2/12/98 5:55p Jmonroe
+ * remove unreferenced funcs
+ * 
+ * 15    2/05/98 11:21p Mgummelt
+ * Making weaps network friendly
+ * 
+ * 14    2/05/98 12:30p Mgummelt
+ * 
+ * 13    2/04/98 4:58p Mgummelt
+ * spawnflags on monsters cleared out
+ * 
+ * 12    2/03/98 7:08p Mgummelt
+ * 
+ * 11    1/27/98 4:18p Mgummelt
+ * 
+ * 10    1/26/98 12:29p Mgummelt
+ * 
+ * 9     1/22/98 5:52p Mgummelt
+ * 
+ * 8     1/22/98 5:01p Mgummelt
+ * 
+ * 7     1/22/98 4:05p Mgummelt
+ * 
+ * 6     1/20/98 1:47p Mgummelt
+ * 
+ * 5     1/14/98 7:43p Mgummelt
+ * 
+ * 118   10/28/97 4:50p Mgummelt
+ * 
+ * 117   10/28/97 1:00p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 116   10/27/97 2:56p Jheitzman
+ * 
+ * 114   9/25/97 12:15p Mgummelt
+ * 
+ * 113   9/11/97 7:13p Rjohnson
+ * Caching Updates
+ * 
+ * 112   9/04/97 3:50p Mgummelt
+ * 
+ * 111   9/04/97 3:26p Mgummelt
+ * 
+ * 110   9/04/97 3:25p Mgummelt
+ * 
+ * 109   9/04/97 3:19p Mgummelt
+ * 
+ * 108   9/04/97 3:08p Mgummelt
+ * 
+ * 107   9/04/97 3:00p Mgummelt
+ * 
+ * 106   9/03/97 9:14p Mgummelt
+ * Fixing targetting AI
+ * 
+ * 105   9/03/97 2:36a Mgummelt
+ * 
+ * 104   9/02/97 6:06p Mgummelt
+ * 
+ * 103   9/01/97 6:37p Rjohnson
+ * Precache change
+ * 
+ * 102   9/01/97 12:07a Mgummelt
+ * 
+ * 101   8/31/97 8:40p Rlove
+ * 
+ * 100   8/31/97 8:52a Mgummelt
+ * 
+ * 99    8/30/97 6:22p Rjohnson
+ * Fix
+ * 
+ * 98    8/30/97 12:22a Rjohnson
+ * Precaching for monster spawners
+ * 
+ * 97    8/28/97 5:41p Mgummelt
+ * 
+ * 96    8/27/97 7:59p Mgummelt
+ * 
+ * 95    8/26/97 9:00a Mgummelt
+ * 
+ * 94    8/26/97 8:53a Mgummelt
+ * 
+ * 93    8/26/97 8:31a Mgummelt
+ * 
+ * 92    8/26/97 8:29a Mgummelt
+ * 
+ * 91    8/21/97 1:53p Mgummelt
+ * 
+ * 90    8/21/97 3:33a Mgummelt
+ * 
+ * 89    8/19/97 3:26p Mgummelt
+ * 
+ * 88    8/18/97 12:20p Mgummelt
+ * 
+ * 87    8/15/97 11:27p Mgummelt
+ * 
+ * 86    8/15/97 8:11p Mgummelt
+ * 
+ * 85    8/15/97 2:55a Mgummelt
+ * 
+ * 84    8/14/97 8:30p Mgummelt
+ * 
+ * 83    8/14/97 7:12p Mgummelt
+ * 
+ * 82    8/14/97 5:17p Mgummelt
+ * 
+ * 81    8/14/97 1:13p Mgummelt
+ * 
+ * 80    8/13/97 11:53p Mgummelt
+ * 
+ * 79    8/13/97 5:35p Mgummelt
+ * 
+ * 78    8/13/97 1:47a Mgummelt
+ * 
+ * 77    8/13/97 1:28a Mgummelt
+ * 
+ * 76    8/12/97 6:10p Mgummelt
+ * 
+ * 75    8/11/97 6:08p Mgummelt
+ * 
+ * 74    8/09/97 5:27a Mgummelt
+ * 
+ * 73    8/09/97 2:03a Mgummelt
+ * 
+ * 72    8/09/97 1:49a Mgummelt
+ * 
+ * 71    8/06/97 10:09p Mgummelt
+ * 
+ * 70    8/06/97 2:27p Mgummelt
+ * 
+ * 69    8/06/97 11:05a Mgummelt
+ * 
+ * 68    8/04/97 8:07p Mgummelt
+ * 
+ * 67    8/04/97 8:03p Mgummelt
+ * 
+ * 66    8/04/97 3:48p Mgummelt
+ * 
+ * 65    8/04/97 3:47p Mgummelt
+ * 
+ * 64    7/28/97 12:31p Rlove
+ * 
+ * 63    7/21/97 4:03p Mgummelt
+ * 
+ * 62    7/21/97 4:02p Mgummelt
+ * 
+ * 61    7/21/97 3:03p Rlove
+ * 
+ * 60    7/18/97 2:06p Rlove
+ * 
+ * 59    7/07/97 2:51p Mgummelt
+ * 
+ * 58    7/03/97 5:58p Mgummelt
+ * 
+ * 57    7/03/97 8:47a Rlove
+ * 
+ * 56    6/30/97 3:23p Mgummelt
+ * 
+ * 55    6/28/97 6:32p Mgummelt
+ * 
+ * 54    6/25/97 9:23p Mgummelt
+ * 
+ * 53    6/25/97 3:01p Mgummelt
+ * 
+ * 52    6/18/97 8:14p Mgummelt
+ * 
+ * 51    6/18/97 5:42p Mgummelt
+ * 
+ * 50    6/18/97 5:40p Mgummelt
+ * 
+ * 48    6/18/97 4:00p Mgummelt
+ * 
+ * 47    6/18/97 2:42p Mgummelt
+ * 
+ * 46    6/17/97 8:16p Mgummelt
+ * 
+ * 45    6/16/97 9:04p Mgummelt
+ * 
+ * 44    6/16/97 7:35p Mgummelt
+ * 
+ * 43    6/16/97 7:00p Mgummelt
+ * 
+ * 42    6/14/97 2:22p Mgummelt
+ * 
+ * 41    6/11/97 10:14a Rlove
+ * Added sight sounds
+ * 
+ * 40    6/10/97 9:27p Mgummelt
+ * 
+ * 39    6/10/97 12:09a Mgummelt
+ * 
+ * 38    6/09/97 10:21p Mgummelt
+ * 
+ * 37    6/09/97 3:07p Mgummelt
+ * 
+ * 36    6/06/97 9:17p Mgummelt
+ * 
+ * 35    6/05/97 8:16p Mgummelt
+ * 
+ * 34    6/02/97 7:58p Mgummelt
+ * 
+ * 33    5/30/97 10:03p Mgummelt
+ * 
+ * 32    5/23/97 4:19p Mgummelt
+ * 
+ * 31    5/23/97 3:43p Mgummelt
+ * 
+ * 30    5/23/97 2:55p Mgummelt
+ * 
+ * 28    5/22/97 7:29p Mgummelt
+ * 
+ * 27    5/22/97 6:30p Mgummelt
+ * 
+ * 26    5/22/97 2:50a Mgummelt
+ * 
+ * 25    5/20/97 9:35p Mgummelt
+ * 
+ * 24    5/19/97 11:36p Mgummelt
+ * 
+ * 23    5/15/97 8:28p Mgummelt
+ * 
+ * 22    5/12/97 10:31a Rlove
+ * 
+ * 21    5/07/97 11:12a Rjohnson
+ * Added a new field to walkmove and movestep to allow for setting the
+ * traceline info
+ * 
+ * 20    5/07/97 11:03a Rlove
+ * 
+ * 17    4/24/97 2:14p Mgummelt
+ * 
+ * 16    4/24/97 9:15a Rlove
+ * Pulling out old Id sounds
+ * 
+ * 15    4/22/97 8:20a Rlove
+ * Mummy AI
+ * 
+ * 14    4/14/97 6:54a Bgokey
+ * 
+ * 13    3/18/97 1:44p Aleggett
+ * 
+ * 11    3/12/97 4:35p Rlove
+ * New monster AI
+ * 
+ * 10    3/10/97 8:29a Rlove
+ * Halfway through rewriting Monster AI
+ * 
+ * 9     3/07/97 10:57a Rlove
+ * 
+ * 8     2/26/97 3:14p Rlove
+ * Changes to basic monster ai
+ * 
+ * 7     1/15/97 12:02p Rjohnson
+ * Removed all of quake's monsters
+ * 
+ * 6     1/02/97 11:19a Rjohnson
+ * Christmas changes
+ * 
+ * 5     11/11/96 1:12p Rlove
+ * Added Source Safe stuff
+ * 
+ * 4     11/11/96 11:14a Rlove
+ * another test
+ */
 

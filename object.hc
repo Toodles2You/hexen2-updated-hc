@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/object.hc 202   10/07/97 2:24p Mgummelt $
+ * $Header: /H2 Mission Pack/HCode/object.hc 58    3/27/98 2:14p Mgummelt $
  */
 
 
@@ -13,6 +13,12 @@ void(float vol) sheep_sound;
 void() obj_barrel_roll;
 void()float;
 void()sheep_trot;
+
+void fix_vel ()
+{
+	self.enemy.velocity=self.mangle;
+	remove(self);
+}
 
 void obj_fly_hurt (entity loser)
 {//MG
@@ -100,10 +106,19 @@ dprint("\n");
 				dprint(ftos(force));
 				dprint("\n");
 */				T_Damage (loser, self, self, force);  
+				if(loser.health<=0)
+				{//Keep 75% of vel if broke loser apart
+	//				dprint("Broke through\n");
+					newmis=spawn();
+					newmis.mangle=self.velocity*0.75;
+					newmis.think=fix_vel;
+					newmis.enemy=self;
+					thinktime newmis : HX_FRAME_TIME;
+				}
 			}
 		}
 
-		if(self.classname!="monster_mezzoman"&&self.netname!="spider")//Cats always land on their feet
+		if(self.classname!="monster_mezzoman"&&self.netname!="spider"&&loser.thingtype!=THINGTYPE_WEBS)//Cats always land on their feet, webs don't hurt
 			if((magnitude>=100+self.health&&self.classname!="player")||magnitude>=700)//health here is used to simulate structural integrity
 			{
 				if(self.classname=="player"&&self.flags&FL_ONGROUND&&magnitude<1000)
@@ -129,6 +144,7 @@ dprint("\n");
 					T_Damage(self,world,world,magnitude);
 				}
 			}
+
 
 	self.last_impact=time;
 	if(self.flags&FL_ONGROUND)
@@ -362,6 +378,33 @@ float ontop,pushed,inertia,force,walkforce;
 	}
 }
 
+void impact_touch_hurt_no_push ()
+{
+
+	if(!other.takedamage)
+		return;
+
+	if(other.solid==SOLID_PHASE||other.movetype==MOVETYPE_FLYMISSILE||other.movetype==MOVETYPE_BOUNCEMISSILE)
+		return;
+
+	if(self.last_impact + 0.1<=time)
+	{
+		obj_fly_hurt(other);
+		if(other.health>0)
+		{
+			float impact_dam;
+		//SpawnPuff (trace_endpos, '0 0 0', 3,trace_ent);
+		//sound, etc.
+			self.last_impact=time;			
+			impact_dam=self.mass/2+random(self.mass/2);
+			if(!impact_dam)
+				impact_dam=10+random(10);
+			if(other.netname=="corpse"||other.netname=="head")
+				impact_dam=other.health*2;
+			T_Damage(other,self,self,impact_dam);
+		}
+	}
+}
 
 
 /*QUAKED obj_chair (0.3 0.1 0.6) (-10 -10 -5) (10 10 40)
@@ -430,6 +473,9 @@ void obj_tree2()
 	precache_model("models/tree2.mdl");
 	CreateEntityNew(self,ENT_TREE,"models/tree2.mdl",tree2_death);
 
+	if(world.target=="sheep")
+		setsize(self,'-12  -12  -16','12  12 210');
+
 	top = spawn();
 	top.scale = self.scale;
 
@@ -475,7 +521,7 @@ void obj_cart()
 {
 	precache_model("models/cart.mdl");
 	CreateEntityNew(self,ENT_CART,"models/cart.mdl",chunk_death);
-	self.hull=HULL_SCORPION;
+	self.hull=HULL_SCORPION;//HYDRA;
 
 	self.touch	= obj_push;
 	self.flags	= self.flags | FL_PUSH;	
@@ -833,7 +879,7 @@ void obj_ballista (void)
 		self.mass=1000;
 
 	CreateEntityNew(self,ENT_BALLISTA,"models/ballista.mdl",chunk_death);
-	self.hull=HULL_SCORPION;
+	self.hull=HULL_SCORPION;//HYDRA;
 
 	if (!self.cnt) 
 	  self.cnt = 30;
@@ -987,7 +1033,7 @@ void brush_pushable()
 	setmodel (self, self.model); 
 	self.classname="pushable brush";
 	self.touch	= obj_push;
-    self.hull = HULL_BIG;
+    self.hull = HULL_SCORPION;//HULL_BIG;
 	setsize(self,self.mins,self.maxs);
 	if(!self.mass)
 		self.mass = 5;
@@ -1063,6 +1109,7 @@ void() obj_statue_mummy =
 	head.drawflags += SCALE_ORIGIN_BOTTOM;
 
 };
+
 
 
 /*QUAKED obj_pot1 (0.3 0.1 0.6) (-24 -24 0) (24 24 50)
@@ -1404,6 +1451,9 @@ FEILDS:
 -----------------------------
 abslight = Spiderwebs may need to be brighter or darker than their surroundings to look best.
 health = default is 0, which means it won't take damage, otherwise, you can shoot it away or, if it has low health, you can break it by landing very hard on it
+
+Note: 'WEAK' and 'TOUCHMOVE' and 'health' conflict...
+
 skin = default is 0 
 	0 = many little spider webs
 	1 = corner web, will appear in right side of the front of the box.
@@ -1476,9 +1526,8 @@ void obj_webs (void)
 	}
 
 	if(!self.spawnflags&32)
-		self.drawflags=DRF_TRANSLUCENT;
+		self.drawflags(+)DRF_TRANSLUCENT;
 
-//	self.use=chunk_death;
 	setorigin(self,self.origin);
 
 	if(self.spawnflags&2)
@@ -1596,11 +1645,11 @@ abslight = default is 0.5
 */
 void ice_touch (void)
 {
-	if(other.flags&FL_ONGROUND)
-		if(random()>self.friction)
-			other.flags-=FL_ONGROUND;
+	if(random()>self.friction)
+		other.flags(-)FL_ONGROUND;
 }
 
+/*
 void ice_slab_melt (void)
 {
 	if(self.scale>0.05)
@@ -1612,11 +1661,12 @@ void ice_slab_melt (void)
 	else
 		remove(self);
 }
+*/
 
 void obj_ice (void)
 {
 //thingtype_ice, need ice chunks
-	if(self.flags2&FL_SUMMONED)
+/*	if(self.flags2&FL_SUMMONED)
 	{
 //Make pushable, floating?!
 		self.solid = SOLID_BBOX;
@@ -1627,7 +1677,7 @@ void obj_ice (void)
 		thinktime self : 10;
 	}
 	else
-	{
+*/	{
 		self.solid = SOLID_BSP;
 		self.movetype = MOVETYPE_PUSH;
 	}
@@ -1700,6 +1750,7 @@ void obj_statue_lion(void)
 	self.drawflags += SCALE_ORIGIN_BOTTOM;
 
 }
+
 
 /*QUAKED obj_statue_athena(0.3 0.1 0.6) (-30 -30 0) (30 30 90)
 Statue of a Athena
@@ -1932,3 +1983,640 @@ void obj_plant_rome (void)
 	CreateEntityNew(self,ENT_PLANT_ROME,"models/plantrom.mdl",chunk_death);
 }
 
+
+void nate_touch(void)
+{
+}
+
+void nate_think(void)
+{
+	local float damage;
+
+	if (self.attack_finished < time && !self.count)
+	{	
+		self.count = 1;
+		damage = 100000 - self.health;
+		dprintf("Totaled %s points of damage... hit me again!\n", damage);
+		self.health = 100000;
+	}
+
+	self.think = nate_think;
+	thinktime self : 0.1;
+}
+
+void nate_pain(entity attacker, float total_damage)
+{
+	self.attack_finished = time + 3;
+	self.count = 0;
+	dprintf("Ouch! I took %s points of damage!\n", total_damage);
+
+	
+}
+
+/*QUAKED NATE_9000 (0.3 0.1 0.6) (-33 -33 -0) (33 33 115)
+Nefariously
+Anal
+Test
+Entity
+*/
+void NATE_9000 (void)
+{
+
+	self.classname = "NATE 9000";
+
+	precache_model("models/sheep.mdl");
+
+	setmodel(self, "models/sheep.mdl");
+	setsize(self, '-30 -30 -30', '30 30 30');
+	self.movetype = MOVETYPE_NONE;
+	self.solid = SOLID_SLIDEBOX;
+	
+	self.takedamage = DAMAGE_YES;
+	self.health = 100000;
+	
+	self.colormap = 199;
+	self.scale = 0.5;
+	self.drawflags (+) MLS_POWERMODE;
+	self.effects = EF_DIMLIGHT;
+	self.touch = nate_touch;
+	self.th_pain = nate_pain;
+	self.think = nate_think;
+	self.flags (+) FL_ALIVE | FL_MONSTER;
+	thinktime self : 0.1;
+}
+
+/*
+ * $Log: /H2 Mission Pack/HCode/object.hc $
+ * 
+ * 58    3/27/98 2:14p Mgummelt
+ * Sheephunt fix
+ * 
+ * 57    3/23/98 5:48p Mgummelt
+ * 
+ * 56    3/19/98 12:17a Mgummelt
+ * last bug fixes
+ * 
+ * 55    3/06/98 4:55p Mgummelt
+ * 
+ * 54    3/05/98 2:38p Jmonroe
+ * 
+ * 53    3/03/98 4:36p Jmonroe
+ * changed over to precache 4 to build my pak
+ * 
+ * 52    2/27/98 11:13p Mgummelt
+ * 
+ * 51    2/26/98 2:40p Mgummelt
+ * 
+ * 50    2/26/98 12:13p Mgummelt
+ * 
+ * 49    2/26/98 12:11p Mgummelt
+ * 
+ * 48    2/26/98 12:10p Mgummelt
+ * 
+ * 47    2/24/98 6:39p Mgummelt
+ * 
+ * 46    2/23/98 3:13p Mgummelt
+ * 
+ * 45    2/20/98 4:39p Jmonroe
+ * removed unused variables
+ * 
+ * 44    2/20/98 4:07p Mgummelt
+ * 
+ * 43    2/20/98 3:55p Mgummelt
+ * 
+ * 42    2/19/98 11:15a Jweier
+ * 
+ * 41    2/18/98 11:56a Jmonroe
+ * Added ent type for samurai
+ * 
+ * 40    2/18/98 11:36a Jmonroe
+ * added samurai statue
+ * 
+ * 39    2/18/98 11:34a Jweier
+ * 
+ * 38    2/13/98 3:27p Mgummelt
+ * 
+ * 37    2/13/98 11:42a Jweier
+ * 
+ * 36    2/12/98 5:55p Jmonroe
+ * remove unreferenced funcs
+ * 
+ * 35    2/10/98 5:08p Mgummelt
+ * 
+ * 34    2/08/98 6:22p Mgummelt
+ * 
+ * 33    2/07/98 10:04p Jweier
+ * 
+ * 32    2/07/98 3:51p Jweier
+ * 
+ * 31    2/06/98 7:06p Mgummelt
+ * 
+ * 30    2/06/98 5:06p Jweier
+ * 
+ * 29    2/06/98 4:54p Jweier
+ * 
+ * 28    2/03/98 2:04p Mgummelt
+ * 
+ * 27    2/03/98 10:56a Mgummelt
+ * 
+ * 26    2/02/98 5:07p Mgummelt
+ * 
+ * 25    2/02/98 3:41p Mgummelt
+ * 
+ * 24    2/02/98 10:38a Mgummelt
+ * 
+ * 23    2/02/98 10:33a Jweier
+ * 
+ * 22    1/27/98 4:19p Jweier
+ * 
+ * 21    1/23/98 12:04p Jweier
+ * 
+ * 20    1/23/98 12:01p Jweier
+ * 
+ * 19    1/23/98 12:00p Jweier
+ * 
+ * 18    1/19/98 4:47p Mgummelt
+ * 
+ * 17    1/08/98 4:25p Mgummelt
+ * 
+ * 16    1/07/98 2:34p Mgummelt
+ * 
+ * 15    1/07/98 11:42a Mgummelt
+ * 
+ * 204   10/28/97 1:01p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 202   10/07/97 2:24p Mgummelt
+ * 
+ * 201   9/16/97 4:17p Rjohnson
+ * Updates
+ * 
+ * 200   9/11/97 7:13p Rjohnson
+ * Caching Updates
+ * 
+ * 199   9/04/97 5:25p Rlove
+ * 
+ * 198   9/04/97 3:50p Mgummelt
+ * 
+ * 197   9/04/97 2:58p Mgummelt
+ * 
+ * 196   9/03/97 3:59a Rlove
+ * 
+ * 195   9/01/97 8:34p Mgummelt
+ * 
+ * 194   9/01/97 4:45p Mgummelt
+ * 
+ * 193   8/27/97 9:37p Jweier
+ * 
+ * 192   8/27/97 8:12p Jweier
+ * 
+ * 191   8/26/97 7:38a Mgummelt
+ * 
+ * 190   8/25/97 2:08p Mgummelt
+ * 
+ * 189   8/23/97 7:15p Rlove
+ * 
+ * 188   8/23/97 2:08p Rlove
+ * 
+ * 187   8/23/97 10:09a Rlove
+ * 
+ * 186   8/21/97 12:18p Mgummelt
+ * 
+ * 185   8/21/97 12:37a Mgummelt
+ * 
+ * 184   8/21/97 12:34a Mgummelt
+ * 
+ * 183   8/20/97 10:23p Mgummelt
+ * 
+ * 182   8/20/97 9:58p Mgummelt
+ * 
+ * 181   8/20/97 3:53p Mgummelt
+ * 
+ * 180   8/20/97 3:39p Mgummelt
+ * 
+ * 179   8/20/97 3:30p Mgummelt
+ * 
+ * 178   8/20/97 2:12p Mgummelt
+ * 
+ * 177   8/19/97 7:14p Rjohnson
+ * Precache update
+ * 
+ * 176   8/19/97 12:57p Mgummelt
+ * 
+ * 175   8/19/97 10:33a Rlove
+ * Commented out boulder code
+ * 
+ * 174   8/19/97 9:56a Rjohnson
+ * precache modification
+ * 
+ * 173   8/17/97 12:22p Rjohnson
+ * Fixed precache
+ * 
+ * 172   8/16/97 2:23p Mgummelt
+ * 
+ * 171   8/15/97 4:46p Mgummelt
+ * 
+ * 170   8/15/97 3:24p Bgokey
+ * 
+ * 169   8/15/97 10:30a Rlove
+ * Changed cart bounding box
+ * 
+ * 168   8/15/97 9:09a Rlove
+ * 
+ * 167   8/15/97 2:55a Mgummelt
+ * 
+ * 166   8/14/97 1:27p Mgummelt
+ * 
+ * 165   8/14/97 7:34a Rlove
+ * Added plants, corpses  
+ * 
+ * 164   8/14/97 6:42a Rlove
+ * 
+ * 163   8/09/97 12:17p Rlove
+ * 
+ * 162   8/09/97 1:49a Mgummelt
+ * 
+ * 161   8/07/97 3:38p Rlove
+ * 
+ * 160   8/02/97 10:11a Rlove
+ * Added Olmec Statue (whatever the heck that is)
+ * 
+ * 159   7/31/97 2:22p Rlove
+ * Added the pew
+ * 
+ * 158   7/30/97 3:33p Mgummelt
+ * 
+ * 157   7/30/97 6:46a Rlove
+ * Added skull
+ * 
+ * 156   7/29/97 5:05p Rlove
+ * 
+ * 155   7/29/97 8:35a Rlove
+ * 
+ * 154   7/28/97 7:50p Mgummelt
+ * 
+ * 153   7/28/97 1:51p Mgummelt
+ * 
+ * 152   7/24/97 4:06p Rlove
+ * 
+ * 151   7/24/97 3:53p Rlove
+ * 
+ * 150   7/24/97 3:27a Mgummelt
+ * 
+ * 149   7/22/97 8:13a Rlove
+ * 
+ * 148   7/21/97 6:42p Rlove
+ * 
+ * 147   7/21/97 3:03p Rlove
+ * 
+ * 146   7/21/97 10:25a Rlove
+ * 
+ * 145   7/16/97 8:12p Mgummelt
+ * 
+ * 144   7/15/97 8:03p Mgummelt
+ * 
+ * 143   7/14/97 9:30p Mgummelt
+ * 
+ * 142   7/14/97 9:30p Mgummelt
+ * 
+ * 141   7/14/97 4:43p Mgummelt
+ * 
+ * 140   7/10/97 6:17p Rlove
+ * 
+ * 139   7/10/97 1:45p Mgummelt
+ * 
+ * 138   7/09/97 11:53a Mgummelt
+ * 
+ * 137   7/07/97 5:24p Mgummelt
+ * 
+ * 136   7/03/97 12:48p Mgummelt
+ * 
+ * 135   6/27/97 4:55p Rlove
+ * 
+ * 134   6/27/97 4:05p Mgummelt
+ * 
+ * 133   6/27/97 4:03p Mgummelt
+ * 
+ * 132   6/25/97 2:25p Rlove
+ * 
+ * 131   6/25/97 12:33p Mgummelt
+ * 
+ * 130   6/23/97 6:57p Mgummelt
+ * 
+ * 129   6/23/97 6:56p Mgummelt
+ * 
+ * 128   6/23/97 3:45p Mgummelt
+ * 
+ * 127   6/23/97 10:08a Mgummelt
+ * 
+ * 126   6/21/97 9:52a Rlove
+ * 
+ * 125   6/20/97 5:09p Rlove
+ * Pulling out references to old CreateEntity function
+ * 
+ * 124   6/18/97 7:13p Mgummelt
+ * 
+ * 123   6/18/97 4:30p Rlove
+ * Rewrote entity spawning code
+ * 
+ * 122   6/17/97 2:23p Mgummelt
+ * 
+ * 121   6/16/97 4:42p Mgummelt
+ * 
+ * 120   6/16/97 3:18p Rlove
+ * 
+ * 119   6/16/97 3:06p Mgummelt
+ * 
+ * 118   6/14/97 3:22p Mgummelt
+ * 
+ * 117   6/14/97 2:33p Mgummelt
+ * 
+ * 116   6/14/97 2:22p Mgummelt
+ * 
+ * 115   6/14/97 9:21a Rlove
+ * The seaweed has no blocking...why?  If a tree where underwater would it
+ * have no blocking too?
+ * 
+ * 114   6/13/97 10:55p Mgummelt
+ * 
+ * 113   6/13/97 6:08p Rlove
+ * 
+ * 112   6/12/97 8:54p Mgummelt
+ * 
+ * 111   6/11/97 7:22a Rlove
+ * New bell animation
+ * 
+ * 110   6/09/97 10:22p Mgummelt
+ * 
+ * 109   6/09/97 2:41p Mgummelt
+ * 
+ * 108   6/06/97 6:30p Rlove
+ * Added seaweed
+ * 
+ * 107   6/05/97 4:44p Rlove
+ * Added beef
+ * 
+ * 106   6/04/97 8:16p Mgummelt
+ * 
+ * 105   6/03/97 10:48p Mgummelt
+ * 
+ * 104   6/02/97 6:27p Rlove
+ * Added smoke to cauldron
+ * 
+ * 103   6/02/97 2:40p Rlove
+ * Added cauldron and skull stick
+ * 
+ * 102   6/01/97 7:32a Mgummelt
+ * 
+ * 101   5/30/97 10:04p Mgummelt
+ * 
+ * 100   5/30/97 3:46p Rlove
+ * New fence bounding box
+ * 
+ * 99    5/30/97 10:04a Rlove
+ * 
+ * 98    5/30/97 9:27a Rlove
+ * New corpse objects
+ * 
+ * 97    5/29/97 4:34p Rlove
+ * Changed pot descriptions
+ * 
+ * 96    5/29/97 12:26p Mgummelt
+ * 
+ * 95    5/29/97 8:57a Rlove
+ * Added combo thingtypes wood/leaf, wood/metal, wood/stone, metal/stone,
+ * metal/cloth
+ * 
+ * 94    5/27/97 7:58a Rlove
+ * New thingtypes of GreyStone,BrownStone, and Cloth.
+ * 
+ * 93    5/24/97 2:48p Rlove
+ * Taking out old Id sounds
+ * 
+ * 92    5/23/97 11:51p Mgummelt
+ * 
+ * 91    5/23/97 2:54p Mgummelt
+ * 
+ * 90    5/23/97 8:55a Rlove
+ * Enlarged chair bounding box
+ * 
+ * 89    5/23/97 8:32a Rlove
+ * New bounding box for bench
+ * 
+ * 88    5/22/97 6:39p Mgummelt
+ * 
+ * 87    5/22/97 2:50a Mgummelt
+ * 
+ * 86    5/21/97 11:18a Mgummelt
+ * 
+ * 84    5/20/97 9:32p Mgummelt
+ * 
+ * 83    5/19/97 11:36p Mgummelt
+ * 
+ * 82    5/19/97 12:43p Mgummelt
+ * 
+ * 81    5/19/97 12:07p Mgummelt
+ * 
+ * 80    5/17/97 8:45p Mgummelt
+ * 
+ * 79    5/16/97 11:27p Mgummelt
+ * 
+ * 78    5/15/97 8:28p Mgummelt
+ * 
+ * 77    5/15/97 11:45a Mgummelt
+ * 
+ * 75    5/12/97 11:12p Mgummelt
+ * 
+ * 74    5/12/97 8:30a Rlove
+ * Changed bounding box on ballista
+ * 
+ * 73    5/12/97 8:22a Rlove
+ * Changed Summon to Herostone
+ * 
+ * 72    5/12/97 7:46a Rlove
+ * For the bell animations
+ * 
+ * 71    5/11/97 10:01p Mgummelt
+ * 
+ * 70    5/11/97 8:54p Mgummelt
+ * 
+ * 69    5/11/97 7:30a Mgummelt
+ * 
+ * 68    5/10/97 1:54p Mgummelt
+ * 
+ * 66    5/09/97 8:52a Rlove
+ * 
+ * 65    5/07/97 11:12a Rjohnson
+ * Added a new field to walkmove and movestep to allow for setting the
+ * traceline info
+ * 
+ * 64    5/07/97 11:03a Rlove
+ * 
+ * 63    5/07/97 7:37a Rlove
+ * Angel Statue
+ * 
+ * 62    5/06/97 2:47p Rlove
+ * 
+ * 61    5/06/97 11:18a Rlove
+ * 
+ * 60    5/06/97 9:12a Rlove
+ * Added thingtype_leaves
+ * 
+ * 59    5/05/97 2:39p Rlove
+ * Added TREE2
+ * 
+ * 58    5/05/97 10:17a Rlove
+ * Added fountain
+ * 
+ * 57    5/03/97 8:51a Rlove
+ * 
+ * 56    4/30/97 6:22a Rlove
+ * Snakes.  Why did it have to be snakes?
+ * 
+ * 55    4/28/97 11:15a Rlove
+ * Added flag entity
+ * 
+ * 54    4/26/97 3:52p Mgummelt
+ * 
+ * 53    4/26/97 12:37p Jweier
+ * 
+ * 52    4/26/97 12:35p Jweier
+ * 
+ * 51    4/26/97 6:30a Rlove
+ * Added thingtype of CLAY for pots
+ * 
+ * 50    4/25/97 4:33p Rlove
+ * Added mummy_head_statue 
+ * 
+ * 49    4/25/97 4:20p Rlove
+ * Fixed Scaling bounding box, added more pots, fixed mummy statue. 
+ * 
+ * 48    4/25/97 8:48a Rlove
+ * Added new pots
+ * 
+ * 47    4/24/97 2:21p Mgummelt
+ * 
+ * 46    4/24/97 8:50a Rlove
+ * Added tut statue
+ * 
+ * 45    4/22/97 5:24p Rlove
+ * Added pots
+ * 
+ * 44    4/21/97 10:32a Rlove
+ * Added stone chunk models 
+ * 
+ * 43    4/21/97 9:16a Rlove
+ * Tried new axe animations
+ * 
+ * 42    4/18/97 1:06p Mgummelt
+ * 
+ * 41    4/18/97 7:01a Rlove
+ * Added new gib models
+ * 
+ * 40    4/17/97 1:28p Rlove
+ * added new built advanceweaponframe
+ * 
+ * 39    4/09/97 11:07a Mgummelt
+ * 
+ * 38    4/07/97 6:29p Mgummelt
+ * 
+ * 37    4/07/97 5:03p Mgummelt
+ * 
+ * 36    4/07/97 4:48p Mgummelt
+ * 
+ * 35    4/07/97 3:28p Mgummelt
+ * 
+ * 34    4/05/97 6:30p Mgummelt
+ * 
+ * 33    4/05/97 6:18p Mgummelt
+ * 
+ * 32    4/05/97 5:56p Mgummelt
+ * 
+ * 31    4/05/97 9:49a Mgummelt
+ * 
+ * 30    4/04/97 6:45p Mgummelt
+ * 
+ * 29    4/04/97 5:40p Rlove
+ * 
+ * 28    4/02/97 11:01a Rlove
+ * Had to comment out some push move code - it was causing objects to get
+ * stuck on walls.
+ * 
+ * 27    3/31/97 2:12p Aleggett
+ * Improved barrel pushing a little.
+ * 
+ * 26    3/31/97 6:46a Rlove
+ * added parameter to CreateModelChunks
+ * 
+ * 25    3/28/97 2:10p Jweier
+ * 
+ * 24    3/28/97 1:15p Jweier
+ * added basic ballista movement code
+ * 
+ * 23    3/27/97 3:37p Jweier
+ * Boulders now hurt the player if they are falling
+ * 
+ * 22    3/27/97 1:06p Rlove
+ * precache model cleanup
+ * 
+ * 21    3/25/97 4:52p Rlove
+ * Added ballista and bell
+ * 
+ * 20    3/24/97 10:53a Rlove
+ * Changed bounding boxes on a few items
+ * 
+ * 19    3/24/97 9:45a Rlove
+ * removing some dprints
+ * 
+ * 18    3/21/97 10:19a Rlove
+ * Changed obj_die calls to chunk_death
+ * 
+ * 17    3/21/97 9:38a Rlove
+ * Created CHUNK.HC and MATH.HC, moved brush_die to chunk_death so others
+ * can use it.
+ * 
+ * 16    3/19/97 3:09p Rlove
+ * Added CreateEntity and ScaleBoundingBox
+ * 
+ * 15    3/18/97 5:26p Jweier
+ * Added FL_PUSH to all pushable items
+ * 
+ * 14    3/18/97 11:31a Rlove
+ * Added sword and boulder
+ * 
+ * 13    3/13/97 9:57a Rlove
+ * Changed constant DAMAGE_AIM  to DAMAGE_YES and the old DAMAGE_YES to
+ * DAMAGE_YES
+ * 
+ * 12    3/03/97 2:49p Rlove
+ * 
+ * 11    2/21/97 2:22p Rlove
+ * Added sprite trees and models chests (please no jokes)
+ * 
+ * 10    2/19/97 10:06a Rlove
+ * New Pull Object and Plaque Code
+ * 
+ * 9     2/13/97 4:22p Rlove
+ * 
+ * 8     2/12/97 9:44a Rlove
+ * Working on pull object
+ * 
+ * 7     2/07/97 1:37p Rlove
+ * Artifact of Invincibility
+ * 
+ * 6     2/03/97 4:06p Rlove
+ * Small fix to push
+ * 
+ * 5     1/27/97 11:44a Rlove
+ * Added new models to window and object explosions.  Added snake model.
+ * 
+ * 4     1/22/97 8:20a Rlove
+ * You can hop on objects without pushing them
+ * 
+ * 3     1/21/97 4:04p Rlove
+ * Added chair and bar stool objects
+ * 
+ * 2     12/30/96 8:30a Rlove
+ * Push objects added
+ */

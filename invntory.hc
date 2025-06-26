@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/invntory.hc 115   9/23/97 8:39a Rlove $
+ * $Header: /H2 Mission Pack/HCode/invntory.hc 20    3/19/98 12:17a Mgummelt $
  */
 
 entity SelectSpawnPoint(void);
@@ -38,7 +38,7 @@ float move_cnt;
 	self.solid=SOLID_NOT;
 	setorigin(self,self.origin+'0 0 42');
 	setsize(self,'-40 -40 -42','40 40 42');
-	self.hull=HULL_HYDRA;
+	self.hull=HULL_SCORPION;//HYDRA;
 	newmis=spawn();
 	setorigin(newmis,self.origin);
 	tracearea(self.origin,self.origin+'0 0 1',self.mins,self.maxs,FALSE,newmis);
@@ -69,6 +69,7 @@ float move_cnt;
 		}
 		self.owner.imp_count+=1;
 		newmis.imp_count=self.owner.imp_count;
+		newmis.team=self.owner.team;
 		newmis.think=monster_imp_lord;
 		thinktime newmis : 0;
 
@@ -141,9 +142,9 @@ entity teleport_ent;
 	self.flags2(+)FL_TORNATO_SAFE;
 	teleport_ent = spawn();
 
-	teleport_ent.goalentity = SelectSpawnPoint ();
+//	teleport_ent.goalentity = SelectSpawnPoint ();
 
-	teleport_ent.classname = "teleportcoin";
+	teleport_ent.classname = teleport_ent.netname = "teleportcoin";
 	teleport_ent.inactive = FALSE;
 	teleport_ent.think = teleport_coin_run;
 	teleport_ent.nextthink = time + .01;
@@ -331,19 +332,21 @@ void TimeBombTouch()
 {
 	if(!other.takedamage)
 		return;
-	other=self.enemy;
-	T_Damage(other,self,self.owner,50);
+	self.dmg/=2;
+	T_Damage(other,self,self.owner,self.dmg);
 	TimeBombBoom();
 }
 
 void Use_TimeBomb()
 {
 	newmis=spawn();
-	newmis.owner=self;
-	newmis.enemy=world;
+	newmis.owner=self;;
 	newmis.classname="timebomb";
 	newmis.solid=SOLID_BBOX;
-	newmis.dmg=50;
+	if(deathmatch&&!coop)
+		newmis.dmg=100;
+	else
+		newmis.dmg=75;
 	newmis.touch=TimeBombTouch;
 	newmis.angles_x=90;
 	newmis.avelocity_y=100;
@@ -373,12 +376,38 @@ void UseBlast (void)
 
 	while(victim)
 	{
-		if (victim.classname!="hook"&&victim.owner.classname != "circfire" && victim.classname != "cube_of_force"&&victim.monsterclass<CLASS_BOSS)
+		if(victim.classname=="cube_of_force"&&victim.controller!=self&&random()<0.2)
+		{
+			if(victim.artifact_flags&AFL_CUBE_RIGHT)
+				victim.controller.artifact_flags(-)AFL_CUBE_RIGHT;
+			if(victim.artifact_flags&AFL_CUBE_LEFT)
+				victim.controller.artifact_flags(-)AFL_CUBE_LEFT;
+			victim.frags=2;
+			victim.movetype=MOVETYPE_BOUNCE;
+			stopSound(victim,0);
+			victim.owner = victim.controller = self;
+			victim.velocity = normalize(victim.origin - (self.absmin+self.absmax)*0.5)*600;
+			victim.avelocity=randomv('-300 -300 -300','300 300 300');
+			if(victim.movedir!='0 0 0')
+				victim.movedir=normalize(victim.velocity);
+			victim.dmg=75;
+			victim.touch = GrenadeTouch2;
+			victim.think = MultiExplode;
+			thinktime victim : 3;
+
+			holdpos = victim.origin;
+			holdpos_z += (victim.maxs_z - victim.mins_z)/2;
+			traceline(self.origin,holdpos,FALSE,self);
+			CreateBlueFlash(trace_endpos);
+		}
+		else if (victim.classname!="hook"&&victim.owner.classname != "circfire" &&victim.classname!="cube_of_force"&&victim.monsterclass<CLASS_BOSS)
 		{
 //			dprint(victim.classname);
 //			dprint(" blasted\n");
 			if (((victim.health) && (victim!=self) ) ||
-				(victim.movetype == MOVETYPE_FLYMISSILE) || (victim.movetype == MOVETYPE_BOUNCEMISSILE) && (victim.owner != self))
+				(victim.movetype == MOVETYPE_FLYMISSILE) ||
+				(victim.movetype == MOVETYPE_BOUNCEMISSILE)||
+				(victim.movetype == MOVETYPE_BOUNCE))// && (victim.owner != self))
 			{
 				traceline(self.origin,victim.origin,TRUE,self);
 
@@ -386,7 +415,10 @@ void UseBlast (void)
 				{
 					sound (self, CHAN_WEAPON, "raven/blast.wav", 1, ATTN_NORM);
 
-					if (((victim.movetype != MOVETYPE_FLYMISSILE) && (victim.movetype != MOVETYPE_BOUNCEMISSILE)) || (victim.classname =="chain_head" ))
+					if (((victim.movetype != MOVETYPE_FLYMISSILE)
+						&& (victim.movetype != MOVETYPE_BOUNCEMISSILE)
+						&& (victim.movetype != MOVETYPE_BOUNCE))
+						|| (victim.classname =="chain_head" )|| (victim.classname =="player" ))
 					{	
 						dir =  victim.origin - self.origin;
 						v_length = vlen (dir);
@@ -413,16 +445,15 @@ void UseBlast (void)
 							victim.velocity_z = push;
 						}
 					}
-					else
+					else if (victim.classname!="funnal")
 					{
 						victim.frags=2;
 						victim.enemy=victim.owner;
 						victim.owner = self;
-						if (victim.classname!="tornato")
-						{
-							victim.velocity = victim.velocity * -1;
-							victim.angles = vectoangles(victim.velocity);
-						}
+						victim.velocity = victim.velocity * -1;
+						victim.angles = vectoangles(victim.velocity);
+						if(victim.movedir!='0 0 0')
+							victim.movedir=normalize(victim.velocity);
 					}
 
 					holdpos = victim.origin;
@@ -433,19 +464,28 @@ void UseBlast (void)
 					points = percent * BLASTDAMAGE;  // Minimum blast damage
 					if (points > 10)
 						points = 10;
+					else if (points < 1)
+						points = 1;
+
 
 					T_Damage (victim, self, self, points);
 				}
 			}
 		}
 
-		if (victim.classname=="tornato" && victim.enemy.flags2&FL_ALIVE)
-			victim.enemy.flags2(+)FL_TORNATO_SAFE;
+//		if (victim.classname=="tornato" && victim.enemy.flags2&FL_ALIVE)
+//			victim.enemy.flags2(+)FL_TORNATO_SAFE;
+		if (victim.owner.classname=="tornato")
+			victim.owner.lifetime=0;
+
 		if(victim.classname=="swarm")
 		{
 			victim.think=hive_die;
 			thinktime victim : 0;
-		} 
+		}
+	
+		if(victim.classname=="pincer")
+			victim.enemy=victim.owner;
 
 		victim = victim.chain;
    }
@@ -575,7 +615,7 @@ void UseInventoryItem (void)
 		if ((!self.artifact_flags & AFL_CUBE_LEFT) ||
 			(!self.artifact_flags & AFL_CUBE_RIGHT))
 		{
-			UseCubeOfForce();
+			UseCubeOfForce(FALSE);
 			self.flags (+) FL_ARTIFACTUSED;
 		}
 	}
@@ -701,7 +741,7 @@ void PanicButton ()
 		if ((!self.artifact_flags & AFL_CUBE_LEFT) ||
 			(!self.artifact_flags & AFL_CUBE_RIGHT))
 		{
-			UseCubeOfForce();
+			UseCubeOfForce(FALSE);
 			self.flags (+) FL_ARTIFACTUSED;
 		}
 	}
@@ -749,7 +789,7 @@ void PanicButton ()
 void  DropInventoryItem (void)
 {
 	entity item,holdent;
-	float throwflag;
+	float throwflag,torch_thrown;
 
 	makevectors(self.v_angle);
 	traceline(self.origin + self.proj_ofs,self.origin + self.proj_ofs + v_forward * 60,FALSE,self);
@@ -780,6 +820,8 @@ void  DropInventoryItem (void)
 	// Is it in the inventory
 	if ((holdent.inventory == INV_TORCH) && (holdent.cnt_torch))
 	{
+		if(holdent.artifact_flags&AFL_TORCH)
+			torch_thrown=TRUE;
 		spawn_artifact(ARTIFACT_TORCH,NO_RESPAWN);
 		holdent.cnt_torch -=1;
 		throwflag = 1;
@@ -886,6 +928,8 @@ void  DropInventoryItem (void)
 		setorigin(item,self.origin + self.proj_ofs + v_up * 10 + v_forward * 40 + v_right * 8);
 		
 		sound(self,CHAN_BODY,"misc/whoosh.wav",1,ATTN_NORM);
+		if(torch_thrown)
+			throw_torch(item);
 	}
 	else
 		remove(item);
@@ -902,3 +946,297 @@ void Inventory_Quick(float which)
 	self.inventory = old_inv;
 }
 
+/*
+ * $Log: /H2 Mission Pack/HCode/invntory.hc $
+ * 
+ * 20    3/19/98 12:17a Mgummelt
+ * last bug fixes
+ * 
+ * 19    3/17/98 4:06p Mgummelt
+ * 
+ * 18    3/17/98 11:02a Mgummelt
+ * 
+ * 17    3/16/98 2:19a Mgummelt
+ * 
+ * 16    3/13/98 3:02a Mgummelt
+ * 
+ * 15    3/12/98 6:31p Mgummelt
+ * 
+ * 14    3/12/98 4:12a Mgummelt
+ * 
+ * 13    3/12/98 1:26a Mgummelt
+ * 
+ * 12    3/11/98 10:11p Mgummelt
+ * 
+ * 11    3/09/98 8:08p Mgummelt
+ * 
+ * 10    3/09/98 7:06p Mgummelt
+ * 
+ * 9     3/04/98 4:24p Mgummelt
+ * 
+ * 8     2/25/98 9:00p Mgummelt
+ * 
+ * 7     2/25/98 5:00p Mgummelt
+ * 
+ * 6     2/12/98 2:48p Mgummelt
+ * 
+ * 5     2/08/98 3:09p Mgummelt
+ * 
+ * 4     1/28/98 3:10p Mgummelt
+ * 
+ * 118   10/28/97 1:01p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 115   9/23/97 8:39a Rlove
+ * 
+ * 114   9/11/97 9:46a Mgummelt
+ * 
+ * 113   9/11/97 9:08a Mgummelt
+ * 
+ * 112   9/10/97 5:44p Mgummelt
+ * 
+ * 111   9/03/97 6:29p Mgummelt
+ * 
+ * 110   9/03/97 3:46a Rlove
+ * 
+ * 109   9/02/97 9:30p Rlove
+ * 
+ * 108   9/02/97 6:46p Rlove
+ * 
+ * 107   9/02/97 3:53p Rlove
+ * 
+ * 106   9/02/97 2:56p Mgummelt
+ * 
+ * 105   9/02/97 2:55p Mgummelt
+ * 
+ * 104   9/02/97 2:55a Mgummelt
+ * 
+ * 103   9/01/97 10:01p Rlove
+ * 
+ * 102   9/01/97 9:32p Rlove
+ * 
+ * 101   9/01/97 2:29p Mgummelt
+ * 
+ * 100   9/01/97 5:13a Mgummelt
+ * 
+ * 99    9/01/97 1:35a Mgummelt
+ * 
+ * 97    8/31/97 4:21p Mgummelt
+ * 
+ * 96    8/31/97 3:14p Rlove
+ * 
+ * 95    8/31/97 2:36p Mgummelt
+ * 
+ * 94    8/31/97 8:52a Mgummelt
+ * 
+ * 93    8/30/97 4:28p Jweier
+ * 
+ * 92    8/30/97 4:21p Mgummelt
+ * 
+ * 91    8/28/97 9:58p Jweier
+ * 
+ * 90    8/28/97 7:56p Mgummelt
+ * 
+ * 89    8/28/97 5:41p Mgummelt
+ * 
+ * 88    8/26/97 6:22p Jweier
+ * 
+ * 87    8/26/97 1:37p Mgummelt
+ * 
+ * 86    8/26/97 2:26a Mgummelt
+ * 
+ * 85    8/25/97 5:40p Rlove
+ * 
+ * 84    8/25/97 1:09a Mgummelt
+ * 
+ * 83    8/21/97 4:46a Mgummelt
+ * 
+ * 82    8/21/97 4:29a Mgummelt
+ * 
+ * 81    8/17/97 3:06p Mgummelt
+ * 
+ * 80    8/17/97 3:13a Mgummelt
+ * 
+ * 79    8/16/97 5:46p Mgummelt
+ * 
+ * 78    8/14/97 8:31p Mgummelt
+ * 
+ * 77    8/14/97 7:12p Mgummelt
+ * 
+ * 76    8/14/97 12:18p Mgummelt
+ * 
+ * 75    8/14/97 12:18p Mgummelt
+ * 
+ * 74    8/14/97 6:42a Rlove
+ * 
+ * 73    8/13/97 1:55p Mgummelt
+ * 
+ * 72    8/13/97 12:33a Mgummelt
+ * 
+ * 71    8/12/97 11:33p Mgummelt
+ * 
+ * 70    8/12/97 10:58p Mgummelt
+ * 
+ * 69    8/12/97 4:27p Mgummelt
+ * 
+ * 68    8/09/97 6:28a Mgummelt
+ * 
+ * 67    8/09/97 1:49a Mgummelt
+ * 
+ * 66    8/08/97 5:50p Rjohnson
+ * Quick use for inventory items
+ * 
+ * 65    8/07/97 10:30p Mgummelt
+ * 
+ * 64    8/04/97 8:07p Mgummelt
+ * 
+ * 63    8/04/97 8:03p Mgummelt
+ * 
+ * 62    7/30/97 11:49p Mgummelt
+ * 
+ * 61    7/30/97 10:43p Mgummelt
+ * 
+ * 60    7/29/97 9:51p Mgummelt
+ * 
+ * 59    7/29/97 5:45p Mgummelt
+ * 
+ * 58    7/28/97 7:50p Mgummelt
+ * 
+ * 57    7/28/97 1:51p Mgummelt
+ * 
+ * 56    7/26/97 8:38a Mgummelt
+ * 
+ * 55    7/25/97 6:10p Mgummelt
+ * 
+ * 54    7/24/97 6:14p Rlove
+ * Artifacts can no longer be used if the current one is still in use.
+ * 
+ * 53    7/24/97 12:32p Mgummelt
+ * 
+ * 52    7/24/97 3:26a Mgummelt
+ * 
+ * 51    7/21/97 3:03p Rlove
+ * 
+ * 50    7/21/97 11:45a Mgummelt
+ * 
+ * 49    7/19/97 9:57p Mgummelt
+ * 
+ * 48    7/19/97 2:30a Bgokey
+ * 
+ * 47    7/18/97 2:06p Rlove
+ * 
+ * 46    7/17/97 4:12p Mgummelt
+ * 
+ * 45    7/17/97 2:31p Mgummelt
+ * 
+ * 44    7/17/97 2:16p Mgummelt
+ * 
+ * 43    7/17/97 11:44a Mgummelt
+ * 
+ * 42    7/16/97 3:31p Rlove
+ * 
+ * 41    7/09/97 11:13a Rlove
+ * Changed damage blast radius does.
+ * 
+ * 40    7/08/97 4:06p Rlove
+ * 
+ * 39    7/08/97 3:32p Rlove
+ * 
+ * 38    7/08/97 3:09p Rlove
+ * 
+ * 37    7/03/97 12:47p Mgummelt
+ * 
+ * 36    6/28/97 6:32p Mgummelt
+ * 
+ * 35    6/27/97 5:37p Mgummelt
+ * 
+ * 34    6/18/97 4:19p Mgummelt
+ * 
+ * 33    6/18/97 2:02p Mgummelt
+ * 
+ * 32    6/16/97 11:48p Bgokey
+ * 
+ * 31    6/16/97 4:01p Rlove
+ * 
+ * 30    6/14/97 2:21p Mgummelt
+ * 
+ * 29    6/03/97 9:00a Rlove
+ * Added fx_smoke_generator entity
+ * 
+ * 28    6/02/97 11:44a Rlove
+ * Teleport Artifact works
+ * 
+ * 27    6/02/97 9:30a Rlove
+ * Added haste blur to player model, changed chase camera - but will
+ * change it back once testing is done
+ * 
+ * 26    5/31/97 10:03a Rlove
+ * Haste works again.
+ * 
+ * 25    5/12/97 11:06a Rlove
+ * 
+ * 24    5/12/97 10:31a Rlove
+ * 
+ * 23    5/07/97 11:03a Rlove
+ * 
+ * 22    5/05/97 10:29a Mgummelt
+ * 
+ * 21    5/03/97 3:23p Rlove
+ * 
+ * 20    5/03/97 12:59p Rlove
+ * 
+ * 19    4/15/97 10:14a Rlove
+ * Changed cleric to crusader
+ * 
+ * 18    4/14/97 3:28p Rlove
+ * Changed Tome Time
+ * 
+ * 17    4/13/96 3:30p Mgummelt
+ * 
+ * 16    4/09/96 4:43p Mgummelt
+ * 
+ * 15    4/04/97 5:40p Rlove
+ * 
+ * 14    3/18/97 7:37a Rlove
+ * Added tome of power
+ * 
+ * 13    2/13/97 1:23p Rlove
+ * Changes to Blast Radius so it will affect missiles.
+ * 
+ * 12    2/12/97 3:59p Rlove
+ * Invincibility is done, changed a few things with ring of water
+ * breathing and the lava death
+ * 
+ * 11    2/07/97 1:37p Rlove
+ * Artifact of Invincibility
+ * 
+ * 10    2/03/97 11:15a Rjohnson
+ * Added cube artifact
+ * 
+ * 9     1/15/97 12:05p Rlove
+ * 
+ * 8     1/13/97 3:32p Rlove
+ * Haste has been added, currently doubles speed but amount can be set in
+ * entity field 'hasted'
+ * 
+ * 7     12/31/96 8:39a Rlove
+ * Glyph of the Ancients is working
+ * 
+ * 6     12/18/96 3:14p Rlove
+ * Mana system started
+ * 
+ * 5     12/18/96 11:50a Rlove
+ * Changes for Health and Super Health use
+ * 
+ * 4     12/18/96 8:56a Rlove
+ * Inventory screen is operational now
+ * 
+ * 3     12/16/96 12:42p Rlove
+ * New gauntlets, artifacts, and inventory
+ * 
+ * 1     12/13/96 3:46p Rlove
+ * 
+ * 2     11/12/96 2:39p Rlove
+ * Updates for the inventory system. Torch, HP boost and Super HP Boost.
+ */

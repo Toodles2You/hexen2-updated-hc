@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/setstaff.hc 62    9/18/97 2:34p Rlove $
+ * $Header: /H2 Mission Pack/HCode/setstaff.hc 4     3/06/98 5:59p Mgummelt $
  */
 
 /*
@@ -79,18 +79,18 @@ void PullBack (void)
 		self.enemy.flags2(-)FL_CHAINED;
 		if(self.enemy.flags2&FL_ALIVE)
 		{
-			dprintf("Restoring old movetype: %s\n",self.enemy.oldmovetype);
+//			dprintf("Restoring old movetype: %s\n",self.enemy.oldmovetype);
 			self.enemy.movetype=self.enemy.oldmovetype;
 		}
 		else
 		{
-			dprint("Setting movetype to bounce\n");
+//			dprint("Setting movetype to bounce\n");
 			self.enemy.movetype=MOVETYPE_BOUNCE;
 		}
 		self.enemy=world;
 	}
-	else
-		dprint("No enemy\n");
+//	else
+//		dprint("No enemy\n");
 
 	self.movetype=MOVETYPE_NOCLIP;
 	self.solid=SOLID_NOT;
@@ -129,9 +129,9 @@ vector dir;
 				sound(self.enemy,CHAN_BODY,"assassin/chntear.wav",1,ATTN_NORM);
         }
 
-		if(self.enemy.health<=self.health/200&&self.frags)
+		if((self.enemy.health<=self.health/100||self.enemy.health<=3)&&self.frags)
 	    {
-		    T_Damage (self.enemy, self, self.owner, 5000);
+			T_Damage (self.enemy, self, self.owner, 5000);
 			self.lifetime=time+2;
 			self.think=PullBack;
 			thinktime self : 0;
@@ -666,3 +666,137 @@ void setstaff_decide_attack (void)
 	self.attack_finished = time + 0.5;
 }
 
+/*
+ * $Log: /H2 Mission Pack/HCode/setstaff.hc $
+ * 
+ * 4     3/06/98 5:59p Mgummelt
+ * 
+ * 3     3/06/98 5:17p Mgummelt
+ * 
+ * 2     3/06/98 4:55p Mgummelt
+ * 
+ * 64    10/28/97 1:01p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 62    9/18/97 2:34p Rlove
+ * 
+ * 61    9/04/97 5:06p Mgummelt
+ * Fixing Meat chunk colors and wrong autoaiming in coop
+ * 
+ * 60    9/04/97 3:50p Mgummelt
+ * 
+ * 59    9/03/97 2:36a Mgummelt
+ * 
+ * 58    9/02/97 7:54p Mgummelt
+ * 
+ * 57    9/01/97 5:13a Mgummelt
+ * 
+ * 56    9/01/97 3:08a Mgummelt
+ * 
+ * 55    9/01/97 1:35a Mgummelt
+ * 
+ * 54    8/31/97 8:52a Mgummelt
+ * 
+ * 53    8/30/97 6:58p Mgummelt
+ * 
+ * 52    8/29/97 2:30a Mgummelt
+ * 
+ * 51    8/26/97 7:38a Mgummelt
+ * 
+ * 50    8/25/97 4:15p Mgummelt
+ * 
+ * 49    8/24/97 9:33p Mgummelt
+ * 
+ * 48    8/19/97 9:31p Mgummelt
+ * 
+ * 47    8/19/97 9:24p Mgummelt
+ * 
+ * 46    8/19/97 9:21p Mgummelt
+ * 
+ * 45    8/19/97 10:22a Rjohnson
+ * Code reduction
+ * 
+ * 44    8/14/97 3:09p Mgummelt
+ * 
+ * 43    8/08/97 6:21p Mgummelt
+ * 
+ * 42    8/08/97 3:34p Mgummelt
+ * 
+ * 41    8/07/97 10:30p Mgummelt
+ * 
+ * 40    8/06/97 10:19p Mgummelt
+ * 
+ * 39    8/04/97 8:03p Mgummelt
+ * 
+ * 38    8/04/97 11:33a Mgummelt
+ * 
+ * 37    7/30/97 11:16p Mgummelt
+ * 
+ * 36    7/30/97 11:14p Mgummelt
+ * 
+ * 35    7/30/97 10:46p Mgummelt
+ * 
+ * 34    7/30/97 8:26p Mgummelt
+ * 
+ * 33    7/28/97 7:50p Mgummelt
+ * 
+ * 32    7/28/97 1:51p Mgummelt
+ * 
+ * 31    7/26/97 8:39a Mgummelt
+ * 
+ * 30    7/24/97 12:33p Mgummelt
+ * 
+ * 29    7/24/97 3:27a Mgummelt
+ * 
+ * 28    7/21/97 4:04p Mgummelt
+ * 
+ * 27    7/21/97 4:02p Mgummelt
+ * 
+ * 26    7/19/97 9:57p Mgummelt
+ * 
+ * 25    7/17/97 6:53p Mgummelt
+ * 
+ * 24    7/16/97 3:53p Mgummelt
+ * 
+ * 23    7/16/97 11:09a Mgummelt
+ * 
+ * 22    7/15/97 9:19p Mgummelt
+ * 
+ * 21    7/15/97 8:31p Mgummelt
+ * 
+ * 20    7/15/97 3:18p Mgummelt
+ * 
+ * 19    7/14/97 9:30p Mgummelt
+ * 
+ * 18    7/10/97 7:21p Mgummelt
+ * 
+ * 17    7/03/97 2:52p Mgummelt
+ * 
+ * 16    7/01/97 7:07p Mgummelt
+ * 
+ * 15    7/01/97 3:30p Mgummelt
+ * 
+ * 14    7/01/97 2:21p Mgummelt
+ * 
+ * 13    6/30/97 8:11p Mgummelt
+ * 
+ * 12    6/30/97 5:33p Mgummelt
+ * 
+ * 11    6/24/97 7:48a Rlove
+ * 
+ * 9     6/18/97 7:31p Mgummelt
+ * 
+ * 8     6/18/97 5:30p Mgummelt
+ * 
+ * 7     6/05/97 9:29a Rlove
+ * Weapons now have deselect animations
+ * 
+ * 6     5/12/97 10:37a Rlove
+ * 
+ * 5     5/06/97 1:29p Mgummelt
+ * 
+ * 4     5/03/97 8:49a Rlove
+ * 
+ * 3     5/02/97 8:05a Rlove
+ */

@@ -29,6 +29,7 @@ Values Used: .o_angle (.movetype must be
 	MOVETYPE_BOUNCEMISSILE)
 =====================================================
 */
+/*
 float Skip (void)
 {
 	vector dir1,dir2;
@@ -44,7 +45,7 @@ float Skip (void)
 	else
 		return FALSE;
 }
-
+*/
 /*
 ====================================================
 void Veer(float amount)
@@ -69,14 +70,14 @@ vector veerdir;
 		self.velocity+=RandomVector(veerdir);
 		self.angles=vectoangles(self.velocity);
 }
-
+/*
 void VeerThink ()
 {
 	Veer(self.veer);
 	if(self.think==Veer)
 		thinktime self : 0.1;
 }
-
+*/
 /*
 =========================================================
 float ahead (entity loser, entity from)

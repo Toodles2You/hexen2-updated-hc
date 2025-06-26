@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/cube.hc 21    9/11/97 12:02p Mgummelt $
+ * $Header: /H2 Mission Pack/HCode/cube.hc 7     3/19/98 12:17a Mgummelt $
  */
 
 
@@ -7,6 +7,7 @@ float cube_distance = 500;
 
 void CubeDie(void)
 {
+	stopSound(self,0);
 	self.owner.artifact_flags(-)self.artifact_flags;
 	remove(self);
 }
@@ -14,25 +15,34 @@ void CubeDie(void)
 float cube_find_target(void)
 {
 	entity item;
+	float pass;
 
-	item = findradius(self.origin, cube_distance);
-
-	while (item)
-	{
-		if ((item.flags & FL_MONSTER) || ((item.classname == "player") && deathmatch == 1) && item.health > 0)
+	while(pass<2)
+	{//on pass 2, accept corpses
+		item = findradius(self.origin, cube_distance);
+		while (item)
 		{
-			tracearea (self.origin,item.origin,self.mins,self.maxs,FALSE,self);
-			if (trace_ent == item)
+			if (((item.flags & FL_MONSTER) || (item.classname == "player" && deathmatch == 1&&item!=self.controller)||(pass==1&&(item.classname=="player_sheep"||item.netname=="corpse"||item.netname=="head"))) &&	item.health > 0)
 			{
-				if (!item.effects & EF_NODRAW)
+				if(item.controller!=self.controller)
 				{
-					self.enemy = item;
-					return TRUE;
+					traceline (self.origin,(item.absmin+item.absmax)*0.5,TRUE,self);
+					if (trace_fraction==1.0)
+					{
+						if ((!item.effects & EF_NODRAW))
+						{
+							self.attack_finished=time+random(0.5);
+							self.drawflags(+)MLS_POWERMODE;
+							self.last_attack=0;
+							self.enemy = item;
+							return TRUE;
+						}
+					}
 				}
 			}
+			item = item.chain;
 		}
-
-		item = item.chain;
+		pass+=1;
 	}
 
 	return FALSE;
@@ -54,23 +64,15 @@ vector CubeDirection[6] =
 void cube_fire(void)
 {
 //	float RanVal;
-	float Distance;
+	vector targ_org;
+//	vector targ_size_min,targ_size_max;
+	float Distance,beam_color;
 	entity temp;
 
-	if (time > self.monster_duration || self.owner.health <= 0 || self.shot_cnt >= 10)
+	if (time > self.monster_duration || self.owner.health <= 0)
 	{
 		CubeDie();
 		return;
-	}
-
-	if (!self.enemy)
-	{
-		self.cnt += 1;
-		if (self.cnt > 5)
-		{
-			cube_find_target();
-			self.cnt = 0;
-		}
 	}
 
 	if (self.enemy)
@@ -78,44 +80,89 @@ void cube_fire(void)
 		if (self.enemy.health <= 0)
 		{
 			self.enemy = world;
-			//self.drawflags (+) DRF_TRANSLUCENT;
+			self.drawflags(-)MLS_POWERMODE;
 		}
 	}
 
+	if (!self.enemy)
+		cube_find_target();
+
 	if (self.enemy)
 	{
-		if (random() < .7)
+		Distance = vlen(self.origin - self.enemy.origin);
+		if (Distance > cube_distance*2)
 		{
-			Distance = vlen(self.origin - self.enemy.origin);
-			if (Distance > cube_distance*2)
+			self.enemy = world;
+			self.drawflags(-)MLS_POWERMODE;
+		}
+		else if (Distance < cube_distance)
+		{
+			// Got to do this otherwise tracearea sees right through you
+			temp = self.owner;
+			self.owner = self;
+
+			/*
+			targ_size_min = self.enemy.maxs - self.enemy.mins;
+			targ_size_max =targ_size_min;
+			targ_size_min *=-0.5;
+			targ_org = (self.enemy.absmin+self.enemy.absmax)*0.5 + randomv(targ_size_min,targ_size_max);
+			*/
+			if(self.enemy.proj_ofs!='0 0 0')
+				targ_org=self.enemy.origin+self.enemy.proj_ofs;
+			else
+				targ_org=(self.enemy.absmin+self.enemy.absmax)*0.5;
+			traceline (self.origin,targ_org,FALSE,self);
+			if(trace_ent!=self.enemy)
+			{//First try missed
+				targ_org=(self.enemy.absmin+self.enemy.absmax)*0.5;
+				traceline (self.origin,targ_org,FALSE,self);
+			}
+			if (trace_ent == self.enemy)
 			{
-				self.enemy = world;
-				//self.drawflags (+) DRF_TRANSLUCENT;
+				self.shot_cnt+=1;
+				self.adjust_velocity = CubeDirection[random(0,5)];
+				self.effects(+)EF_MUZZLEFLASH;
+				if(self.last_attack+1.5<time)
+					sound(self, CHAN_WEAPON, "golem/gbfire.wav", 1, ATTN_NORM);
+				else
+					sound(self, CHAN_BODY, "crusader/sunhum.wav", 1, ATTN_NORM);
+				updateSoundPos(self,CHAN_BODY);
+				updateSoundPos(self,CHAN_WEAPON);
+				beam_color=rint(random(0,4));
+				self.last_attack=time;
+				WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
+				WriteByte (MSG_BROADCAST, TE_STREAM_COLORBEAM);	//beam type
+				WriteEntity (MSG_BROADCAST, self);				//owner
+				WriteByte (MSG_BROADCAST, 0);					//tag + flags
+				WriteByte (MSG_BROADCAST, 1);					//time
+				WriteByte (MSG_BROADCAST, beam_color);			//color
+
+				WriteCoord (MSG_BROADCAST, self.origin_x);
+				WriteCoord (MSG_BROADCAST, self.origin_y);
+				WriteCoord (MSG_BROADCAST, self.origin_z);
+
+				WriteCoord (MSG_BROADCAST, targ_org_x);
+				WriteCoord (MSG_BROADCAST, targ_org_y);
+				WriteCoord (MSG_BROADCAST, targ_org_z);
+
+				LightningDamage (self.origin, targ_org, self, beam_color+1,"sunbeam");
 			}
 			else
 			{
-				// Got to do this otherwise tracearea sees right through you
-				temp = self.owner;
-				self.owner = self;
-
-				tracearea (self.origin,self.enemy.origin,self.mins,self.maxs,FALSE,self);
-				if (trace_ent == self.enemy)
+				traceline (self.origin,(self.enemy.absmin+self.enemy.absmax)*0.5,TRUE,self);
+				if(trace_fraction!=1.0)
 				{
-					self.adjust_velocity = CubeDirection[random(0,5)];
-					self.abslight = 1;
-
-					self.shot_cnt += 1;
-
-					do_fireball('0 0 0');
+					self.cnt+=1;
+					if(self.cnt>=5)
+					{//can't see enemy for last 10 tries, find someone else
+						self.enemy=world;
+						self.cnt=0;
+						self.drawflags(-)MLS_POWERMODE;
+					}
 				}
-				else 
-				{
-					self.enemy = world;
-					//self.drawflags (+) DRF_TRANSLUCENT;
-				}
-
-				self.owner = temp;
 			}
+
+			self.owner = temp;
 		}
 	}
 }
@@ -139,15 +186,26 @@ void CubeThinkerB(void)
 	float Distance;
 	thinktime self : 0.05;
 
+	updateSoundPos(self,CHAN_VOICE);
 	if (!self.owner.flags2 & FL_ALIVE) 
 	{
 		CubeDie();
 		return;
 	}
 
+	if(self.attack_finished<time)
+	{
+		if(random()<0.5)
+			cube_fire();
+		if(self.shot_cnt>17)
+		{
+			self.shot_cnt=0;
+			self.attack_finished=time+random(0.5,2);
+		}
+	}
+
 	if (self.adjust_velocity == '0 0 0')
 	{
-		cube_fire();
 		if (self.adjust_velocity == '0 0 0')
 		{
 			if (random() < 0.02)
@@ -157,9 +215,6 @@ void CubeThinkerB(void)
 		}
 	}
 	cube_rotate();
-
-	if (self.abslight > .1) 
-		self.abslight -= 0.1;
 
 	self.angles = self.owner.angles + self.v_angle;
 	
@@ -173,7 +228,7 @@ void CubeThinkerB(void)
 	if (Distance > cube_distance)
 	{
 		self.enemy = world;
-		//self.drawflags (+) DRF_TRANSLUCENT;
+		self.drawflags(-)MLS_POWERMODE;
 	}
 
 	if (self.enemy != world)
@@ -227,7 +282,7 @@ void CubeThinkerB(void)
 	setorigin(self,NewSpot);
 }
 
-void UseCubeOfForce(void)
+void UseCubeOfForce(float on_spawn)
 {
 	entity cube;
 
@@ -240,6 +295,7 @@ void UseCubeOfForce(void)
 	cube = spawn();
 
 	cube.owner = self;
+	cube.controller = self;
 	cube.solid = SOLID_SLIDEBOX;
 	cube.movetype = MOVETYPE_NOCLIP;//MOVETYPE_FLY;
 	cube.flags (+) FL_FLY | FL_NOTARGET;
@@ -265,18 +321,87 @@ void UseCubeOfForce(void)
 	cube.th_die = CubeDie;
 
 	thinktime cube : 0.01;
-	cube.monster_duration = time + 45;
-	cube.shot_cnt = 0;
+	if(on_spawn)
+		cube.monster_duration = time + 10;
+	else
+		cube.monster_duration = time + 45;
 
 	cube.movedir = '100 100 0';
 	cube.count = random(360);
 	self.movedir_z = random(360);
 
-//	cube.drawflags (+) DRF_TRANSLUCENT;
-	cube.drawflags (+) MLS_ABSLIGHT;
-
-	cube.abslight = .1;
-
 	self.cnt_cubeofforce -= 1;
 }
 
+
+/*
+ * $Log: /H2 Mission Pack/HCode/cube.hc $
+ * 
+ * 7     3/19/98 12:17a Mgummelt
+ * last bug fixes
+ * 
+ * 6     3/17/98 4:06p Mgummelt
+ * 
+ * 5     3/16/98 6:38a Mgummelt
+ * 
+ * 4     3/16/98 2:19a Mgummelt
+ * 
+ * 3     3/14/98 11:09p Mgummelt
+ * 
+ * 2     3/14/98 9:24p Mgummelt
+ * 
+ * 23    10/28/97 1:00p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 21    9/11/97 12:02p Mgummelt
+ * 
+ * 20    9/02/97 10:11p Rlove
+ * 
+ * 19    8/26/97 8:30p Jweier
+ * 
+ * 18    8/26/97 8:11p Jweier
+ * 
+ * 17    8/20/97 7:08p Jweier
+ * 
+ * 16    8/14/97 11:22p Bgokey
+ * 
+ * 15    7/21/97 4:03p Mgummelt
+ * 
+ * 14    7/21/97 4:02p Mgummelt
+ * 
+ * 13    7/15/97 4:49p Rjohnson
+ * Removed a debug statement
+ * 
+ * 12    7/15/97 4:47p Rjohnson
+ * Updates
+ * 
+ * 11    6/26/97 9:08p Rjohnson
+ * Update
+ * 
+ * 10    6/26/97 4:45p Rjohnson
+ * Update
+ * 
+ * 9     6/18/97 6:21p Mgummelt
+ * 
+ * 8     6/18/97 4:00p Mgummelt
+ * 
+ * 7     5/15/97 6:34p Rjohnson
+ * Code cleanup
+ * 
+ * 6     5/07/97 11:12a Rjohnson
+ * Added a new field to walkmove and movestep to allow for setting the
+ * traceline info
+ * 
+ * 5     2/12/97 4:38p Rjohnson
+ * Looks good at this point
+ * 
+ * 4     2/10/97 4:28p Rjohnson
+ * More movement updates
+ * 
+ * 3     2/04/97 3:26p Rjohnson
+ * Will spawn it on the left or right, 2 at most
+ * 
+ * 2     2/04/97 10:46a Rjohnson
+ * Added different type of movement
+ */

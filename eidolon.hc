@@ -146,7 +146,7 @@ void()eidolon_face_orb;
 void orb_die()
 {
 	self.owner.health=4000+skill*2000;
-	self.th_save=eidolon_ready_roar;
+	self.owner.th_save=eidolon_ready_roar;
 	self.owner.controller=world;
 	self.owner.goalentity=self.owner.enemy;
 	self.owner.think=multiplayer_health;
@@ -227,7 +227,7 @@ void orb_lightning_recharge ()  [++ 0 .. 35]
 		self.proj_ofs=self.owner.origin+self.owner.proj_ofs+v_forward*200+v_right*36+'0 0 100';
 	}
 
-	do_lightning (self.owner,self.weaponframe_cnt,0, 2, self.view_ofs, self.proj_ofs,0);
+	do_lightning (self.owner,self.weaponframe_cnt,0, 2, self.view_ofs, self.proj_ofs,0,TE_STREAM_LIGHTNING);
 }
 
 void orb_lightning_pattern ()  [++ 0 .. 35]
@@ -248,7 +248,7 @@ void orb_lightning_pattern ()  [++ 0 .. 35]
 //			self.v_angle-=randomv('15 15 15','45 45 45');
 		makevectors(self.v_angle);
 		self.proj_ofs=self.origin+'0 0 1'*self.absmax_z*0.6+v_forward*54;
-		do_lightning (self.owner,self.weaponframe_cnt,0, random(4), self.view_ofs, self.proj_ofs,0);
+		do_lightning (self.owner,self.weaponframe_cnt,0, random(4), self.view_ofs, self.proj_ofs,0,TE_STREAM_LIGHTNING);
 	}
 	else
 	{
@@ -268,7 +268,7 @@ void orb_lightning_pattern_init ()
 	self.v_angle+=randomv('-45 -45 -45','45 45 45');
 	makevectors(self.v_angle);
 	self.proj_ofs=self.origin+'0 0 1'*self.absmax_z*0.6+v_forward*54;
-	do_lightning (self.owner,self.weaponframe_cnt,0, random(3), self.view_ofs, self.proj_ofs,0);
+	do_lightning (self.owner,self.weaponframe_cnt,0, random(3), self.view_ofs, self.proj_ofs,0,TE_STREAM_LIGHTNING);
 	self.think=orb_lightning_pattern;
 	thinktime self :0.05;
 }
@@ -473,7 +473,7 @@ vector displace;
 				setorigin(self,self.origin+v_forward*move_speed);
 			}
 		}
-		else if(trace_ent)
+		else if(trace_ent!=world)
 		{
 			displace = normalize(trace_ent.origin - self.origin);
 			if (infront(trace_ent))
@@ -503,10 +503,10 @@ vector org,from;
 	makevectors(self.angles);
 	org=(self.absmin+self.absmax)*0.5;
 	from=org+'0 0 500';
-	do_lightning (self,1,0,4,org,from+v_forward*300,0);
-	do_lightning (self,1,0,4,org,from+v_right*300,0);
-	do_lightning (self,1,0,4,org,from-v_forward*300,0);
-	do_lightning (self,1,0,4,org,from-v_up*300,0);
+	do_lightning (self,1,0,4,org,from+v_forward*300,0,TE_STREAM_LIGHTNING);
+	do_lightning (self,1,0,4,org,from+v_right*300,0,TE_STREAM_LIGHTNING);
+	do_lightning (self,1,0,4,org,from-v_forward*300,0,TE_STREAM_LIGHTNING);
+	do_lightning (self,1,0,4,org,from-v_up*300,0,TE_STREAM_LIGHTNING);
 	sound(self,CHAN_BODY,"player/megagib.wav",1,ATTN_NONE);
 	sound (self, CHAN_ITEM, "weapons/exphuge.wav", 1, ATTN_NONE);
 	SpawnPuff(org,self.size,100,self);
@@ -599,8 +599,8 @@ entity found;
 	if(self.frame<$grow71)
 		thinktime self : 0.1;
 //	check_use_model("models/boss/bigeido.mdl");
-	if(self.scale<2.5)
-		self.scale+=0.02;
+	if(self.scale<2.52)
+		self.scale+=0.03;
 	setsize (self, '-16 -16 0'*1.3333333*self.scale, '16 16 200'*1.3333333*self.scale);
 	self.mass=2000*1.34*self.scale;
 	self.hull=HULL_POINT;
@@ -619,10 +619,11 @@ entity found;
 	}
 	if(cycle_wrapped)
 	{
+		self.scale=2.55;
 		self.rider_path_distance=64;
 		self.weapon=0;
 		self.health=10000;
-		self.experience_value=100000;
+		self.experience_value=self.init_exp_val=100000;
 		self.drawflags(-)MLS_POWERMODE;
 		self.flags2(-)FL_SMALL;
 		self.controller.think=orb_wait;
@@ -653,13 +654,17 @@ void eidolon_ready_grow () [++ $dwait1 .. $dwait29]
 void eidolon_darken_sky () [++ $dwait1 .. $dwait29]
 {
 float lightval;
+entity watcher;
 //	check_use_model("models/boss/smaleido.mdl");
 	lightval=lightstylevalue(self.lockentity.style);
-	if(lightval>2)
-		lightstylestatic(self.lockentity.style,lightval - 1);
 //	else if(self.frame==$dwait29 &&lineofsight(self,self.enemy))
+	if(lightval>2)
+	{
+		lightval-=1;
+		lightstylestatic(self.lockentity.style,lightval);
+	}
 	else if(self.frame==$dwait29)
-		if(infront_of_ent(self,self.enemy))
+/*		if(infront_of_ent(self,self.enemy))
 		if(infront_of_ent(self.controller,self.enemy))
 		if(vlen(self.enemy.origin-self.origin)<1500)
 		{
@@ -674,6 +679,33 @@ float lightval;
 		}
 	self.health=self.max_health;
 	self.lockentity.lightvalue1=lightval;
+*/
+	{
+		watcher=self.enemy;
+		if(self.enemy.classname=="monster_imp_lord")//if enemy an imp, look for it's owner
+			watcher=self.enemy.controller;
+		if(!watcher.flags2&FL_ALIVE)
+		{//If enemy not alive, look for other players
+			watcher=find(world,classname,"player");
+			while(watcher!=world&&!watcher.flags2&FL_ALIVE)
+				watcher=find(watcher,classname,"player");
+		}
+		if(infront_of_ent(self,watcher))
+			if(infront_of_ent(self.controller,watcher))
+				if(vlen(self.enemy.origin-self.origin)<1500)
+				{
+					self.velocity='0 0 0';
+					self.movetype=MOVETYPE_NOCLIP;
+					self.flags(+)FL_FLY;
+					MonsterQuake(500);
+					SUB_UseTargets();
+					self.target="";
+					self.lifetime=time+2;
+					self.think=eidolon_ready_grow;
+				}
+	}
+	self.health=self.max_health;
+	self.lockentity.lightvalue1=lightval;
 }
 
 void eidolon_fake_die () [++ $death1 .. $death30]
@@ -681,7 +713,7 @@ void eidolon_fake_die () [++ $death1 .. $death30]
 //	check_use_model("models/boss/smaleido.mdl");
 	self.health=self.max_health;
 	if(self.frame==$death30)
-	 	if(self.lockentity!=world)
+		if(self.lockentity!=world)
 		{
 			self.lockentity.wait=100;
 			self.lockentity.dmg=0;
@@ -717,6 +749,7 @@ void eidolon_pain () [++ $painA1 .. $painA9]
 {
 //	if(self.frame==$painA1)
 //		check_use_model("models/boss/smaleido.mdl");
+
 	if(self.frame==$painA9)
 	{
 		if(self.weapon>=1000&&self.controller.flags2&FL_ALIVE)
@@ -890,6 +923,7 @@ void eidolon_power () [++ $power1 .. $power20]
 void eidolon_face_orb () [++ $walk1 .. $walk16]
 {
 //	check_use_model("models/boss/smaleido.mdl");
+
 	self.ideal_yaw = vectoyaw(self.controller.origin - self.origin);
 	ChangeYaw();
 	if(self.angles_y>self.ideal_yaw - 10&&self.angles_y<self.ideal_yaw + 10)
@@ -1068,7 +1102,7 @@ void eidolon_spell () [++ $spell1 .. $spell20]
 		if(self.veer)
 			EidoPoly();
 		else
-			FireMagicMissile(0);
+			FireMagicMissile(0,TRUE);
 	}
 	if(self.frame==$spell20)
 	{
@@ -1240,13 +1274,15 @@ void monster_eidolon(void)
     precache_model2 ("models/boss/shaft.mdl");
     precache_model2 ("models/boss/circle.mdl");
     precache_model2 ("models/boss/star.mdl");
+	precache_model2 ("models/xplod29.spr");	//eidolon and purifier
+	precache_model2 ("models/ring.mdl");		//Smoke ring
 
 	precache_sound2 ("eidolon/roar.wav");
-	precache_sound2 ("eidolon/pain.wav");	//Hurt
-	precache_sound2 ("eidolon/death.wav");	//Dies- long and agonizing
-	precache_sound2 ("eidolon/fakedie.wav");//1st death- fake
-	precache_sound2 ("eidolon/spell.wav");	//Spell attack (tracking globes)
-	precache_sound2 ("eidolon/stomp.wav");	//Hot-steppin'
+	precache_sound2 ("eidolon/pain.wav");		//Hurt
+	precache_sound2 ("eidolon/death.wav");		//Dies- long and agonizing
+	precache_sound2 ("eidolon/fakedie.wav");	//1st death- fake
+	precache_sound2 ("eidolon/spell.wav");		//Spell attack (tracking globes)
+	precache_sound2 ("eidolon/stomp.wav");		//Hot-steppin'
 	precache_sound2 ("eidolon/fireball.wav");	//Launching Nasty fireballs
 	precache_sound2 ("eidolon/flamstrt.wav");	//
 	precache_sound2 ("eidolon/flambrth.wav");	//
@@ -1265,13 +1301,15 @@ void monster_eidolon(void)
 	self.movetype = MOVETYPE_STEP;
 	self.takedamage=DAMAGE_YES;
 	self.monsterclass=CLASS_FINAL_BOSS;
-	self.flags2(+)FL_ALIVE|FL_MONSTER|FL_SMALL;
+	self.flags(+)FL_MONSTER;
+	self.flags2(+)FL_ALIVE|FL_SMALL;
 	self.thingtype=THINGTYPE_FLESH;
 
 	setmodel (self, "models/boss/smaleido.mdl");
 	self.skin = 0;
 
-	setsize (self, '-32 -32 0', '32 32 150');
+	setsize (self, '-40 -40 0', '40 40 150');
+//	setsize (self, '-32 -32 0', '32 32 150');
 	self.hull=HULL_GOLEM;
 	self.health = self.max_health=3000+skill*1000;
 
@@ -1281,7 +1319,7 @@ void monster_eidolon(void)
 	self.rider_path_distance=30;
 
 	self.proj_ofs=self.view_ofs='0 0 100';
-	self.experience_value = 10000;
+	self.experience_value = self.init_exp_val=10000;
 
 	self.th_stand = eidolon_wait;
 	self.th_jump = eidolon_ready_roar;
@@ -1300,4 +1338,143 @@ void monster_eidolon(void)
 	self.think=multiplayer_health;
 	thinktime self : 2;
 }
+
+/*
+ * $Log: /H2 Mission Pack/HCode/eidolon.hc $
+ * 
+ * 19    3/18/98 3:50p Mgummelt
+ * 
+ * 18    3/18/98 3:49p Mgummelt
+ * Last minute original game fixes, doors, eidolon, icemace, rats.
+ * 
+ * 17    3/13/98 5:53p Mgummelt
+ * 
+ * 16    3/13/98 5:08p Mgummelt
+ * 
+ * 15    3/03/98 7:31p Mgummelt
+ * 
+ * 14    3/02/98 3:27p Mgummelt
+ * 
+ * 13    3/02/98 12:41p Mgummelt
+ * 
+ * 12    2/27/98 2:46p Mgummelt
+ * 
+ * 11    2/27/98 11:52a Mgummelt
+ * 
+ * 10    2/26/98 2:03p Mgummelt
+ * 
+ * 9     2/26/98 1:38a Mgummelt
+ * 
+ * 8     2/24/98 6:39p Mgummelt
+ * 
+ * 7     2/24/98 10:20a Jweier
+ * 
+ * 6     2/02/98 1:20p Jmonroe
+ * moved some more sprites to specific precache
+ * 
+ * 5     1/22/98 4:05p Mgummelt
+ * 
+ * 51    10/28/97 1:00p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 49    9/25/97 5:30p Mgummelt
+ * 
+ * 48    9/25/97 5:24p Mgummelt
+ * 
+ * 47    9/25/97 10:37a Mgummelt
+ * 
+ * 46    9/11/97 12:04p Mgummelt
+ * 
+ * 45    9/07/97 9:42a Mgummelt
+ * 
+ * 44    9/03/97 9:14p Mgummelt
+ * Fixing targetting AI
+ * 
+ * 43    9/03/97 6:01a Mgummelt
+ * 
+ * 42    9/03/97 5:58a Mgummelt
+ * 
+ * 41    9/03/97 3:41a Mgummelt
+ * 
+ * 40    9/03/97 1:13a Mgummelt
+ * 
+ * 39    9/03/97 12:25a Mgummelt
+ * 
+ * 38    9/02/97 1:18a Mgummelt
+ * 
+ * 37    9/02/97 1:16a Mgummelt
+ * 
+ * 36    9/01/97 9:22p Mgummelt
+ * 
+ * 35    9/01/97 4:45p Mgummelt
+ * 
+ * 34    9/01/97 4:12p Mgummelt
+ * 
+ * 32    9/01/97 6:54a Mgummelt
+ * 
+ * 31    9/01/97 6:34a Mgummelt
+ * 
+ * 30    8/31/97 5:56p Mgummelt
+ * 
+ * 29    8/31/97 4:21p Mgummelt
+ * 
+ * 28    8/29/97 11:14p Mgummelt
+ * 
+ * 27    8/28/97 2:42p Mgummelt
+ * 
+ * 26    8/23/97 8:24p Mgummelt
+ * 
+ * 25    8/22/97 5:15p Mgummelt
+ * 
+ * 24    8/21/97 4:45a Mgummelt
+ * 
+ * 23    8/21/97 3:33a Mgummelt
+ * 
+ * 22    8/19/97 6:58p Mgummelt
+ * 
+ * 21    8/19/97 12:57p Mgummelt
+ * 
+ * 20    8/19/97 12:22a Mgummelt
+ * 
+ * 19    8/18/97 12:20p Mgummelt
+ * 
+ * 18    8/16/97 5:46p Mgummelt
+ * 
+ * 17    8/15/97 11:27p Mgummelt
+ * 
+ * 16    8/15/97 2:55a Mgummelt
+ * 
+ * 15    8/14/97 3:09p Mgummelt
+ * 
+ * 14    8/13/97 5:57p Mgummelt
+ * 
+ * 13    8/13/97 3:49p Mgummelt
+ * 
+ * 12    8/13/97 2:56p Mgummelt
+ * 
+ * 11    8/07/97 10:30p Mgummelt
+ * 
+ * 10    8/06/97 10:19p Mgummelt
+ * 
+ * 9     8/06/97 11:06a Mgummelt
+ * 
+ * 8     8/04/97 8:03p Mgummelt
+ * 
+ * 7     7/31/97 12:57a Mgummelt
+ * 
+ * 6     7/30/97 3:32p Mgummelt
+ * 
+ * 5     7/29/97 9:15p Mgummelt
+ * 
+ * 4     7/29/97 6:54p Mgummelt
+ * 
+ * 3     7/29/97 5:44p Mgummelt
+ * 
+ * 2     7/24/97 5:47p Rjohnson
+ * name Change
+ * 
+ * 1     6/19/97 10:33p Rjohnson
+ * Initial Version
+ */
 

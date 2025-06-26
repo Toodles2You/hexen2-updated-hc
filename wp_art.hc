@@ -37,7 +37,7 @@
 //
 //====================================================================================================
 
-/*QUAKED wp_weapon2 (0 0 0) (-8 -8 -44) (8 8 20) FLOATING
+/*QUAKED wp_weapon2 (0 1 1) (-8 -8 -44) (8 8 20) FLOATING
 In world weapon 2 pickup for single player mode
 -------------------------FIELDS-------------------------
 none
@@ -62,7 +62,7 @@ void wp_weapon2 (void)
 }
 
 
-/*QUAKED wp_weapon3 (0 0 0) (-8 -8 -44) (8 8 20) FLOATING
+/*QUAKED wp_weapon3 (0 1 1) (-8 -8 -44) (8 8 20) FLOATING
 In world weapon 3 pickup for single player mode
 -------------------------FIELDS-------------------------
 none
@@ -86,7 +86,7 @@ void wp_weapon3 (void)
 
 }
 
-/*QUAKED wp_weapon4_head (0 0 0) (-8 -8 -44) (8 8 20) FLOATING
+/*QUAKED wp_weapon4_head (0 1 1) (-8 -8 -44) (8 8 20) FLOATING
 In world weapon 4 pickup (staff head) for single player mode
 -------------------------FIELDS-------------------------
 none
@@ -110,7 +110,7 @@ void wp_weapon4_head (void)
 
 }
 
-/*QUAKED wp_weapon4_staff (0 0 0) (-8 -8 -44) (8 8 20) FLOATING
+/*QUAKED wp_weapon4_staff (0 1 1) (-8 -8 -44) (8 8 20) FLOATING
 In world weapon 4 pickup (staff) for single player mode
 -------------------------FIELDS-------------------------
 none

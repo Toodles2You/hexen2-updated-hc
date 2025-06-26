@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/Doors.hc 79    8/30/97 6:58p Mgummelt $
+ * $Header: /H2 Mission Pack/HCode/Doors.hc 26    3/19/98 2:26p Mgummelt $
  */
 
 float DOOR_START_OPEN	= 1;
@@ -24,8 +24,6 @@ Door.enemy chains from the master door through all doors linked in the chain.
 
 void door_hit_bottom();
 void door_hit_top();
-
-
 
 /*
 ===========================================================================
@@ -198,7 +196,10 @@ void door_blocked()
 				T_Damage (other, self, self, other.health+50);
 		}
 		else
+		{
 			T_Damage (other, self, self, self.dmg);
+		}
+			
 	
 //Rotating doors rotating around a x or z axis push you up and in the direction they're turning
 /*	if(self.strength==2)
@@ -221,13 +222,118 @@ void door_blocked()
 	
 // if a door has a negative wait, it would never come back if blocked,
 // so let it just squash the object to death real fast
-	if (self.wait >= 0)
+	if (other.health>0)
+		if (self.wait >= 0)
+		{
+			if (self.state == STATE_DOWN)
+				door_go_up ();
+			else
+				door_go_down ();
+		}
+}
+
+void door_blocked_mp()
+{
+float do_dmg;
+
+/*
+		dprint("Blocked Door: \n");
+		dprint(other.classname);
+		dprint("\n");
+		dprintv("Velocity: %s\n",self.velocity);
+		dprintv("Avelocity: %s\n",self.avelocity);
+*/
+//FIXME: Rotating doors seem to think they're being blocked
+//	even if they're rotating down and the object is above them
+//	if(self.classname=="door_rotating")
+//		self.nextthink+=HX_FRAME_TIME;//self.wait?
+
+/*	dprint("door blocked\n");
+	dprintf("dmg = %s\n",self.dmg);
+	dprintf("strength = %s\n",self.strength);
+	dprintf("wait = %s\n",self.wait);
+	dprint("other = ");
+	dprint(other.classname);
+	dprint("\n");*/
+	if(self.dmg==-1)
 	{
-		if (self.state == STATE_DOWN)
-			door_go_up ();
+		if(other.classname=="player" && other.flags2&FL_ALIVE)
+		{
+			if (self.wait >= 0)
+			{
+				if (self.state == STATE_DOWN)
+					door_go_up ();
+				else
+					door_go_down ();
+			}
+			return;
+		}
 		else
-			door_go_down ();
+			do_dmg=2;
 	}
+	else
+		do_dmg=self.dmg;
+
+//	dprintf("Door dmg = %s\n",do_dmg);
+	if(self.wait>-2)//&&self.strength<=0)
+	{
+		if(do_dmg==666)
+		{
+			if(other.classname=="player"&&other.flags2&FL_ALIVE)
+			{
+				other.decap=TRUE;
+				T_Damage (other, self, self, other.health+300);
+			}
+			else
+				T_Damage (other, self, self, other.health+50);
+		}
+		else
+		{
+//			dprintf("crushing- %s\n",do_dmg);
+			T_Damage (other, self, self, do_dmg);//FIXME: Rotating doors get stuck open and never try to return
+		}
+	}
+//	else
+//		dprint("Door wait <= -2\n");
+
+//Rotating doors rotating around a x or z axis push you up and in the direction they're turning
+/*	if(self.strength==2)
+	{
+		other.flags(-)FL_ONGROUND;
+		other.velocity=normalize(self.origin-(other.absmin+other.absmax)*0.5)*100;
+	}
+	else*/
+
+/*NOT in MP maps?
+	if(other.flags&FL_ONGROUND&&(self.movedir_x||self.movedir_z)&&self.strength==1)//&&other.origin_z>self.origin_z
+	{//This is not neccessary anymore
+		other.flags(-)FL_ONGROUND;
+		other.velocity_z+=self.speed*2;
+		other.velocity_x-=self.speed*self.movedir_x;
+		other.velocity_y-=self.speed*self.movedir_z;
+	}
+	else
+	{
+		other.flags(-)FL_ONGROUND;
+		other.velocity_z+=10;
+	}
+*/	
+// if a door has a negative wait, it would never come back if blocked,
+// so let it just squash the object to death real fast
+	if (other.health>0)
+		if (self.wait >= 0)//&&self.wait!=1.5)
+		{
+			if (self.state == STATE_DOWN)
+			{
+	//			dprint("Going up...\n");
+				door_go_up ();
+			}
+			else
+			{
+	//			dprint("Going down...\n");
+				door_go_down ();
+			}
+		}
 }
 
 
@@ -260,6 +366,7 @@ void door_hit_bottom()
 
 void door_go_down()
 {
+string hold_target;
 	sound(self, CHAN_VOICE, self.noise2, 1, ATTN_NORM);
 	if(!self.thingtype && self.max_health)
 	{
@@ -271,9 +378,10 @@ void door_go_down()
 
 	if(self.classname == "door")
 	{
+//		dprintv("rotation: %s\n",self.v_angle);
 		if(self.spawnflags & DOOR_SLIDE)
 			door_slide(self.pos1);
-		else  if(self.spawnflags & DOOR_NORMAL)
+		else if(self.spawnflags & DOOR_NORMAL)
 			if(self.v_angle!='0 0 0')
 				if(self.speed)
 					if(self.anglespeed)
@@ -287,7 +395,16 @@ void door_go_down()
 		else
 			door_crash(self.pos1); 
 	}
-	else if (self.classname == "door_rotating") SUB_CalcAngleMove(self.pos1, self.speed, door_hit_bottom);
+	else if (self.classname == "door_rotating")
+		SUB_CalcAngleMove(self.pos1, self.speed, door_hit_bottom);
+
+	if(self.close_target!="")
+	{//Use second target when closing
+		hold_target=self.target;
+		self.target=self.close_target;
+		SUB_UseTargets();
+		self.target=hold_target;
+	}
 }
 
 
@@ -306,11 +423,15 @@ void new_movedir (vector movin,float dir)
 void door_go_up()
 {
 	if(self.state == STATE_UP)		/* Already going up */
+	{
+//		dprint("UP: Tried to go up while already going up\n");
 		return;
+	}
 
 	if(self.state == STATE_TOP) 	/* Reset top wait time */
 	{
 		self.nextthink = self.ltime + self.wait;
+//		dprint("TOP: Tried to go up while already at top\n");
 		return;
 	}
 
@@ -356,8 +477,12 @@ ACTIVATION FUNCTIONS
 
 void door_fire()
 {
-	local entity 	oself;
-	local entity	starte;
+entity 	oself;
+entity	starte;
+
+//	if(self.wait<=-1 || self.wait==1.5)//not supposed to return
+//			if(self.velocity!='0 0 0'||self.avelocity!='0 0 0')//Moving
+//				return;
 
 	if (self.owner != self)
 		objerror ("door_fire: self.owner != self");
@@ -401,7 +526,23 @@ void door_fire()
 
 void door_use()
 {
-	local entity oself;
+entity oself;
+
+
+	/*
+	dprint("Door Used by: ");
+	dprint(other.classname);
+	dprint("\n");
+	dprint("Door's Activator: ");
+	dprint(activator.classname);
+	dprint("\n");
+*/
+
+	if(self.inactive)
+	{
+	//	dprint("Door not active\n");
+		return;
+	}
 
 	self.message = 0;			// door messages are for touch only
 	self.owner.message = 0;
@@ -432,6 +573,9 @@ void door_trigger_touch()
 	if(!other.flags&FL_CLIENT&&!other.flags&FL_MONSTER)
 		return;
 
+	if(other.flags&FL_MONSTER&&world.spawnflags&MISSIONPACK)
+		return;
+
 	if(time < self.attack_finished)
 		return;
 
@@ -453,7 +597,9 @@ void door_trigger_touch()
 			return;
 		}
 	}
+	
 	self.attack_finished = time + 1;
+
 	activator	= other;
 	door_use();
 }
@@ -485,10 +631,14 @@ void door_touch()
 	string temp;
 	float removepp, inversepp;
 
-//	if(!other.flags2&FL_ALIVE)
+//	dprint("Door hit!\n");
+	//	if(!other.flags2&FL_ALIVE)
 //		return;
 
 	if(!other.flags&FL_CLIENT&&!other.flags&FL_MONSTER)
+		return;
+
+	if(other.flags&FL_MONSTER&&world.spawnflags&MISSIONPACK)
 		return;
 
 	if(self.dmg==666&&(self.velocity!='0 0 0'||self.avelocity!='0 0 0'))
@@ -505,9 +655,10 @@ void door_touch()
 	if(self.owner.attack_finished > time)
 		return;
 
-	self.owner.attack_finished = time + 2;
+	if (self.owner)
+		self.owner.attack_finished = time + 2;
 
-	if(self.owner.message != 0 && !deathmatch)
+	if(self.owner.message != 0 && !deathmatch && self.owner != world)
 	{
 		temp = getstring(self.owner.message);
 		centerprint (other, temp);
@@ -551,7 +702,8 @@ SPAWNING FUNCTIONS
 
 
 entity spawn_field(vector fmins, vector fmaxs, entity door)
-{
+{//FIXME: THIS ENTITY NEEDS TO REMOVE ITSELF IF IT'S OWNER IS
+	//REMOVED!
 entity	trigger;
 vector	t1, t2;
 	
@@ -628,11 +780,12 @@ float EntitiesTouching(entity e1, entity e2)
 
 void LinkDoors()
 {
-	local entity	t, starte;
-	local vector	cmins, cmaxs;
+entity	t, starte;
+vector	cmins, cmaxs;
 
 	if (self.enemy)
 		return;		// already linked by another door
+
 	if (self.spawnflags & 4)
 	{
 		self.owner = self.enemy = self;
@@ -711,8 +864,6 @@ void door_sounds(void)
 
 	if (self.soundtype == 0)			// No sound
 	{
-		precache_sound ("misc/null.wav");
-		precache_sound ("misc/null.wav");
 		self.noise1 = "misc/null.wav";
 		self.noise2 = "misc/null.wav";
 		self.noise4 = "misc/null.wav";
@@ -852,6 +1003,9 @@ vector newvect;
 };
 
 /*QUAKED func_door (0 .5 .8) ? START_OPEN REVERSE DOOR_DONT_LINK TOGGLE SLIDE NORMAL_MOVE remove_pp no_pp
+NOTE: Doors can now be activated and deactivated with the appropriate triggers.
+"inactive" set to 1 to start the door deactivated.
+
 if two doors touch, they are assumed to be connected and operate as a unit.
 
 -----------------------FIELDS-------------------------
@@ -869,7 +1023,10 @@ Key doors are allways wait -1.
 "speed"	movement speed (100 default), -1 will not move, just rotate
 "wait" wait before returning (3 default, -1 = never return)
 "lip" lip remaining at end of move (8 default)
-"dmg" damage to inflict when blocked (2 default)  If you make it 666, it will gib anything it touches, and behead players.
+"dmg" damage to inflict when blocked (2 default)  If you make it 
+	666, it will gib anything it touches, and behead players.
+	-1 it will hurt other things, but not players
+"close_target" secondary target to fire when door closes
 
 ROTATING DOORS: MUST HAVE AN ORIGIN BRUSH
 "v_angle" Angle to turn, in: pitch yaw roll, '0 0 0' will not rotate, just move (default = '0 0 0')
@@ -899,6 +1056,7 @@ Puzzle Pieces (use the puzzle_id value from the pieces)
 */
 void func_door()
 {
+float movedist, num_axes;
 	door_sounds();
 
 	SetMovedir ();
@@ -916,7 +1074,6 @@ void func_door()
 	setmodel (self, self.model);
 	self.classname = "door";
 
-	self.blocked = door_blocked;
 	self.use = door_use;
 
 	if (self.abslight)
@@ -929,17 +1086,65 @@ void func_door()
 
 	if (!self.wait)
 		self.wait = 3;
+
 	if (!self.lip)
 		self.lip = 8;
+
+	if(world.spawnflags&MISSIONPACK)
+		self.blocked = door_blocked_mp;
+	else
+		self.blocked = door_blocked;
 	if (!self.dmg)
+//		self.dmg = -1;
 		self.dmg = 2;
 
 	self.pos1 = self.origin;
-	if(self.level)
-		self.pos2 = self.pos1 + self.movedir*(self.level - self.lip);
+//	dprintf("Worldspawn.spawnflags = %s\n",world.spawnflags);
+	if(world.spawnflags&MISSIONPACK)
+	{
+//		dprint("Using new door code\n");
+		if(self.level)
+			movedist = self.level - self.lip;
+		else
+		{
+			//was: movedist=fabs(self.movedir*self.size) - self.lip;
+//			dprintv("Door movedir = %s\n",self.movedir);
+//			dprintv("Door size = %s\n",self.size);
+			num_axes=0;
+			movedist=0;
+			if(fabs(self.movedir_x)>0.001)
+			{
+//				dprint("X axis\n");
+				movedist+=fabs(self.movedir_x*self.size_x);
+				num_axes+=1;
+			}
+			if(fabs(self.movedir_y)>0.001)
+			{
+//				dprint("Y axis\n");
+				movedist+=fabs(self.movedir_y*self.size_y);
+				num_axes+=1;
+			}
+			if(fabs(self.movedir_z)>0.001)
+			{
+//				dprint("Z axis\n");
+				movedist+=fabs(self.movedir_z*self.size_z);
+				num_axes+=1;
+			}
+			movedist=movedist/num_axes - self.lip;
+//			dprintf("Door movedist = %s\n",movedist);
+		}
+		self.pos2 = self.pos1 + self.movedir*movedist;
+	}
 	else
-		self.pos2 = self.pos1 + self.movedir*(fabs(self.movedir*self.size) - self.lip);
-
+	{
+//		dprint("Using old door code\n");
+		if(self.level)
+			self.pos2 = self.pos1 + self.movedir*(self.level - self.lip);
+		else
+			self.pos2 = self.pos1 + self.movedir*(fabs(self.movedir*self.size) - self.lip);
+	}
+//	dprintv("Pos1: %s\n",self.pos1);
+//	dprintv("Pos2: %s\n",self.pos2);
 	if(self.v_angle!='0 0 0')
 	{
 		self.o_angle=self.angles;
@@ -1012,6 +1217,9 @@ void func_door()
 
 
 /*QUAKED func_door_smashing (0 .5 .8) ? START_OPEN x DOOR_DONT_LINK TOGGLE SLIDE NORMAL_MOVE remove_pp no_pp
+NOTE: Doors can now be activated and deactivated with the appropriate triggers.
+"inactive" set to 1 to start the door deactivated.
+
 if two doors touch, they are assumed to be connected and operate as a unit.
 
 -----------------------FIELDS-------------------------
@@ -1028,6 +1236,7 @@ Key doors are allways wait -1.
 "wait" wait before returning (3 default, -1 = never return)
 "lip" lip remaining at end of move (8 default)
 "dmg" damage to inflict when blocked (2 default)
+"close_target" secondary target to fire when door closes
 
 
 "soundtype"
@@ -1063,7 +1272,10 @@ void func_door_smashing()
 	setmodel (self, self.model);
 	self.classname = "door";
 
-	self.blocked = door_blocked;
+	if(world.spawnflags&MISSIONPACK)
+		self.blocked = door_blocked_mp;
+	else
+		self.blocked = door_blocked;
 	self.use = door_use;
 	
 	if (!self.speed)
@@ -1147,6 +1359,9 @@ void fd_secret_use()
 
 	// exit if still moving around...
 	if(self.origin != self.oldorigin)
+		return;
+
+	if(self.inactive)
 		return;
 
 	self.message = 0;		// no more message
@@ -1292,6 +1507,9 @@ void secret_touch()
 
 
 /*QUAKED func_door_secret (0 .5 .8) ? open_once 1st_left 1st_down no_shoot always_shoot x remove_pp no_pp
+NOTE: Doors can now be activated and deactivated with the appropriate triggers.
+"inactive" set to 1 to start the door deactivated.
+
 Basic secret door. Slides back, then to the side. Angle determines direction.
 -----------------------FIELDS-------------------------
 wait  = # of seconds before coming back
@@ -1301,6 +1519,7 @@ always_shoot = even if targeted, keep shootable
 t_width = override WIDTH to move back (or height if going down)
 t_length = override LENGTH to move sideways
 "dmg"		damage to inflict when blocked (2 default)
+"close_target" secondary target to fire when door closes
 
 If a secret door has a targetname, it will only be opened by it's botton or trigger, not by damage.
 
@@ -1336,6 +1555,18 @@ void func_door_secret()
 	// Magic formula...
 	self.mangle = self.angles;
 	self.angles = '0 0 0';
+	if(world.spawnflags&MISSIONPACK)
+	{
+		if(self.mangle=='0 -1 0')
+		{
+			self.mangle='-90 0 0';
+		}
+		else if(self.mangle=='0 -2 0')
+		{
+			self.mangle='90 0 0';
+		}
+	}
+
 	self.solid = SOLID_BSP;
 	self.movetype = MOVETYPE_PUSH;
 	self.classname = "door";
@@ -1359,6 +1590,9 @@ void func_door_secret()
 }
 
 /*QUAKED func_door_rotating (0 .5 .8) ? START_OPEN REVERSE DOOR_DONT_LINK remove_pp no_pp TOGGLE X_AXIS Y_AXIS
+NOTE: Doors can now be activated and deactivated with the appropriate triggers.
+"inactive" set to 1 to start the door deactivated.
+
 if two doors touch, they are assumed to be connected and operate as  
 a unit.
 
@@ -1387,8 +1621,10 @@ REVERSE will cause the door to rotate in the opposite direction.
 "speed"		movement speed (100 default)
 "wait"		wait before returning (3 default, -1 = never return)
 "dmg"		damage to inflict when blocked (2 default)
+a "dmg" of -1 will make it only hurt non-players
 "flags2" will damage the object that touches it
 "strength" When set to 1, it will throw something if it gets in the way
+"close_target" secondary target to fire when door closes
 
 "soundtype"
 0) no sound
@@ -1462,6 +1698,7 @@ vector	vec;
 	if (self.wait==0)
 		self.wait = 3;
 	if (!self.dmg)
+//		self.dmg = -1;
 		self.dmg = 2;
 	if(self.wait== -2)
 	{
@@ -1500,7 +1737,10 @@ vector	vec;
 	self.state = STATE_BOTTOM;
 
 	self.touch = door_touch;
-	self.blocked = door_blocked;
+	if(world.spawnflags&MISSIONPACK)
+		self.blocked = door_blocked_mp;
+	else
+		self.blocked = door_blocked;
 	self.use = door_use;
 
 	if (self.puzzle_piece_1 != string_null || 
@@ -1528,3 +1768,243 @@ vector	vec;
 	}
 }
 
+
+
+/*
+ * $Log: /H2 Mission Pack/HCode/Doors.hc $
+ * 
+ * 26    3/19/98 2:26p Mgummelt
+ * 
+ * 25    3/18/98 3:49p Mgummelt
+ * Last minute original game fixes, doors, eidolon, icemace, rats.
+ * 
+ * 24    3/16/98 1:08a Jweier
+ * 
+ * 23    3/16/98 12:46a Mgummelt
+ * 
+ * 22    3/02/98 11:51a Mgummelt
+ * 
+ * 21    2/27/98 6:08p Mgummelt
+ * 
+ * 20    2/18/98 6:02p Jmonroe
+ * added cache4 functions, added puzzle piece cache_file4 cmds
+ * 
+ * 19    2/17/98 11:59a Mgummelt
+ * 
+ * 18    2/05/98 12:30p Mgummelt
+ * 
+ * 17    2/04/98 4:58p Mgummelt
+ * spawnflags on monsters cleared out
+ * 
+ * 16    2/04/98 11:36a Mgummelt
+ * 
+ * 15    2/03/98 10:56a Mgummelt
+ * 
+ * 14    2/03/98 1:43a Mgummelt
+ * 
+ * 13    2/02/98 5:07p Mgummelt
+ * 
+ * 12    2/02/98 4:45p Mgummelt
+ * 
+ * 11    2/02/98 3:41p Mgummelt
+ * 
+ * 10    2/02/98 10:38a Mgummelt
+ * 
+ * 9     1/28/98 6:55p Mgummelt
+ * 
+ * 8     1/19/98 6:20p Mgummelt
+ * 
+ * 7     1/13/98 5:39p Mgummelt
+ * 
+ * 6     1/08/98 4:25p Mgummelt
+ * 
+ * 81    10/28/97 1:00p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 79    8/30/97 6:58p Mgummelt
+ * 
+ * 78    8/28/97 1:54p Rjohnson
+ * Puzzle piece update
+ * 
+ * 77    8/20/97 7:54p Rjohnson
+ * Removed message for deathmatch
+ * 
+ * 76    8/15/97 3:35p Bgokey
+ * 
+ * 75    8/12/97 6:10p Mgummelt
+ * 
+ * 74    8/05/97 11:13a Mgummelt
+ * 
+ * 73    8/05/97 11:12a Mgummelt
+ * 
+ * 72    7/25/97 3:59p Mgummelt
+ * 
+ * 71    7/21/97 4:03p Mgummelt
+ * 
+ * 70    7/21/97 4:02p Mgummelt
+ * 
+ * 69    7/17/97 4:16p Rlove
+ * 
+ * 68    7/16/97 8:47p Mgummelt
+ * 
+ * 67    7/14/97 4:43p Mgummelt
+ * 
+ * 66    7/14/97 2:11p Mgummelt
+ * 
+ * 65    7/14/97 2:11p Mgummelt
+ * 
+ * 64    7/10/97 7:09p Rlove
+ * 
+ * 63    7/09/97 7:35a Rlove
+ * New thingtype of CLEARGLASS
+ * 
+ * 62    7/08/97 4:46p Rlove
+ * 
+ * 61    7/08/97 4:37p Rlove
+ * 
+ * 60    7/08/97 3:23p Rjohnson
+ * Switched messages to using a string index
+ * 
+ * 59    7/08/97 8:00a Rlove
+ * 
+ * 58    7/03/97 3:24p Mgummelt
+ * 
+ * 57    7/03/97 11:43a Mgummelt
+ * 
+ * 56    7/03/97 11:20a Mgummelt
+ * 
+ * 55    7/03/97 10:47a Mgummelt
+ * 
+ * 54    7/01/97 4:55p Mgummelt
+ * 
+ * 53    6/26/97 11:16a Rjohnson
+ * Global text for puzzle messages
+ * 
+ * 52    6/18/97 5:31p Jweier
+ * 
+ * 51    6/18/97 2:33p Jweier
+ * 
+ * 50    6/18/97 12:59p Mgummelt
+ * 
+ * 49    6/17/97 3:35p Mgummelt
+ * 
+ * 48    6/16/97 2:18p Jweier
+ * Fixed rotating door spawnflag problem
+ * 
+ * 47    6/16/97 9:14a Jweier
+ * 
+ * 46    6/01/97 5:08a Mgummelt
+ * 
+ * 45    5/27/97 8:22p Mgummelt
+ * 
+ * 43    5/27/97 7:58a Rlove
+ * New thingtypes of GreyStone,BrownStone, and Cloth.
+ * 
+ * 42    5/24/97 2:48p Rlove
+ * Taking out old Id sounds
+ * 
+ * 41    5/23/97 11:51p Mgummelt
+ * 
+ * 40    5/23/97 5:03p Jweier
+ * 
+ * 39    5/22/97 6:23p Jweier
+ * 
+ * 38    5/22/97 5:18p Rlove
+ * New door sounds
+ * 
+ * 37    5/19/97 11:36p Mgummelt
+ * 
+ * 36    5/11/97 7:30a Mgummelt
+ * 
+ * 35    5/06/97 4:27p Rjohnson
+ * Added absolute light level
+ * 
+ * 34    5/06/97 4:24p Rjohnson
+ * Added abslight to rotating doors
+ * 
+ * 33    4/30/97 5:03p Mgummelt
+ * 
+ * 32    4/29/97 1:09p Mgummelt
+ * 
+ * 31    4/29/97 12:34p Mgummelt
+ * 
+ * 30    4/26/97 1:34p Jweier
+ * 
+ * 29    4/22/97 5:55p Mgummelt
+ * 
+ * 28    4/22/97 4:42p Rjohnson
+ * Fixed a problem with doors
+ * 
+ * 27    4/19/97 1:01p Rjohnson
+ * Fixed a problem with the doors and puzzle pieces
+ * 
+ * 26    4/18/97 4:46p Rjohnson
+ * Added messages for when you don't have the puzzle pieces
+ * 
+ * 25    4/16/97 4:53p Rjohnson
+ * Added info for quake-ed
+ * 
+ * 24    4/16/97 4:45p Rjohnson
+ * Doors now work with puzzle pieces
+ * 
+ * 23    4/05/97 9:49a Rlove
+ * Uncommented out line 387 - linked buttons appear to be the culprit.
+ * 
+ * 22    4/04/97 6:49p Jweier
+ * fixed breakable brush problem (in EntitiesTouching)
+ * 
+ * 21    4/03/97 6:55a Rlove
+ * Had to comment out line 384 - it was crashing the game
+ * 
+ * 20    3/29/97 12:41p Aleggett
+ * 
+ * 19    3/27/97 12:23p Jweier
+ * Fixed up some linking problems with the rotating doors
+ * 
+ * 18    3/25/97 9:41a Jweier
+ * 
+ * 17    3/24/97 11:00a Jweier
+ * 
+ * 16    3/24/97 10:49a Jweier
+ * func_door_rotating !!!
+ * 
+ * 15    3/21/97 5:44p Jweier
+ * 
+ * 14    3/21/97 10:06a Rlove
+ * Changed break_die to chunk_death
+ * 
+ * 13    3/18/97 5:27p Aleggett
+ * Added smashable door...
+ * 
+ * 12    3/13/97 4:06p Jweier
+ * 
+ * 11    3/13/97 9:57a Rlove
+ * Changed constant DAMAGE_AIM  to DAMAGE_YES and the old DAMAGE_YES to
+ * DAMAGE_YES
+ * 
+ * 10    3/12/97 6:46p Jweier
+ * 
+ * 9     3/12/97 6:19p Jweier
+ * De-kludged the door slide, works better now
+ * 
+ * 8     3/07/97 5:25p Jweier
+ * More door slidin' madness!  (read: fixed odd door slide problem)
+ * 
+ * 7     3/06/97 5:50p Jweier
+ * 
+ * 6     3/06/97 5:41p Jweier
+ * Doors now crash down and slide up by default
+ * 
+ * 5     2/26/97 5:45p Jweier
+ * Doors can slide into place or crash into it (still no bounce though..)
+ * 
+ * 4     11/19/96 8:49a Rlove
+ * func_door is back in
+ * 
+ * 3     11/18/96 3:29p Rlove
+ * Changed sounds variable to soundtype
+ * 
+ * 2     11/11/96 1:12p Rlove
+ * Added Source Safe stuff
+ */

@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/Corpse.hc 35    9/11/97 6:56p Mgummelt $
+ * $Header: /H2 Mission Pack/HCode/Corpse.hc 4     3/19/98 12:17a Mgummelt $
  */
 
 
@@ -61,12 +61,13 @@ vector newmaxs;
 
 //Won't be necc to pass headmdl once everything has it's .headmodel
 //value set in spawn
+	self.netname="corpse";
     self.th_die = chunk_death;
 	self.touch = obj_push;
     self.health = random(10,25);
 	self.takedamage = DAMAGE_YES;
 	self.solid = SOLID_PHASE;
-	self.experience_value = 0;
+	self.experience_value = self.init_exp_val = 0;
 	if(self.classname!="monster_hydra")
 		self.movetype = MOVETYPE_STEP;//Don't get in the way	
 	if(!self.mass)
@@ -84,7 +85,7 @@ vector newmaxs;
     self.controller = self;
 	self.onfire = FALSE;
 
-	pitch_roll_for_slope('0 0 0');
+	pitch_roll_for_slope('0 0 0',self);
 
     if ((self.decap)  && (self.classname == "player"))
     {	
@@ -105,3 +106,73 @@ vector newmaxs;
 	}
 };
 
+/*
+ * $Log: /H2 Mission Pack/HCode/Corpse.hc $
+ * 
+ * 4     3/19/98 12:17a Mgummelt
+ * last bug fixes
+ * 
+ * 3     3/03/98 7:31p Mgummelt
+ * 
+ * 2     1/14/98 7:43p Mgummelt
+ * 
+ * 37    10/28/97 1:00p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 35    9/11/97 6:56p Mgummelt
+ * 
+ * 34    9/11/97 3:41p Mgummelt
+ * 
+ * 33    9/11/97 12:02p Mgummelt
+ * 
+ * 32    8/29/97 11:14p Mgummelt
+ * 
+ * 31    8/26/97 2:40p Mgummelt
+ * 
+ * 30    8/14/97 10:27p Bgokey
+ * 
+ * 29    8/14/97 1:27p Mgummelt
+ * 
+ * 28    8/14/97 1:17p Mgummelt
+ * 
+ * 27    8/13/97 5:34p Mgummelt
+ * 
+ * 26    8/13/97 1:28a Mgummelt
+ * 
+ * 25    8/12/97 6:10p Mgummelt
+ * 
+ * 24    8/06/97 10:18p Mgummelt
+ * 
+ * 23    8/06/97 11:10a Rlove
+ * 
+ * 22    7/22/97 4:13p Rlove
+ * Putting final touches on skull wizard.
+ * 
+ * 21    7/01/97 7:09a Rlove
+ * Corpses give no experience points.
+ * 
+ * 20    6/30/97 5:38p Mgummelt
+ * 
+ * 19    6/25/97 9:23p Mgummelt
+ * 
+ * 18    6/19/97 5:15p Mgummelt
+ * 
+ * 17    6/18/97 6:09p Mgummelt
+ * 
+ * 16    6/18/97 4:00p Mgummelt
+ * 
+ * 15    5/30/97 10:04p Mgummelt
+ * 
+ * 14    5/28/97 10:45a Rlove
+ * Moved sprite effects to client side - smoke, explosions, and flashes.
+ * 
+ * 13    5/27/97 10:57a Rlove
+ * Took out old Id sound files
+ * 
+ * 12    5/15/97 6:34p Rjohnson
+ * Code cleanup
+ * 
+ * 11    5/13/97 2:26p Rlove
+ * 
+ */

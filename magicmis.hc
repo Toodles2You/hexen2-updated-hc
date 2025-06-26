@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/magicmis.hc 50    10/07/97 2:22p Mgummelt $
+ * $Header: /H2 Mission Pack/HCode/magicmis.hc 5     3/18/98 3:49p Mgummelt $
  */
 
 /*
@@ -60,15 +60,6 @@ $frame select1      select2      select3      select4      select5
 $frame select6      select7      
 
 
-void chain_remove ()
-{
-	if(self.movechain.movechain!=world)
-		remove(self.movechain.movechain);
-	if(self.movechain!=world)
-		remove(self.movechain);
-	remove(self);
-}
-
 void MagicMissileTouch (void)
 {
 	if(other.classname==self.classname&&other.owner==self.owner)
@@ -117,7 +108,7 @@ void StarTwinkle (void)
 	thinktime self : 0.05;
 }
 
-void FireMagicMissile (float offset)
+void FireMagicMissile (float offset,float eidoball)
 {
 entity star1,star2;
 vector spread;
@@ -148,10 +139,13 @@ vector spread;
 	setmodel(newmis,"models/ball.mdl");
 	setsize(newmis,'0 0 0','0 0 0');
 
-	if(self.classname=="monster_eidolon")
+	if(eidoball)
 	{
 		newmis.scale=0.75;
-		setorigin(newmis,self.origin+self.proj_ofs+v_forward*48+v_right*20);
+		if(self.classname=="monster_eidolon")
+			setorigin(newmis,self.origin+self.proj_ofs+v_forward*48+v_right*20);
+		else
+			setorigin(newmis,self.origin+self.proj_ofs+v_forward*10);
 		sound(self,CHAN_AUTO,"eidolon/spell.wav",1,ATTN_NORM);
 	}
 	else
@@ -163,9 +157,10 @@ vector spread;
 
 	if(self.artifact_active&ART_TOMEOFPOWER)
 	{
-		if(self.classname=="monster_eidolon")
+		if(eidoball)
 		{
-			newmis.enemy=self.enemy;
+			if(self.classname=="monster_eidolon");
+				newmis.enemy=self.enemy;
 			newmis.classname = "eidolon spell";
 			newmis.turn_time=3;
 			newmis.dmg=random(30,40);
@@ -200,7 +195,7 @@ vector spread;
 	star1.avelocity_z=400;
 	star1.avelocity_y=300;
 	star1.angles_y=90;
-	if(self.classname=="monster_eidolon")
+	if(eidoball)
 		setmodel(star1,"models/glowball.mdl");
 	else
 	{
@@ -209,7 +204,7 @@ vector spread;
 	}
 	setorigin(star1,newmis.origin);
 	star2=spawn();
-	if(self.classname!="monster_eidolon")
+	if(eidoball)
 	{
 		star1.movechain = star2;
 		star2.drawflags(+)MLS_ABSLIGHT;
@@ -270,9 +265,9 @@ void  mmis_power()
 		return;
 
 	FireFlash();
-	FireMagicMissile(-3);
-	FireMagicMissile(0);
-	FireMagicMissile(3);
+	FireMagicMissile(-3,FALSE);
+	FireMagicMissile(0,FALSE);
+	FireMagicMissile(3,FALSE);
 	self.bluemana-=10;
 	self.attack_finished=time+0.7;
 }
@@ -283,7 +278,7 @@ void  mmis_normal()
 		return;
 
 	FireFlash();
-	FireMagicMissile(0);
+	FireMagicMissile(0,FALSE);
 	self.bluemana-=2;
 	self.attack_finished=time+0.2;
 }
@@ -378,3 +373,113 @@ void magicmis_select_from_bone (void)
 	}
 }
 
+/*
+ * $Log: /H2 Mission Pack/HCode/magicmis.hc $
+ * 
+ * 5     3/18/98 3:49p Mgummelt
+ * Last minute original game fixes, doors, eidolon, icemace, rats.
+ * 
+ * 4     3/14/98 6:37p Mgummelt
+ * 
+ * 3     2/02/98 10:26a Mgummelt
+ * 
+ * 2     1/22/98 4:05p Mgummelt
+ * 
+ * 52    10/28/97 1:01p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 50    10/07/97 2:22p Mgummelt
+ * 
+ * 49    9/19/97 8:47a Rlove
+ * 
+ * 48    9/17/97 11:22a Rlove
+ * 
+ * 47    9/17/97 11:11a Rlove
+ * 
+ * 46    9/07/97 9:42a Mgummelt
+ * 
+ * 45    9/03/97 6:01a Mgummelt
+ * 
+ * 44    9/03/97 12:25a Mgummelt
+ * 
+ * 43    9/01/97 7:41p Mgummelt
+ * 
+ * 42    8/31/97 8:52a Mgummelt
+ * 
+ * 41    8/26/97 7:38a Mgummelt
+ * 
+ * 40    8/25/97 1:09a Mgummelt
+ * 
+ * 39    8/17/97 3:06p Mgummelt
+ * 
+ * 38    8/13/97 2:56p Mgummelt
+ * 
+ * 37    8/11/97 5:31p Mgummelt
+ * 
+ * 36    8/08/97 6:21p Mgummelt
+ * 
+ * 35    8/07/97 10:30p Mgummelt
+ * 
+ * 34    8/06/97 10:19p Mgummelt
+ * 
+ * 33    8/04/97 8:03p Mgummelt
+ * 
+ * 32    8/01/97 9:52p Mgummelt
+ * 
+ * 31    7/30/97 10:43p Mgummelt
+ * 
+ * 30    7/30/97 8:26p Mgummelt
+ * 
+ * 29    7/30/97 3:33p Mgummelt
+ * 
+ * 28    7/29/97 6:54p Mgummelt
+ * 
+ * 27    7/29/97 5:45p Mgummelt
+ * 
+ * 26    7/29/97 3:46p Mgummelt
+ * 
+ * 25    7/28/97 8:27p Mgummelt
+ * 
+ * 24    7/28/97 7:50p Mgummelt
+ * 
+ * 23    7/24/97 12:32p Mgummelt
+ * 
+ * 22    7/15/97 2:20p Mgummelt
+ * 
+ * 21    7/14/97 9:30p Mgummelt
+ * 
+ * 20    7/10/97 7:21p Mgummelt
+ * 
+ * 19    7/09/97 6:31p Mgummelt
+ * 
+ * 18    7/01/97 3:30p Mgummelt
+ * 
+ * 17    7/01/97 2:21p Mgummelt
+ * 
+ * 16    6/30/97 5:38p Mgummelt
+ * 
+ * 15    6/23/97 6:57p Mgummelt
+ * 
+ * 14    6/23/97 4:54p Mgummelt
+ * 
+ * 13    6/23/97 4:50p Mgummelt
+ * 
+ * 12    6/18/97 6:58p Mgummelt
+ * 
+ * 11    6/18/97 4:19p Mgummelt
+ * 
+ * 10    6/18/97 4:00p Mgummelt
+ * 
+ * 9     6/10/97 12:09a Mgummelt
+ * 
+ * 8     6/09/97 10:22p Mgummelt
+ * 
+ * 7     6/07/97 8:59p Mgummelt
+ * 
+ * 6     6/06/97 4:08p Mgummelt
+ * 
+ * 5     6/05/97 9:29a Rlove
+ * Weapons now have deselect animations
+ * 
+ */

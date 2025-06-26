@@ -4,7 +4,7 @@
 //** spider.hc
 //** bgokey
 //**
-//** $Header: /H3/game/hcode/spider.hc 56    9/09/97 4:00p Mgummelt $
+//** $Header: /H2 Mission Pack/HCode/spider.hc 11    3/22/98 6:27p Jmonroe $
 //**
 //**************************************************************************
 
@@ -99,14 +99,14 @@ float SpiderExp[4] =
 
 // CODE --------------------------------------------------------------------
 
-void monster_spider(void) {}
+//void monster_spider(void) {}
 
 //==========================================================================
 //
 // monster_spider_red_large
 //
 //==========================================================================
-/*QUAKED monster_spider_red_large (1 0.3 0) (-16 -16 0) (16 16 26) AMBUSH STUCK JUMP PLAY_DEAD DORMANT ONWALL
+/*QUAKED monster_spider_red_large (1 0.3 0) (-16 -16 0) (16 16 26) AMBUSH STUCK JUMP x DORMANT ONWALL
 Large red spider.
 
 ------- key / value ----------------------------------
@@ -120,6 +120,11 @@ IMPORTANT!  Put ONWALL spiders 8 pixels away from the wall you want them to be o
 
 void monster_spider_red_large(void)
 {
+	if(!self.th_init)
+	{
+		self.th_init=monster_spider_red_large;
+		self.init_org=self.origin;
+	}
 	SpiderInit(SPIDER_RED_LARGE);
 }
 
@@ -128,7 +133,7 @@ void monster_spider_red_large(void)
 // monster_spider_red_small
 //
 //==========================================================================
-/*QUAKED monster_spider_red_small (1 0.3 0) (-12 -12 0) (12 12 16) AMBUSH STUCK JUMP PLAY_DEAD DORMANT ONWALL
+/*QUAKED monster_spider_red_small (1 0.3 0) (-12 -12 0) (12 12 16) AMBUSH STUCK JUMP x DORMANT ONWALL
 Small red spider.
 
 ------- key / value ----------------------------------
@@ -142,6 +147,11 @@ IMPORTANT!  Put ONWALL spiders 8 pixels away from the wall you want them to be o
 
 void monster_spider_red_small(void)
 {
+	if(!self.th_init)
+	{
+		self.th_init=monster_spider_red_small;
+		self.init_org=self.origin;
+	}
 	SpiderInit(SPIDER_RED_SMALL);
 }
 
@@ -150,7 +160,7 @@ void monster_spider_red_small(void)
 // monster_spider_yellow_large
 //
 //==========================================================================
-/*QUAKED monster_spider_yellow_large (1 0.3 0) (-16 -16 0) (16 16 26) AMBUSH STUCK JUMP PLAY_DEAD DORMANT ONWALL
+/*QUAKED monster_spider_yellow_large (1 0.3 0) (-16 -16 0) (16 16 26) AMBUSH STUCK JUMP x DORMANT ONWALL
 Large yellow spider.
 
 ------- key / value ----------------------------------
@@ -164,6 +174,11 @@ IMPORTANT!  Put ONWALL spiders 8 pixels away from the wall you want them to be o
 
 void monster_spider_yellow_large(void)
 {
+	if(!self.th_init)
+	{
+		self.th_init=monster_spider_yellow_large;
+		self.init_org=self.origin;
+	}
 	SpiderInit(SPIDER_YELLOW_LARGE);
 }
 
@@ -172,7 +187,7 @@ void monster_spider_yellow_large(void)
 // monster_spider_yellow_small
 //
 //==========================================================================
-/*QUAKED monster_spider_yellow_small (1 0.3 0) (-12 -12 0) (12 12 16) AMBUSH STUCK JUMP PLAY_DEAD DORMANT ONWALL
+/*QUAKED monster_spider_yellow_small (1 0.3 0) (-12 -12 0) (12 12 16) AMBUSH STUCK JUMP x DORMANT ONWALL
 Small yellow spider.
 ------- key / value ----------------------------------
 health = 100
@@ -185,23 +200,13 @@ IMPORTANT!  Put ONWALL spiders 8 pixels away from the wall you want them to be o
 
 void monster_spider_yellow_small(void)
 {
+	if(!self.th_init)
+	{
+		self.th_init=monster_spider_yellow_small;
+		self.init_org=self.origin;
+	}
 	SpiderInit(SPIDER_YELLOW_SMALL);
 }
-
-void spider_possum_up (void) [-- $sdeath20..$sdeath1]
-{
-	if (cycle_wrapped)
-		self.think=self.th_run;
-}
-
-void spider_playdead (void)
-{
-	self.frame=$sdeath20;
-	self.think=spider_playdead;
-	self.nextthink=time+0.1;
-	ai_stand();
-}
-
 //==========================================================================
 //
 // SpiderInit
@@ -269,7 +274,7 @@ void spider_onwall_wait_init ()
 	self.view_ofs=v_forward*36;
 	self.movedir=v_forward;
 	traceline(self.origin,self.origin-v_forward*100,TRUE,self);
-	pitch_roll_for_slope(trace_plane_normal);
+	pitch_roll_for_slope(trace_plane_normal,self);
 	self.use=spider_onwall_use;
 	if(self.targetname=="")
 	{
@@ -288,7 +293,7 @@ void SpiderInit(float type)
 		return;
 	}
 
-	if(!self.flags2&FL_SUMMONED)
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 		precache_spider();
 
 	setmodel(self, "models/spider.mdl");
@@ -327,7 +332,10 @@ void SpiderInit(float type)
 	self.mintel = 10;
 	self.netname = "spider";
 
-	self.health = SpiderHealth[type];
+	if(!self.health)
+		self.health = SpiderHealth[type];
+	if(!self.max_health)
+		self.max_health=self.health;
 	self.experience_value = SpiderExp[type];
 
 	self.attack_state = AS_STRAIGHT;
@@ -339,11 +347,10 @@ void SpiderInit(float type)
 	self.th_melee = SpiderMeleeBegin;
 	self.th_missile = SpiderJumpBegin;
 	self.th_pain = SpiderPain;
-	self.th_possum = spider_playdead;
-	self.th_possum_up = spider_possum_up;
 
 	self.flags = self.flags|FL_MONSTER;
 
+	self.init_exp_val = self.experience_value;
 	if(self.spawnflags&ONWALL)
 		spider_onwall_wait_init();
 	else
@@ -376,7 +383,7 @@ void SpiderGone(void)
 
 void SpiderPain(entity attacker, float total_damage)
 {
-	if(random(self.health)>total_damage)
+	if(random(self.health)>total_damage&&!(self.flags&FL_FLY))
 		return;
 
 	sound(self, CHAN_VOICE, "spider/pain.wav", 1, ATTN_NORM);
@@ -426,6 +433,7 @@ void SpiderMeleeBegin(void) [++ $sattak1..$sattak12]
 	thinktime self : SPIDER_FRAME_TIME;
 }
 
+/*
 void SpiderMeleeSettle (void) [++ $sjump12..$sjump16]
 {
 	ai_charge(self.speed/2);
@@ -433,6 +441,7 @@ void SpiderMeleeSettle (void) [++ $sjump12..$sjump16]
 		self.think=self.th_run;
 	thinktime self : SPIDER_FRAME_TIME;
 }
+*/
 
 void SpiderJumpTouch ()
 {
@@ -447,7 +456,7 @@ void SpiderJumpBegin(void) [++ $sjump1..$sjump11]
 {
 	if(self.frame==$sjump1)
 	{
-		if(!CheckJump()||self.level<20)
+		if(!CheckJump(FALSE)||self.level<20)
 		{
 			self.think=SpiderRun;
 			self.nextthink=time;
@@ -615,11 +624,11 @@ void SpiderRun(void) [++ $swalk1..$swalk16]
 	if(random()<0.2)
 	{
 		spider_noise();
-		pitch_roll_for_slope('0 0 0');
+		pitch_roll_for_slope('0 0 0',self);
 	}
 
-	if ((self.flags2 & FL_SUMMONED)  && (self.lifetime < time))  // Summoned spiders only live a little while
-		SpiderDie();
+//	if ((self.flags2 & FL_SUMMONED)  && (self.lifetime < time))  // Summoned spiders only live a little while
+//		SpiderDie();
 	thinktime self : SPIDER_FRAME_TIME;
 }
 
@@ -635,6 +644,6 @@ void SpiderWalk(void) [++ $swalk1..$swalk16]
 	if(random()<0.1)
 	{
 		spider_noise();
-		pitch_roll_for_slope('0 0 0');
+		pitch_roll_for_slope('0 0 0',self);
 	}
 }

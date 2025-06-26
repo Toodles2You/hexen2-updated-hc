@@ -111,11 +111,14 @@ float chunk_size;
 
 void shatter ()
 {
-vector dir,spin,org;
-float numshards,maxshards,rng;
+vector dir,org;
+//vector spin;
+//float numshards;
+float maxshards,rng,thngtyp;
 string type;
 	if(self.movechain!=world&&!self.movechain.flags&FL_CLIENT)
 		remove(self.movechain);
+
 	if(self.scale==0)
 		self.scale=1;
 	if(self.classname=="snowball")
@@ -126,8 +129,8 @@ string type;
 	if(self.deathtype=="ice shatter"||self.deathtype=="ice melt")
 	{
 //origin color radius count
-		particleexplosion(org,14,25,50);
-//		particle2(org,'-50 -50 -50','50 50 50',145,14,50);
+		if(!deathmatch&&!coop)
+			particleexplosion(org,14,25,50);
 		if(self.deathtype=="ice shatter")
 			rng=600;
 		else
@@ -135,24 +138,25 @@ string type;
 		if(self.classname!="snowball")
 			sound(self,CHAN_BODY,"misc/icestatx.wav",1,ATTN_NORM);
 		type="ice";
+		thngtyp=THINGTYPE_ICE;
 	}
 	else if(self.deathtype=="stone crumble")
 	{
 		sound(self,CHAN_BODY,"misc/sshatter.wav",1,ATTN_NORM);
-		particleexplosion(org,10,60,50);
-//		particle2(org,'-30 -30 -30','30 30 30',16,10,50);
+		if(!deathmatch&&!coop)
+			particleexplosion(org,10,60,50);
 		rng=450;
 		type="pebbles";
+		thngtyp=THINGTYPE_GREYSTONE;
 	}
-/*	else if(self.deathtype=="burnt crumble")
-	{
-		sound(self,CHAN_BODY,"misc/bshatter.wav",1,ATTN_NORM);
-		particleexplosion(org,1,60,50);
-//		particle2(org,'-30 -30 -30','30 30 30',1,10,50);
-		rng=200;
-		type="ashes";
-	}
-*/	while(numshards<maxshards)
+//	if(deathmatch||coop)
+//	{
+		dir_x=random(0-rng,rng);
+		dir_y=random(0-rng,rng);
+		dir_z=random(0-rng,rng);
+		starteffect(CE_CHUNK, org, thngtyp, dir, maxshards);
+/*	}
+	else while(numshards<maxshards)
 	{
 		dir_x=random(0-rng,rng);
 		dir_y=random(0-rng,rng);
@@ -163,8 +167,7 @@ string type;
 		throw_shard(org,dir,spin,type,self.size);
 		numshards+=1;
 	}
-	if(self.movechain!=world&&!self.movechain.flags&FL_CLIENT)
-		remove(self.movechain);
+*/
 	if(self.classname!="player")	
 		remove(self);
 }

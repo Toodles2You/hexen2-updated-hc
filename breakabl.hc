@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/breakabl.hc 46    9/04/97 3:00p Mgummelt $
+ * $Header: /H2 Mission Pack/HCode/breakabl.hc 5     2/20/98 1:00p Jmonroe $
  */
 
 /*
@@ -21,7 +21,7 @@ float BREAK_INVISIBLE  = 128;
 
 float (entity e1, entity e2) EntitiesTouching;
 
-float breakhealth[21] = 
+float breakhealth[25] = 
 {
 	0,
 	75,		// THINGTYPE_GREYSTONE
@@ -43,7 +43,11 @@ float breakhealth[21] =
 	10,		// THINGTYPE_GLASS
 	50,		// THINGTYPE_ICE
 	10,		// THINGTYPE_CLEARCLASS
-	10		// THINGTYPE_CLEARCLASS
+	10,		// THINGTYPE_REDGLASS
+	10,		// THINGTYPE_ACID
+	10,		// THINGTYPE_METEOR
+	30,		// THINGTYPE_GREENFLESH
+	40		// THINGTYPE_BONE
 };
 
 //============================================================================
@@ -187,31 +191,15 @@ void brush_use()
 	}
 }
 
+/*
 void brush_no_link_use (void)
 {
 //entity found, starte;
 
 	SUB_UseTargets();
-/*	if(self.target)
-	{
-		found=find(found,targetname,self.target);
-		if(found!=world)
-		{
-			starte=found;
-			found.think=found.use;
-			thinktime found : 0;
-			found=find(found,targetname,self.target);
-			while(found!=starte&&found!=world)
-			{
-				found.think=found.use;
-				thinktime found : 0;
-				found=find(found,targetname,self.target);
-			}
-		}
-	}
-*/
 	self.th_die();
 }
+*/
 
 /*QUAKED breakable_brush (0 0 1) ? KILLALL HIERARCH NOLINK CHECKNAME ORDERED TRANSLUCENT INVINCIBLE INVISIBLE
 Breakable window or wall
@@ -255,8 +243,14 @@ thingtype - type of chunks and sprites it will generate
    14 - metal stone
    15 - metal cloth
    16 - spider web
+   17 - stained glass
+   18 - ice
    19 - clear glass
    20 - red glass
+   21 - acid
+   22 - meteor
+   23 - green flesh
+   24 - bone
 
 health - amount of damage item can take.  Default is based on thingtype
    glass       -  25
@@ -342,3 +336,132 @@ void breakable_brush()
 	self.ltime = time;
 }
 
+/*
+ * $Log: /H2 Mission Pack/HCode/breakabl.hc $
+ * 
+ * 5     2/20/98 1:00p Jmonroe
+ * added thingtype_bone
+ * 
+ * 4     2/16/98 10:54a Mgummelt
+ * 
+ * 3     2/12/98 5:55p Jmonroe
+ * remove unreferenced funcs
+ * 
+ * 2     1/15/98 6:04p Mgummelt
+ * 
+ * 48    10/28/97 1:00p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 46    9/04/97 3:00p Mgummelt
+ * 
+ * 45    8/24/97 8:32p Mgummelt
+ * 
+ * 44    8/23/97 5:16p Rlove
+ * 
+ * 43    8/18/97 1:45p Mgummelt
+ * 
+ * 42    8/14/97 7:12p Mgummelt
+ * 
+ * 41    7/21/97 3:03p Rlove
+ * 
+ * 40    7/14/97 2:11p Mgummelt
+ * 
+ * 39    7/11/97 7:06a Rlove
+ * 
+ * 38    7/09/97 7:35a Rlove
+ * New thingtype of CLEARGLASS
+ * 
+ * 37    6/30/97 9:31a Rlove
+ * Added invisible breakable brushes
+ * 
+ * 36    6/25/97 9:23p Mgummelt
+ * 
+ * 35    6/18/97 4:00p Mgummelt
+ * 
+ * 34    6/17/97 2:30p Rlove
+ * tighten up health code a bit
+ * 
+ * 33    6/15/97 5:10p Mgummelt
+ * 
+ * 32    6/14/97 2:59p Mgummelt
+ * 
+ * 31    6/06/97 10:58a Rjohnson
+ * Fix for lights
+ * 
+ * 30    6/05/97 8:51p Mgummelt
+ * 
+ * 28    6/03/97 10:48p Mgummelt
+ * 
+ * 27    5/28/97 5:10p Rlove
+ * 
+ * 26    5/27/97 8:22p Mgummelt
+ * 
+ * 25    5/27/97 7:58a Rlove
+ * New thingtypes of GreyStone,BrownStone, and Cloth.
+ * 
+ * 24    5/21/97 3:34p Rlove
+ * New chunks
+ * 
+ * 23    5/17/97 1:23p Jweier
+ * 
+ * 22    5/12/97 11:11p Mgummelt
+ * 
+ * 21    5/11/97 9:11p Mgummelt
+ * 
+ * 20    5/06/97 4:27p Rjohnson
+ * Added absolute light level
+ * 
+ * 19    4/26/97 3:52p Mgummelt
+ * 
+ * 18    4/24/97 2:53p Rjohnson
+ * Added backpack functionality and spawning of objects
+ * 
+ * 17    4/21/97 12:30p Rjohnson
+ * Added translucent flag
+ * 
+ * 16    4/09/97 4:56p Jweier
+ * If a brush is targetted, it will not take damage
+ * 
+ * 15    3/28/97 10:58a Jweier
+ * 
+ * 14    3/28/97 10:40a Jweier
+ * 
+ * 13    3/28/97 10:07a Jweier
+ * 
+ * 12    3/27/97 12:29p Jweier
+ * Added QuakeEd comments for clarification
+ * 
+ * 11    3/26/97 2:46p Aleggett
+ * Allowed breakable brushes to "use" an entity when they "die".
+ * 
+ * 10    3/21/97 9:38a Rlove
+ * Created CHUNK.HC and MATH.HC, moved brush_die to chunk_death so others
+ * can use it.
+ * 
+ * 9     3/20/97 6:15p Jweier
+ * 
+ * 8     3/19/97 6:30p Jweier
+ * reversed priority numbering (easier on designer)
+ * 
+ * 7     3/19/97 5:18p Jweier
+ * added more hierarchial functionality
+ * 
+ * 6     3/15/97 5:48p Jweier
+ * Ordered breaking!
+ * 
+ * 5     3/15/97 5:28p Jweier
+ * Added in more features (ordered breaks, name checks, etc)
+ * 
+ * 4     3/15/97 4:16p Jweier
+ * Basic hierarchial breakable object code added!
+ * 
+ * 3     3/13/97 9:57a Rlove
+ * Changed constant DAMAGE_AIM  to DAMAGE_YES and the old DAMAGE_YES to
+ * DAMAGE_NO_GRENADE
+ * 
+ * 2     3/06/97 8:37a Rlove
+ * Added thingtype of metal to Breakable entity
+ * 
+ * 1     3/04/97 4:24p Rlove
+ */

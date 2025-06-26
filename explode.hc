@@ -7,10 +7,11 @@ void()BlowUp=
 	{
 		self.v_angle=RandomVector('180 180 180');
 		self.scale=self.dmg;
+		if(self.enemy)
+			if(self.enemy.health>0&&self.enemy.flags2&FL_ALIVE)//Stay with enemy;
+				setorigin(self,self.enemy.origin+self.view_ofs);
 	    T_RadiusDamage (self, self.owner, self.dmg*100, world);
 		self.dmg += 0.1;
-		if(self.enemy)	//Stay with enemy;
-			setorigin(self,self.enemy.origin+self.view_ofs);
 		self.think=BlowUp;
 		thinktime self : 0.025;
 	}
@@ -45,6 +46,37 @@ local entity fireballblast;
 	remove(self);
 };
 
+void BecomeExplosion (float explodetype)
+{
+	if (explodetype)
+	{
+		if(explodetype==CE_FLOOR_EXPLOSION)
+			starteffect(CE_FLOOR_EXPLOSION , self.origin+'0 0 64');
+		else
+			starteffect(explodetype , self.origin);
+	}
+	else
+	{
+		if (self.flags2&FL_SMALL)
+			starteffect(CE_SM_EXPLOSION , self.origin);
+		else if(self.flags&FL_ONGROUND)
+			starteffect(CE_FLOOR_EXPLOSION , self.origin+'0 0 64');
+		else
+			starteffect(CE_LG_EXPLOSION , self.origin);
+	}
+
+	if(self.classname=="multigrenade")
+	{//Let sounds play here
+		self.effects=EF_NODRAW;
+		self.velocity='0 0 0';
+		self.movetype=MOVETYPE_NONE;
+		self.think=SUB_Remove;
+		thinktime self : 3;
+	}
+	else
+		remove(self);
+}
+
 void SmallExplosion (void)
 {
 	sound(self,CHAN_AUTO,"weapons/explode.wav",0.5,ATTN_NORM);
@@ -57,7 +89,7 @@ entity ignore;
 	if(self.classname=="timebomb")
 	{
 		sound(self,CHAN_AUTO,"weapons/explode.wav",1,ATTN_NORM);
-		ignore=self.enemy;
+		ignore=self.owner;
 	}
 	else if(self.classname=="pincer")
 	{
@@ -91,6 +123,7 @@ entity ignore;
 
 void() MultiExplode =
 {
+float nummeteorites;
 //FIXME: For some reason, the light casting effects in Hex2
 //are a lot more costly than they were in Quake...
 	if(self.classname=="stickmine")
@@ -103,9 +136,12 @@ void() MultiExplode =
 
 	if(self.classname=="meteor")
 	{
-	local float nummeteorites;
 		nummeteorites=random(3,10);
-		while(nummeteorites>0)
+		if(deathmatch||coop)
+		{
+			starteffect(CE_CHUNK, self.origin, THINGTYPE_METEOR,'0 0 600', nummeteorites);
+		}
+		else while(nummeteorites>0)
 		{
 			FireMeteor("minimeteor");
 			nummeteorites =nummeteorites - 1;

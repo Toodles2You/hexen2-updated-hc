@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/WORLD.hc 71    10/03/97 4:06p Rjohnson $
+ * $Header: /H2 Mission Pack/HCode/WORLD.hc 17    3/27/98 2:49p Jmonroe $
  */
 
 //void() InitBodyQue;
@@ -10,15 +10,10 @@ void() main =
 // these are just commands the the prog compiler to copy these files
 
 //	precache_file ("progs.dat");
-//	precache_file2 ("progs2.dat");
 	precache_file ("gfx.wad");
 //	precache_file ("hexen.rc");
-	precache_file ("default.cfg");
+	precache_file4 ("default.cfg");	//want this new one in pak3
 
-//	precache_file ("end1.bin");
-//	precache_file2 ("end2.bin");
-
-//	precache_file ("demo1.dem");
 //	precache_file ("demo2.dem");
 //	precache_file ("demo3.dem");
 
@@ -36,7 +31,11 @@ void() main =
 
 	precache_sound ("ambience/water1.wav");
 	precache_sound ("ambience/wind2.wav");
-	
+
+//!!just to build the pak files!!
+	precache_file4("models/buddaL.mdl");
+	precache_file4("models/buddaR.mdl");
+
 // demo
 	precache_file("maps/demo1.bsp");
 	precache_file("maps/demo2.bsp");
@@ -105,18 +104,55 @@ void() main =
     precache_file2("midi/roma1.mid");
     precache_file2("midi/roma2.mid");
     precache_file2("midi/roma3.mid");
+
+    precache_file4("maps/keep1.bsp");
+    precache_file4("maps/keep2.bsp");
+    precache_file4("maps/keep3.bsp");
+    precache_file4("maps/keep4.bsp");
+    precache_file4("maps/keep5.bsp");
+
+    precache_file4("midi/tulku1.mid");
+    precache_file4("midi/tulku2.mid");
+    precache_file4("midi/tulku3.mid");
+    precache_file4("midi/tulku4.mid");
+    precache_file4("midi/tulku5.mid");
+    precache_file4("midi/tulku6.mid");
+    precache_file4("midi/tulku7.mid");
+    precache_file4("midi/tulku8.mid");
+    precache_file4("midi/tulku9.mid");
+    precache_file4("midi/tulku10.mid");
+
+    precache_file4("maps/tibet1.bsp");
+    precache_file4("maps/tibet2.bsp");
+    precache_file4("maps/tibet3.bsp");
+    precache_file4("maps/tibet4.bsp");
+    precache_file4("maps/tibet5.bsp");
+    precache_file4("maps/tibet6.bsp");
+    precache_file4("maps/tibet7.bsp");
+    precache_file4("maps/tibet8.bsp");
+    precache_file4("maps/tibet9.bsp");
+    precache_file4("maps/tibet10.bsp");
+
+	precache_file4("t9.dem");
+    precache_file4("maps/thomas.bsp");
+    precache_file4("maps/monsters.bsp");
+    precache_file4("maps/sheephunt.bsp");
+    precache_file4("maps/mgallmon.bsp");
 };
 
 
 entity	lastspawn;
 
 //=======================
-/*QUAKED worldspawn (0 0 0) ?
+/*QUAKED worldspawn (0 0 0) ? MissionPack 
 Only used for the world entity.
-Set message to the level name.
-Set sounds to the cd track to play.
+Set message to the string index of the level name.
+Set CD to the cd track to play.
+Set MIDI to the midi file name
+Check MissionPack to enable the enhanced door and plat code
 -------------------------FIELDS-------------------------
-worldtype - determines different models to use (pots, torches)
+target = sheep enables the Sheep Hunter code
+worldtype - determines which skin obj_pots use
 0 - castle
 1 - egypt
 2 - meso
@@ -127,8 +163,6 @@ worldtype - determines different models to use (pots, torches)
 void() worldspawn =
 {
 	lastspawn = world;
-
-//	InitBodyQue ();
 
 // custom map attributes
 	if (self.model == "maps/eidolon.bsp"||
@@ -150,21 +184,17 @@ void() worldspawn =
 		cvar_set ("sv_gravity", "800");
 
 // the area based ambient sounds MUST be the first precache_sounds
-
-// player precaches	
 	W_Precache ();			// get weapon precaches
 
 	Precache_wav ();		// Precache Raven wavs 
 
-	Precache_Id_mdl ();		// Precache Id models
+	Precache_misc();
 
-	Precache_mdl ();		// Precache Raven models
-
-	// FIXME: these need to be added to Precache_mdl
-	precache_model("models/schunk1.mdl");
-	precache_model("models/schunk2.mdl");
-	precache_model("models/schunk3.mdl");
-	precache_model("models/schunk4.mdl");
+//	dprint("All classes precached\n");
+	Precache_Paladin();
+	Precache_Crusader();
+	Precache_Necromancer();
+	Precache_Assassin();
 
 	Precache_spr ();		// Precache Raven sprites
 

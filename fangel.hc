@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/fangel.hc 52    9/25/97 12:15p Mgummelt $
+ * $Header: /H2 Mission Pack/HCode/fangel.hc 12    3/24/98 4:01p Jmonroe $
  */
 
 /*
@@ -514,10 +514,10 @@ float chance;
 
 void() fangel_deathframes =
 {
-entity stemp;//,skull;
-
 	if(self.health<=-40)
 	{
+		stopSound(self,CHAN_WEAPON);
+		//sound (self, CHAN_WEAPON, "misc/null.wav", 1, ATTN_NORM);//cut off wings sound
 		chunk_death();
 		return;
 	}
@@ -802,35 +802,53 @@ void() init_fangel =
 
 	self.monster_stage = FANGEL_STAGE_WAIT;
 
-	precache_model2 ("models/fangel.mdl");
-	precache_model2 ("models/faspell.mdl");
-	precache_model2 ("models/fablade.mdl");
-	precache_model2 ("models/h_fangel.mdl");
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	{
+		precache_model4 ("models/fangel.mdl");//converted for MP
+		precache_model2 ("models/faspell.mdl");
+		precache_model2 ("models/fablade.mdl");
+		precache_model4 ("models/h_fangel.mdl");
 
-    precache_sound2("fangel/fly.wav");
-	precache_sound2("fangel/deflect.wav");
-	precache_sound2("fangel/hand.wav");
-	precache_sound2("fangel/wing.wav");
+		precache_sound2("fangel/fly.wav");
+		precache_sound2("fangel/deflect.wav");
+		precache_sound2("fangel/hand.wav");
+		precache_sound2("fangel/wing.wav");
+	}
 
+	if (self.classname == "monster_fallen_angel")
+	{
+		if(!self.health)
+			self.health = 250;
+		if(!self.experience_value)
+			self.experience_value = 150;
+	}
+	else
+	{
+		if(!self.health)
+			self.health = 500;
+		if(!self.experience_value)
+			self.experience_value = 400;
+	}
 	CreateEntityNew(self,ENT_FANGEL,"models/fangel.mdl",fangel_deathframes);
 
 	self.skin = 0;
 
-	self.hull = HULL_BIG;
+	self.hull = HULL_SCORPION;//HULL_BIG;
 	if (self.classname == "monster_fallen_angel")
 	{
-		precache_sound2("fangel/ambi1.wav");
+		if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+			precache_sound2("fangel/ambi1.wav");
 		self.skin = 0;
-		self.health = 250;
-		self.experience_value = 150;
 	}
 	else
 	{
-		precache_sound2("fangel/ambi2.wav");
+		if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+			precache_sound2("fangel/ambi2.wav");
 		self.skin = 1;
-		self.health = 500;
-		self.experience_value = 400;
 	}
+
+	if(!self.max_health)
+		self.max_health=self.health;
 
 	self.th_stand = fangel_flyframes;
 	self.th_walk = fangel_flyframes;
@@ -855,6 +873,7 @@ void() init_fangel =
 	if (self.classname == "monster_fallen_angel_lord")
 		self.drawflags (+) DRF_TRANSLUCENT;
 
+	self.init_exp_val = self.experience_value;
 	self.pausetime = 99999999;
 	self.frame=$fhand1;
 	self.think=fangel_wait;
@@ -863,7 +882,7 @@ void() init_fangel =
 };
 
 
-/*QUAKED monster_fallen_angel (1 0.3 0) (-14 -14 -41) (14 14 23) AMBUSH STUCK JUMP PLAY_DEAD DORMANT
+/*QUAKED monster_fallen_angel (1 0.3 0) (-14 -14 -41) (14 14 23) AMBUSH STUCK JUMP x DORMANT
 New item for QuakeEd
 
 -------------------------FIELDS-------------------------
@@ -872,13 +891,21 @@ New item for QuakeEd
 */
 void() monster_fallen_angel =
 {
-	precache_sound2("fangel/death.wav");
-	precache_sound2("fangel/pain.wav");
+	if(!self.th_init)
+	{
+		self.th_init=monster_fallen_angel;
+		self.init_org=self.origin;
+	}
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	{
+		precache_sound2("fangel/death.wav");
+		precache_sound2("fangel/pain.wav");
+	}
 
 	init_fangel();
 };
 
-/*QUAKED monster_fallen_angel_lord (1 0.3 0) (-14 -14 -41) (14 14 23) AMBUSH STUCK JUMP PLAY_DEAD DORMANT
+/*QUAKED monster_fallen_angel_lord (1 0.3 0) (-14 -14 -41) (14 14 23) AMBUSH STUCK JUMP x DORMANT
 New item for QuakeEd
 
 -------------------------FIELDS-------------------------
@@ -887,9 +914,154 @@ New item for QuakeEd
 */
 void() monster_fallen_angel_lord =
 {
-	precache_sound2("fangel/death2.wav");
-	precache_sound2("fangel/pain2.wav");
+	if(!self.th_init)
+	{
+		self.th_init=monster_fallen_angel_lord;
+		self.init_org=self.origin;
+	}
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	{
+		precache_sound2("fangel/death2.wav");
+		precache_sound2("fangel/pain2.wav");
+	}
 
 	init_fangel();
 };
 
+
+
+/*
+ * $Log: /H2 Mission Pack/HCode/fangel.hc $
+ * 
+ * 12    3/24/98 4:01p Jmonroe
+ * removed unused var
+ * 
+ * 11    3/19/98 12:17a Mgummelt
+ * last bug fixes
+ * 
+ * 10    3/14/98 5:52p Mgummelt
+ * changed precaches to precache 4 for old models converted for MP
+ * 
+ * 9     3/13/98 3:27a Mgummelt
+ * Replaced all sounds that played a null.wav with stopSound commands
+ * 
+ * 8     3/09/98 3:05p Mgummelt
+ * 
+ * 7     3/03/98 7:31p Mgummelt
+ * 
+ * 6     2/20/98 4:39p Jmonroe
+ * removed unused variables
+ * 
+ * 5     2/20/98 3:55p Mgummelt
+ * 
+ * 4     2/05/98 12:30p Mgummelt
+ * 
+ * 3     2/04/98 4:58p Mgummelt
+ * spawnflags on monsters cleared out
+ * 
+ * 54    10/28/97 1:00p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 52    9/25/97 12:15p Mgummelt
+ * 
+ * 51    9/07/97 9:41a Mgummelt
+ * 
+ * 50    9/03/97 3:49a Mgummelt
+ * 
+ * 49    8/31/97 2:36p Mgummelt
+ * 
+ * 48    8/31/97 11:40a Mgummelt
+ * 
+ * 47    8/31/97 11:38a Mgummelt
+ * To which I say- shove where the sun don't shine- sideways!  Yeah!
+ * How's THAT for paper cut!!!!
+ * 
+ * 46    8/31/97 8:52a Mgummelt
+ * 
+ * 45    8/29/97 11:14p Mgummelt
+ * 
+ * 44    8/29/97 4:17p Mgummelt
+ * Long night
+ * 
+ * 43    8/29/97 12:59a Mgummelt
+ * 
+ * 42    8/27/97 7:07p Mgummelt
+ * 
+ * 41    8/26/97 4:18p Rlove
+ * 
+ * 40    8/23/97 4:30p Rlove
+ * 
+ * 37    8/19/97 8:12p Rlove
+ * 
+ * 36    8/19/97 5:37p Rjohnson
+ * Fixed precache problem
+ * 
+ * 35    8/19/97 11:01a Rlove
+ * 
+ * 28    8/05/97 9:24a Rlove
+ * Not so linear in her movements
+ * 
+ * 25    7/07/97 5:07p Rlove
+ * 
+ * 24    7/03/97 5:06p Rlove
+ * 
+ * 23    7/03/97 8:47a Rlove
+ * 
+ * 22    6/21/97 1:23p Rlove
+ * 
+ * 21    6/19/97 3:08p Rjohnson
+ * Code space optimizations
+ * 
+ * 20    5/23/97 3:43p Mgummelt
+ * 
+ * 19    5/22/97 3:29p Mgummelt
+ * 
+ * 18    5/19/97 11:36p Mgummelt
+ * 
+ * 17    5/15/97 6:34p Rjohnson
+ * Code cleanup
+ * 
+ * 16    5/07/97 11:12a Rjohnson
+ * Added a new field to walkmove and movestep to allow for setting the
+ * traceline info
+ * 
+ * 15    4/07/97 2:56p Mgummelt
+ * 
+ * 14    4/07/97 1:39p Rjohnson
+ * Added sounds to the imp, fangel, and hydra
+ * 
+ * 13    3/27/97 1:56p Rjohnson
+ * Precache problem
+ * 
+ * 12    3/19/97 5:53p Jweier
+ * added CreateEntity change (was backed up!)
+ * 
+ * 11    3/19/97 4:15p Rjohnson
+ * Removed test code
+ * 
+ * 10    3/17/97 5:27p Rjohnson
+ * Added pain frames
+ * 
+ * 9     3/14/97 5:08p Rjohnson
+ * Removed the debugging print
+ * 
+ * 8     3/13/97 9:57a Rlove
+ * Changed constant DAMAGE_AIM  to DAMAGE_YES and the old DAMAGE_YES to
+ * DAMAGE_NO_GRENADE
+ * 
+ * 7     3/12/97 10:57p Rjohnson
+ * Added the death frames with the particles
+ * 
+ * 6     3/12/97 4:56p Rjohnson
+ * Refinement
+ * 
+ * 5     1/28/97 10:30a Rjohnson
+ * Added generic experience value and missile rebounding more random
+ * 
+ * 4     1/17/97 10:36a Rjohnson
+ * Made her actually do stuff!
+ * 
+ * 3     1/15/97 9:48a Rjohnson
+ * Added missile rebounding
+ */

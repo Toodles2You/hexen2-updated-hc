@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/ravenstf.hc 52    10/21/97 2:24p Rlove $
+ * $Header: /H2 Mission Pack/HCode/ravenstf.hc 5     3/19/98 12:17a Mgummelt $
  */
 
 // For building the model
@@ -52,7 +52,7 @@ void raven_spark (void)
 
 void raven_death_init (void)
 {
-	self.owner.raven_cnt -= 1;
+	self.controller.raven_cnt-=1;
 	self.takedamage = DAMAGE_NO;
 
 	traceline(self.origin,self.origin + '0 0 600',FALSE,self);
@@ -83,13 +83,13 @@ void raven_bounce(void)
 
 	makevectors (self.angles);
 	self.velocity = normalize (v_forward);
-	self.velocity = self.velocity * 600;
+	self.velocity = self.velocity * self.speed;
 
 	self.think = raven_flap;
 	self.nextthink = time + HX_FRAME_TIME;
 
 	self.think1 = raven_track_init;
-	self.next_action = time + HX_FRAME_TIME * random(2,4);
+	self.next_action = time + HX_FRAME_TIME * random(1,3);
 
 	self.touch = raven_touch;
 }
@@ -119,7 +119,7 @@ void raven_touch (void)
 		self.nextthink = time + .05;  // Need to wait a little before flipping model to match velocity
 	}
 
-	if ((self.lifetime < time) || (self.owner.raven_cnt > 6))
+	if ((self.lifetime < time) || (self.controller.raven_cnt > 6))
 	{
 		raven_death_init();
 		return;
@@ -144,7 +144,7 @@ void raven_search(void)
 				victim = victim;		// Do nothing if its a player on your team.
 			else
 			{
-				traceline(self.origin,victim.origin,TRUE,self);
+				traceline(self.origin,(victim.absmin+victim.absmax)*0.5,TRUE,self);
 				if (trace_fraction == 1.0)  
 				{
 					self.enemy = victim;
@@ -171,11 +171,11 @@ void raven_search(void)
 
 		makevectors (self.angles);
 		self.velocity = normalize (v_forward);
-		self.velocity = self.velocity * 600;
+		self.velocity = self.velocity * self.speed;
 		
 	}
 
-	if ((self.searchtime < time) || (self.lifetime < time) || (self.owner.raven_cnt > 6))
+	if ((self.searchtime < time) || (self.lifetime < time) || (self.controller.raven_cnt > 6))
 		raven_death_init();
 }
 
@@ -205,7 +205,7 @@ void raven_track (void)
 			delta = hold_spot - self.origin;
 
 			self.velocity = normalize(delta);
-			self.velocity = self.velocity * 600;
+			self.velocity = self.velocity * self.speed;
 			self.angles = vectoangles(self.velocity);
 
 			self.think1 = raven_track;
@@ -218,7 +218,7 @@ void raven_track (void)
 			raven_search();
 	}
 
-	if ((self.lifetime < time) || (self.owner.raven_cnt > 6))
+	if ((self.lifetime < time) || (self.controller.raven_cnt > 6))
 	{
 		raven_death_init();
 		return;
@@ -244,7 +244,7 @@ void raven_track_init (void)
 
 		makevectors(self.angles);
 		self.velocity = normalize(v_forward);
-		self.velocity = self.velocity * 600;
+		self.velocity = self.velocity * self.speed;
 		self.pitchdowntime = time + HX_FRAME_TIME *3;
 
 		self.think = raven_track;
@@ -274,7 +274,7 @@ void raven_flap(void)
 		self.nextthink = time + HX_FRAME_TIME;
 	}
 
-	if ((self.lifetime < time) || (self.owner.raven_cnt > 6))
+	if ((self.lifetime < time) || (self.controller.raven_cnt > 6))
 	{
 		raven_death_init();
 		return;
@@ -292,9 +292,9 @@ void create_raven(void)
 
 	missile = spawn ();
 	missile.frags=TRUE;
-	missile.owner = self.owner;
+	missile.owner = missile.controller = self.owner;
 
-	self.owner.raven_cnt += 1;
+	missile.controller.raven_cnt += 1;
 
 	missile.movetype = MOVETYPE_BOUNCEMISSILE;
 	missile.solid = SOLID_BBOX;
@@ -303,7 +303,11 @@ void create_raven(void)
 	// set missile speed	
 	makevectors (self.v_angle);
 	missile.velocity = normalize (v_forward);
-	missile.velocity = missile.velocity * 600;
+	if(deathmatch)
+		missile.speed=1000;
+	else
+		missile.speed=600;
+	missile.velocity = missile.velocity * missile.speed;
 	missile.angles = vectoangles(missile.velocity);
 	missile.searchtime = 0;
 	missile.yaw_speed = 50;
@@ -314,34 +318,46 @@ void create_raven(void)
 	setorigin (missile, self.origin + self.proj_ofs - v_forward * 14 + v_right * random(-8,8));
 		
 	missile.touch = raven_touch;
-	missile.lifetime = time + 5;
+	missile.lifetime = time + 10;
 	missile.classname = "bird_missile";
 	sound(missile,CHAN_VOICE,"raven/ravengo.wav",1,ATTN_NORM);
 
-	// Find an enemy
-	makevectors(self.v_angle);
-	spot1 = self.origin + self.proj_ofs;
-	spot2 = spot1 + (v_forward*600); // Look ahead
-	traceline(spot1,spot2,FALSE,self);
 	missile.th_die=raven_death_init;
-
-	// We have a victim in sights
-	if ((trace_ent!=world) && 
-		(trace_ent.flags & FL_MONSTER) && (trace_ent.owner != self) && (trace_ent.health>0))
-	{	
-		missile.enemy = trace_ent;
-
+	if(self.enemy.flags2&FL_ALIVE)
+	{
+		missile.enemy=self.enemy;
 		missile.nextthink = time + HX_FRAME_TIME;
 		missile.think = raven_flap;
-
 		missile.next_action = time + .01;
 		missile.think1 = raven_track;
 		missile.think1 = raven_track_init;
+	// Find an enemy
 	}
 	else
-	{	
-		missile.nextthink = time + .01;
-		missile.think = raven_search;
+	{
+		makevectors(self.v_angle);
+		spot1 = self.origin + self.proj_ofs;
+		spot2 = spot1 + (v_forward*600); // Look ahead
+		traceline(spot1,spot2,FALSE,self);
+
+		// We have a victim in sights
+		if ((trace_ent!=world) && 
+			(trace_ent.flags & FL_MONSTER) && (trace_ent.owner != self) && (trace_ent.health>0))
+		{	
+			missile.enemy = trace_ent;
+
+			missile.nextthink = time + HX_FRAME_TIME;
+			missile.think = raven_flap;
+
+			missile.next_action = time + .01;
+			missile.think1 = raven_track;
+			missile.think1 = raven_track_init;
+		}
+		else
+		{	
+			missile.nextthink = time + .01;
+			missile.think = raven_search;
+		}
 	}
 }
 
@@ -361,6 +377,7 @@ void ravenmissile_explode (void)
 
 void ravenmissile_touch (void)
 {
+entity found;
 	if (pointcontents(self.origin) == CONTENT_SKY)
 	{
 		remove(self);
@@ -373,6 +390,20 @@ void ravenmissile_touch (void)
 		starteffect(CE_SM_EXPLOSION , self.origin);
 		self.enemy = other;
 		T_Damage(other,self,self,10);
+	}
+	else
+	{
+		found=findradius(self.origin,100);
+		while(found)
+		{
+			if(found.flags2&FL_ALIVE)
+			{
+				self.enemy=found;
+				found=world;
+			}
+			else
+				found=found.chain;
+		}
 	}
 	ravenmissile_explode();
 }
@@ -411,12 +442,12 @@ void launch_superraven (void)
 	setsize (newmis, '0 0 0', '0 0 0');		
 
 	newmis.velocity = normalize (v_forward);
-	newmis.velocity = newmis.velocity * 600;
+	newmis.velocity = newmis.velocity * 800;
 	newmis.angles = vectoangles(newmis.velocity);
 	setorigin(newmis, self.origin + self.proj_ofs  + v_forward*10);
 
 	newmis.touch = ravenmissile_touch;
-	newmis.lifetime = time + .5;
+	newmis.lifetime = time + 3;
 	newmis.avelocity_z = 1000; 
 	newmis.scale = .40;
 	thinktime newmis : HX_FRAME_TIME * 3;
@@ -434,7 +465,7 @@ void ravenshot_touch (void)
 		return;
 	}
 
-	T_Damage (other, self, self.owner, 30 );
+	T_Damage (other, self, self.owner, self.dmg );
 
 	sound (self, CHAN_WEAPON, "weapons/explode.wav", 1, ATTN_NORM);
 
@@ -456,6 +487,7 @@ void create_raven_shot2(vector location,float add_yaw,float nexttime,float rotat
 	missile.solid = DAMAGE_YES;
 		
 // set missile speed	
+	missile.dmg = 30;
 	missile.angles = self.angles;
 
 	holdangle = self.angles;
@@ -501,7 +533,7 @@ void create_raven_shot1(vector location,float nexttime,void() nextfunc,vector fi
 	missile.avelocity_z = 1000; 
 
 	missile.angles = vectoangles(missile.velocity);
-	missile.dmg = 40;
+	missile.dmg = 90;
 	
 	missile.touch = ravenshot_touch;
 
@@ -582,7 +614,7 @@ void split (void)
 
 	sound(self,CHAN_WEAPON,"raven/split.wav",1,ATTN_NORM);
 
-	self.dmg = 20;
+	self.dmg = 30;
 	holdangles = self.angles;
 	holdangles_z = 0;
 	holdangles_x = 0 - holdangles_x;
@@ -707,3 +739,83 @@ void ravenstaff_deselect (void)
 
 }
 
+/*
+ * $Log: /H2 Mission Pack/HCode/ravenstf.hc $
+ * 
+ * 5     3/19/98 12:17a Mgummelt
+ * last bug fixes
+ * 
+ * 4     3/16/98 2:19a Mgummelt
+ * 
+ * 3     3/14/98 11:09p Mgummelt
+ * 
+ * 2     3/14/98 9:24p Mgummelt
+ * 
+ * 54    10/28/97 1:01p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 52    10/21/97 2:24p Rlove
+ * Fixed a bug with bone shards
+ * 
+ * 51    10/17/97 3:56p Rlove
+ * 
+ * 50    10/17/97 11:13a Rlove
+ * 
+ * 49    9/04/97 5:06p Mgummelt
+ * Fixing Meat chunk colors and wrong autoaiming in coop
+ * 
+ * 48    9/04/97 3:50p Mgummelt
+ * 
+ * 47    9/02/97 8:00p Rlove
+ * 
+ * 46    9/01/97 9:49p Rlove
+ * 
+ * 45    9/01/97 6:01p Rlove
+ * 
+ * 44    9/01/97 1:19a Rlove
+ * 
+ * 43    8/31/97 9:46p Rlove
+ * 
+ * 42    8/31/97 3:45p Rlove
+ * 
+ * 41    8/30/97 7:32p Jweier
+ * 
+ * 40    8/26/97 10:49a Rlove
+ * 
+ * 39    8/26/97 10:16a Rlove
+ * 
+ * 38    8/26/97 7:41a Mgummelt
+ * Removing one last old player frame code reference
+ * 
+ * 37    8/26/97 5:55a Rlove
+ * 
+ * 36    8/24/97 2:13p Rlove
+ * 
+ * 35    8/23/97 7:15p Rlove
+ * 
+ * 33    8/11/97 10:55a Rlove
+ * 
+ * 31    8/08/97 10:02a Rlove
+ * 
+ * 28    8/08/97 8:03a Rlove
+ * 
+ * 25    8/07/97 11:13a Rlove
+ * 
+ * 18    7/24/97 12:02p Mgummelt
+ * 
+ * 17    7/21/97 3:03p Rlove
+ * 
+ * 15    7/12/97 9:09a Rlove
+ * Reworked Assassin Punch Dagger
+ * 
+ * 12    7/03/97 8:12a Rlove
+ * 
+ * 10    6/30/97 9:41a Rlove
+ * 
+ * 4     6/26/97 7:36a Rlove
+ * Changed Vindictus to Ravenstaff
+ * 
+ * 3     6/24/97 7:48a Rlove
+ * 
+ */

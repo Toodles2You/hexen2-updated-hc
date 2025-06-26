@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/pstboar.hc 34    9/11/97 2:09p Mgummelt $
+ * $Header: /H2 Mission Pack/HCode/pstboar.hc 5     3/03/98 7:31p Mgummelt $
  */
 
 /*
@@ -195,27 +195,6 @@ void throw_hive (void)
 	thinktime newmis : 0;
 }
 
-void poison_think ()
-{
-	self.enemy.deathtype="poison";
-	T_Damage (self.enemy, self, self.owner, 1 );
-	if(self.enemy.flags&FL_CLIENT)
-		stuffcmd(self.enemy,"bf\n");
-	if(self.lifetime<time||self.enemy.health<=0)
-		self.think=SUB_Remove;
-	thinktime self : 1;
-}
-
-void spawn_poison ()
-{
-	newmis=spawn();
-	newmis.think=poison_think;
-	newmis.enemy=self.enemy;
-	newmis.owner=self.owner;
-
-	thinktime newmis : 0.05;
-	newmis.lifetime=time+random(5,10);
-}
 
 void pestilence_missile_touch(void)
 {
@@ -236,7 +215,7 @@ void pestilence_missile_touch(void)
 		if(other.flags&FL_CLIENT)
 			stuffcmd(other,"bf\n");
 		if(other.classname!="rider_pestilence")
-			spawn_poison();
+			spawn_poison(self.enemy,self.owner,random(5,10));
 		other.deathtype="poison";
 		T_Damage (other, self, self.owner, damg );
 		sound (self, CHAN_WEAPON, "pest/xbowhit.wav", 1, ATTN_NORM);
@@ -761,7 +740,7 @@ void hive_touch(void)
 	chunk_death();
 }
 
-
+/*
 void create_swarm (void)
 {
 entity newmis;
@@ -787,7 +766,7 @@ vector diff;
 	newmis.enemy = self;
 	newmis.touch = hive_touch;
 }
-
+*/
 /*QUAKED rider_pestilence (1 0 0)  (-55 -55 -24) (55 55 100) TRIGGER_WAIT
 Pestilence rider monster.  You must place rider_path entites
 on the map.  The rider will first proceed to the 
@@ -845,6 +824,7 @@ void rider_pestilence(void)
 	setsize (self, '-84 -84 0', '84 84 100');
 	self.health = 4400;
 	self.experience_value = 1500;
+	self.init_exp_val = self.experience_value;
 	self.th_pain = pest_hurt;
 	self.rider_gallop_mode = self.monster_stage = PB_STAGE_NORMAL;
 	self.speed = pst_speed[self.rider_gallop_mode];
@@ -867,3 +847,94 @@ void rider_pestilence(void)
 	thinktime self : 1;
 }
 
+/*
+ * $Log: /H2 Mission Pack/HCode/pstboar.hc $
+ * 
+ * 5     3/03/98 7:31p Mgummelt
+ * 
+ * 4     2/12/98 5:55p Jmonroe
+ * remove unreferenced funcs
+ * 
+ * 3     2/12/98 2:48p Mgummelt
+ * 
+ * 2     2/08/98 3:09p Mgummelt
+ * 
+ * 36    10/28/97 1:01p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 34    9/11/97 2:09p Mgummelt
+ * 
+ * 33    9/03/97 3:42a Mgummelt
+ * 
+ * 32    9/03/97 2:50a Mgummelt
+ * 
+ * 31    9/03/97 2:46a Mgummelt
+ * 
+ * 30    9/03/97 12:26a Mgummelt
+ * 
+ * 29    9/02/97 2:55a Mgummelt
+ * 
+ * 28    9/02/97 1:31a Mgummelt
+ * 
+ * 27    9/01/97 7:09a Mgummelt
+ * 
+ * 26    9/01/97 12:11a Rlove
+ * 
+ * 25    8/31/97 11:56p Rlove
+ * 
+ * 24    8/31/97 9:15p Mgummelt
+ * 
+ * 22    8/31/97 4:21p Mgummelt
+ * 
+ * 21    8/31/97 2:36p Mgummelt
+ * 
+ * 20    8/31/97 11:38a Mgummelt
+ * To which I say- shove where the sun don't shine- sideways!  Yeah!
+ * How's THAT for paper cut!!!!
+ * 
+ * 19    8/31/97 8:52a Mgummelt
+ * 
+ * 18    8/30/97 6:58p Mgummelt
+ * 
+ * 17    8/29/97 11:15p Mgummelt
+ * 
+ * 16    8/29/97 4:17p Mgummelt
+ * Long night
+ * 
+ * 15    8/29/97 12:59a Mgummelt
+ * 
+ * 14    8/28/97 5:41p Mgummelt
+ * 
+ * 13    8/28/97 3:34p Rjohnson
+ * Increased health
+ * 
+ * 12    8/28/97 2:02a Mgummelt
+ * 
+ * 11    8/26/97 1:37p Mgummelt
+ * 
+ * 10    8/25/97 4:29p Mgummelt
+ * 
+ * 9     8/24/97 12:21a Mgummelt
+ * 
+ * 8     8/23/97 8:24p Mgummelt
+ * 
+ * 7     8/23/97 10:05a Rlove
+ * 
+ * 6     8/23/97 9:41a Rlove
+ * 
+ * 5     8/08/97 4:28p Rjohnson
+ * Update for size
+ * 
+ * 4     8/06/97 4:31p Rjohnson
+ * Update for initialization
+ * 
+ * 3     8/06/97 4:28p Rlove
+ * Not done with hive yet...
+ * 
+ * 2     7/25/97 5:35p Rjohnson
+ * Updates
+ * 
+ * 1     6/23/97 3:15p Rjohnson
+ * Initial Version
+ */

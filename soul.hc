@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/soul.hc 27    9/02/97 9:20p Rlove $
+ * $Header: /H2 Mission Pack/HCode/soul.hc 2     3/13/98 3:27a Mgummelt $
  */
 
 // Possible improvement: Make model shrink before disappearing
@@ -115,7 +115,8 @@ void () soul_move =
 
 	if (self.health <= 0)
 	{
-		sound (self, CHAN_VOICE, "misc/null.wav", 1, ATTN_NORM);
+		stopSound(self,CHAN_VOICE);
+		//sound (self, CHAN_VOICE, "misc/null.wav", 1, ATTN_NORM);
 		remove(self);
 		remove(self.enemy);
 	}
@@ -232,3 +233,78 @@ void crusader_sphere (entity ent)
 	new2.enemy = new;
 }
 
+/*
+ * $Log: /H2 Mission Pack/HCode/soul.hc $
+ * 
+ * 2     3/13/98 3:27a Mgummelt
+ * Replaced all sounds that played a null.wav with stopSound commands
+ * 
+ * 29    10/28/97 1:01p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 27    9/02/97 9:20p Rlove
+ * 
+ * 26    9/01/97 12:18a Rlove
+ * 
+ * 25    9/01/97 12:13a Rlove
+ * 
+ * 24    8/30/97 2:29p Jweier
+ * 
+ * 23    8/29/97 1:00p Mgummelt
+ * Spheres were floating too high
+ * 
+ * 22    8/07/97 5:45p Rlove
+ * 
+ * 21    8/06/97 10:14p Mgummelt
+ * 
+ * 20    8/06/97 11:12a Rlove
+ * 
+ * 19    8/04/97 12:33p Rlove
+ * 
+ * 18    8/01/97 4:48p Rlove
+ * 
+ * 17    8/01/97 4:38p Rlove
+ * 
+ * 16    7/21/97 3:03p Rlove
+ * 
+ * 15    7/01/97 11:23a Rlove
+ * 
+ * 14    7/01/97 11:06a Rlove
+ * 
+ * 13    7/01/97 9:46a Rlove
+ * Crusader soul sphere is in. It does double damage.
+ * 
+ * 12    6/30/97 7:30p Rlove
+ * 
+ * 11    6/19/97 4:11p Rjohnson
+ * Optimization
+ * 
+ * 10    6/19/97 4:08p Rjohnson
+ * removed crandom()
+ * 
+ * 9     6/18/97 10:46a Rjohnson
+ * Code cleanu
+ * 
+ * 8     6/17/97 10:20a Rlove
+ * 
+ * 7     6/16/97 8:04a Rlove
+ * Fixed null.wav error, also paladin weapons deplete mana now
+ * 
+ * 6     6/03/97 10:48p Mgummelt
+ * 
+ * 5     6/03/97 7:59a Rlove
+ * Change take_art.wav to artpkup.wav
+ * 
+ * 4     5/15/97 6:34p Rjohnson
+ * Code cleanup
+ * 
+ * 3     3/12/97 10:57p Rjohnson
+ * Changed the particle2 parameters to make it less taxing on the network
+ * and more versitile
+ * 
+ * 2     2/03/97 4:42p Rlove
+ * Newest soul sphere
+ * 
+ * 1     2/03/97 2:43p Rlove
+ */

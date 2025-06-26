@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/HCode/damage.hc 153   10/07/97 12:59p Mgummelt $
+ * $Header: /H2 Mission Pack/HCode/damage.hc 48    3/27/98 2:14p Mgummelt $
  */
 
 void() T_MissileTouch;
@@ -7,8 +7,8 @@ void() info_player_start;
 void necromancer_sphere(entity ent);
 void crusader_sphere(entity ent);
 
-void() monster_death_use;
-void()player_pain;
+void(float force_respawn) monster_death_use;
+void(entity attacker,float total_damage)player_pain;
 void()PlayerDie;
 void MonsterDropStuff(void);
 void Use_TeleportCoin(void);
@@ -16,6 +16,276 @@ void UseInvincibility(void);
 void Use_TomeofPower(void);
 void use_super_healthboost();
 
+entity FindExpLeader()
+{
+entity lastent, leader;
+float top_exp;
+	lastent=nextent(world);
+	num_players=0;
+	while(lastent)
+	{
+		if(lastent.classname=="player")
+		{
+			num_players+=1;
+			if(lastent.experience>top_exp)
+			{
+				leader=lastent;
+				top_exp=leader.experience;
+			}
+		}
+		lastent=find(lastent,classname,"player");
+	}
+	return leader;
+}
+
+float CheckExpAward (entity attacker,entity targ,float fatality,float damage)
+{
+float exp_bonus,health_mod,exp_base;
+entity lastleader,newking;
+	if(!attacker.flags&FL_CLIENT)
+	{
+//		dprint("Attacker not a player!\n");
+		return FALSE;
+	}
+
+	if(attacker.deadflag>=DEAD_DYING)
+	{
+//		dprint("Attacker dead!\n");
+		return FALSE;
+	}
+
+	if(world.target=="sheep")
+	{
+		if(fatality&&targ.classname=="player_sheep")
+		{
+			if(attacker.flags&FL_CLIENT)
+			{
+			string sheep_pointer;
+				sound (attacker, CHAN_BODY, "misc/comm.wav", 1, ATTN_NORM);
+				exp_base=random();
+				if(!targ.scale)
+					targ.scale=1;
+				sprint(attacker,"Got me a ");
+				sheep_pointer=ftos(targ.experience_value);
+				sprint(attacker,sheep_pointer);
+				sprint(attacker,"-pointer!\n");
+				if(targ.scale<0.5)
+				{
+					sprint(attacker,"Slippery sucker! ");
+					exp_bonus=rint((0.6-targ.scale)*10);
+					sheep_pointer=ftos(exp_bonus);
+					sprint(attacker,sheep_pointer);
+					sprint(attacker,"-point bonus!\n");
+					attacker.experience+=exp_bonus;
+				}
+/*				if(fatality==2)
+				{
+					sprint(attacker,"Non-scope bonus point!");
+					attacker.experience+=1;
+				}*/
+
+				if(exp_base<0.2)
+					centerprint(attacker,"Bullseye!\n");
+				else if(exp_base<0.4)
+					centerprint(attacker,"Got one!\n");
+				else if(exp_base<0.6)
+					centerprint(attacker,"Right in the kill zone!\n");
+				else if(exp_base<0.8)
+					centerprint(attacker,"Boo-yah!\n");
+				else
+					centerprint(attacker,"Nee-hahhh!\n");
+			}
+			attacker.experience+=targ.experience_value;
+		}
+		return FALSE;
+	}
+	//NOTE: exp_mult is for DM only
+	health_mod=1;
+	if(deathmatch)
+	{
+		if(attacker.artifact_active&ART_INVINCIBILITY)
+			health_mod=0.2;//CHEAP!!!
+		else if(attacker.health>attacker.max_health)
+		{
+			health_mod=attacker.max_health/attacker.health;
+			if(health_mod<0.5)
+				health_mod=0.5;
+		}
+		else if(attacker.health<attacker.max_health*0.5)
+		{
+			health_mod=((attacker.max_health*0.5)/attacker.health)*0.1;
+			if(health_mod>3.3)
+				health_mod=3.3;
+		}
+	}
+	exp_mult*=health_mod;
+
+	if(targ.classname=="player")
+	{
+		if(fatality)
+			if(damage>targ.max_health)
+				damage=targ.max_health;
+		targ.experience_value=(targ.level*800 - 500)*exp_mult;
+		if(fatality)
+			targ.experience_value*=(damage/targ.max_health);//remainder of health
+		else
+			targ.experience_value*=(damage/targ.max_health*0.5);
+		exp_base=targ.experience_value;
+	}
+	else
+	{
+		if(fatality)
+			exp_base=targ.experience_value;//remainder of health
+		else
+			exp_base=targ.init_exp_val*(damage/targ.max_health*0.5);//give appropriate exp for % of damage to max_health, divided by 2
+	}
+
+	if(exp_base<=0)
+	{
+//		dprint("target has no exp_val\n");
+		return FALSE;
+	}
+
+	if(attacker.model=="models/sheep.mdl")
+	{//3000 exp bonus for killing as sheep.
+		if(fatality)
+		{
+			sound (attacker, CHAN_BODY, "misc/comm.wav", 1, ATTN_NORM);
+			centerprint(attacker,"Sheep kill BONUS!!!\n");
+			exp_bonus=3000;
+		}
+	}
+
+	if(deathmatch)
+	{
+		lastleader=FindExpLeader();//Find King of the Hill
+		if(targ.classname=="player")//Exp gained is (level*800 - 500) * exp_mult
+		{
+			if(!fatality)
+			{
+				if((targ.classname=="player"&&teamplay&&attacker.team==self.team)||attacker==targ)//hit your own guy
+				{//this is checked above to, but what the hay
+//					dprint("Attacker hit own teammate in DM!\n");
+					return FALSE;
+				}
+				else
+				{
+//					dprint("Attacker valid player in DM!\n");
+					return exp_base;//exp_bonus only for fatalities
+				}
+			}
+			else
+			{
+				attacker.level_frags+=targ.level;//Level frags
+				if(lastleader==targ&&attacker!=targ)//Killed King		
+				{
+					sound (attacker, CHAN_ITEM, "misc/comm.wav", 1, ATTN_STATIC);
+					centerprint(attacker,"You took out the King of the Hill!\n");
+					if(num_players>2)//Only give bonus if more than 2 players
+						exp_bonus+=500*(num_players - 2);	//Give an extra 500* num players,you beat others to the kill
+				}
+			}
+		}
+		
+		if((targ.classname=="player"&&teamplay&&attacker.team==targ.team)||attacker==targ)
+		{
+			if(!fatality)
+			{//this is checked above to, but what the hay
+//				dprint("Attacker hit own teammate in DM!\n");
+				return FALSE;
+			}
+			else if(attacker==targ)
+				return FALSE;
+			else
+				drop_level(attacker,1);//Killed someone on your team, or killed self, lose a level, get no exp
+		}
+		else
+		{
+			if(targ.classname=="player"&&attacker.level+2<targ.level)
+			{
+				if(fatality)
+					drop_level(targ,1); //If player killed by a lower level player, lose 1 level (diff in levels must be 3 or more)
+			}
+
+			if(attacker!=targ.controller)//No credit for killing your imp!
+			{
+				if(!fatality)
+				{
+//					dprint("Attacker hit valid player in DM!\n");
+					return exp_base;//exp_bonus is only for fatalities
+				}
+				else
+					AwardExperience(attacker,targ,exp_base+exp_bonus);
+			}
+			else if(!fatality)
+			{
+//				dprint("Attacker hit own ent in DM!\n");
+				return FALSE;
+			}
+		}
+
+		if(deathmatch)
+		{
+			newking=FindExpLeader();
+			if(newking!=lastleader)
+			{//Tell everyone if the king of the hill has changed
+				sound (world, CHAN_BODY, "misc/comm.wav", 1, ATTN_NONE);
+				bprint(newking.netname);
+				bprint(" is the NEW King of the Hill!\n");
+				WriteByte(MSG_ALL, SVC_UPDATE_KINGOFHILL);
+				WriteEntity (MSG_ALL, newking);
+			}
+		}
+	}
+	else if(targ.classname=="player"&&coop&&teamplay&&attacker.team==targ.team)
+	{
+		if(!fatality)
+		{
+//			dprint("Attacker hit own teammate in coop\n");
+			return FALSE;
+		}
+		else
+			drop_level(attacker,1);	//Killed friend in coop, lose a level
+	}
+	else if(attacker!=targ.controller&&(targ.monsterclass<CLASS_BOSS||targ.classname=="obj_chaos_orb"))//Bosses award Exp themselves, to all players in coop
+	{
+		if(!fatality)
+		{
+//			dprint("Attacker hit valid exp targ\n");
+			return exp_base;//exp_bonus only for fatalities
+		}
+		else
+			AwardExperience(attacker,targ,exp_base+exp_bonus);
+	}
+	return TRUE;
+}
+
+void poison_think ()
+{
+	self.enemy.deathtype="poison";
+	T_Damage (self.enemy, self, self.owner, 1 );
+	if(self.enemy.flags&FL_CLIENT)
+		stuffcmd(self.enemy,"bf\n");
+	if(self.lifetime<time||self.enemy.health<=0||(!self.enemy.flags2&FL2_POISONED))
+	{
+		self.enemy.flags2(-)FL2_POISONED;
+		self.think=SUB_Remove;
+	}
+	thinktime self : 1;
+}
+
+void spawn_poison(entity loser,entity killer,float poison_length)
+{
+entity poison_ent;
+	loser.flags2(+)FL2_POISONED;
+	poison_ent=spawn();
+	poison_ent.think=poison_think;
+	poison_ent.enemy=loser;
+	poison_ent.owner=killer;
+
+	thinktime poison_ent : 0.05;
+	poison_ent.lifetime=time+poison_length;
+}
 
 float ClassArmorProtection[16] =
 {
@@ -107,27 +377,6 @@ float targ_rad,loop_cnt;
 	return FALSE;
 };
 
-entity FindExpLeader()
-{
-entity lastent, leader;
-float top_exp;
-	lastent=nextent(world);
-	num_players=0;
-	while(lastent)
-	{
-		if(lastent.classname=="player")
-		{
-			num_players+=1;
-			if(lastent.experience>top_exp)
-			{
-				leader=lastent;
-				top_exp=leader.experience;
-			}
-		}
-		lastent=find(lastent,classname,"player");
-	}
-	return leader;
-}
 
 float Pal_DivineIntervention(void)
 {
@@ -167,10 +416,9 @@ float Pal_DivineIntervention(void)
 Killed
 ============
 */
-void(entity targ, entity attacker, entity inflictor) Killed =
+void(entity targ, entity attacker, entity inflictor,float damage) Killed =
 {
 entity oself;
-float exp_bonus;
 	oself = self;
 	self = targ;
 
@@ -241,6 +489,16 @@ float exp_bonus;
 	if (self.classname == "player")
 		ClientObituary(self, attacker, inflictor);
 
+	if(world.target=="sheep")
+	{
+		if(inflictor.scoped)
+			CheckExpAward(attacker,self,TRUE,damage);
+		else
+			CheckExpAward(attacker,self,2,damage);
+	}
+	else
+		CheckExpAward(attacker,self,TRUE,damage);
+/*
 	if(attacker.deadflag<DEAD_DYING)
 	{
 		if(attacker.model=="models/sheep.mdl"&&attacker.flags&FL_CLIENT)
@@ -293,28 +551,38 @@ float exp_bonus;
 		else if(attacker.flags&FL_CLIENT&&attacker!=self.controller&&(self.monsterclass<CLASS_BOSS||self.classname=="obj_chaos_orb"))//Bosses award Exp themselves, to all players in coop
 			AwardExperience(attacker,self,self.experience_value+exp_bonus);
 	}
-
+*/
 	self.enemy = attacker;
 
 // bump the monster counter
+	if(self.model=="models/sheep.mdl"&&world.target=="sheep")
+		monster_death_use(TRUE);
+
 	if (self.flags & FL_MONSTER)
 	{
-		MonsterDropStuff();
+		self.experience_value= self.init_exp_val = 0;
+		if(self.puzzle_id=="")
+			MonsterDropStuff();
 		killed_monsters = killed_monsters + 1;
 		WriteByte (MSG_ALL, SVC_KILLEDMONSTER);
-		monster_death_use();
-		pitch_roll_for_slope('0 0 0');
+		if(self.classname!="monster_imp_lord"&&self.classname!="monster_fish")
+			monster_death_use(FALSE);
+		pitch_roll_for_slope('0 0 0',self);
 	}
-	else if(self.target)
-		SUB_UseTargets();
+	else if(self.th_die==SUB_Null)
+		if(self.target)
+			SUB_UseTargets();
 
 	self.th_stand=self.th_walk=self.th_run=self.th_pain=self.oldthink=self.think=self.th_melee=self.th_missile=SUB_Null;
 	
 	if(pointcontents(self.origin+self.view_ofs)==CONTENT_WATER)
 		DeathBubbles(20);
 
+
 	if(attacker.classname=="rider_death")
 		spawn_ghost(attacker);
+	if(self.puzzle_id!="")
+		DropPuzzlePiece();
 
 	if(oself!=targ)
 	{
@@ -511,9 +779,16 @@ entity	oldself;
 float	save;
 float	total_damage,do_mod;
 float armor_damage;
-entity holdent;
+float hurt_exp_award;
+entity holdent,lastleader,newking;
 
 	if (!targ.takedamage)
+		return;
+
+	if(targ.camera_time>=time&&!deathmatch)
+		return;
+
+	if(targ.thingtype==THINGTYPE_ACID&&inflictor.thingtype==THINGTYPE_ACID)
 		return;
 
 	if(targ.invincible_time>time)
@@ -521,6 +796,9 @@ entity holdent;
 		sound(targ,CHAN_ITEM,"misc/pulse.wav",1,ATTN_NORM);
 		return;
 	}
+
+	if(inflictor.classname=="cube_of_force")
+		attacker=inflictor.controller;
 
 	if(targ!=attacker)
 		if (targ.deathtype != "teledeath"&&targ.deathtype != "teledeath2"&&targ.deathtype != "teledeath3"&&targ.deathtype != "teledeath4")
@@ -571,8 +849,25 @@ entity holdent;
 		return;
 	}
 
+	if(deathmatch)
+		if(targ.flags&FL_CLIENT)
+			if(targ.viewentity!=targ&&targ.viewentity!=world)
+			{
+				oldself=self;
+				self=targ;
+				CameraReturn();
+				self=oldself;
+			}
 //Damage modifiers
 // used by buttons and triggers to set activator for target firing
+
+	//NOTE: EXPERIMENTAL, FIXME?
+	if(skill>=4)
+	{//NOTE: respawn monster when it dies after 10 seconds?
+		if(targ.flags&FL_CLIENT)
+			damage*=2;
+	}
+
 	damage_attacker = attacker;
 
 	if(attacker.flags&FL_CLIENT&&attacker==inflictor)
@@ -678,7 +973,7 @@ entity holdent;
 			attacker=attacker.controller;
 		}
 		targ.th_pain=SUB_Null;	//Should prevents interruption of death sequence
-		Killed (targ, attacker,inflictor);
+		Killed (targ, attacker,inflictor,total_damage);
 		return;
 	}
 
@@ -686,11 +981,47 @@ entity holdent;
 	oldself = self;
 	self = targ;
 
+/*	if(self.experience_value)
+	{
+		if(!self.max_health)
+			dprint("WARNING!  EXPERIENCE AWARDER WITHOUT MAX_HEALTH!!!\n");
+
+		if(self.max_health<self.health)
+		{
+			dprint(self.classname);
+			dprint(" - WARNING!  MAX_HEALTH<HEALTH!!!\n");
+		}
+
+		if(self.init_exp_val<self.experience_value)
+			dprint("WARNING!  EXPERIENCE > INIT_EXP!!!\n");
+	}
+*/
+	lastleader=FindExpLeader();
+	hurt_exp_award=CheckExpAward(attacker,self,FALSE,total_damage);
+	if(hurt_exp_award>0)
+	{
+		AwardExperience(attacker,self,hurt_exp_award);
+		if(deathmatch)
+		{
+			newking=FindExpLeader();
+			if(newking!=lastleader)
+			{//Tell everyone if the king of the hill has changed
+				sound (world, CHAN_BODY, "misc/comm.wav", 1, ATTN_NONE);
+				bprint(newking.netname);
+				bprint(" is the NEW King of the Hill!\n");
+				WriteByte(MSG_ALL, SVC_UPDATE_KINGOFHILL);
+				WriteEntity (MSG_ALL, newking);
+			}
+		}
+		if(self.classname!="player")
+			self.experience_value-=hurt_exp_award;
+	}
+
 // barrels need sliding information
 	if (self.classname == "barrel")
 	{
 		self.enemy = inflictor;
-		self.count = damage;
+		self.count = total_damage;
 	}
 	else if (self.classname == "catapult")
 		self.enemy = inflictor;
@@ -699,7 +1030,7 @@ entity holdent;
 
 	if ( (self.flags & FL_MONSTER) && attacker != world && !(attacker.flags & FL_NOTARGET)&&attacker!=self.controller&&(attacker.controller!=self.controller||attacker.controller==world))
 	{	// Monster's shouldn't attack each other (kin don't shoot kin)
-		if (self != attacker && attacker != self.enemy&&(self.enemy.classname!="player"||attacker.classname=="player"||attacker.controller.classname=="player"))// && attacker.flags & FL_CLIENT)
+		if (self != attacker && attacker != self.enemy&&(self.enemy.classname!="player"||attacker.classname=="player"||(attacker.controller.classname=="player"&&attacker.flags2&FL_ALIVE)))// && attacker.flags & FL_CLIENT)
 		{
 			if (self.classname != attacker.classname||random(100)<=5) //5% chance they'll turn on selves
 			{
@@ -715,15 +1046,16 @@ entity holdent;
 	}
 
 	if (self.th_pain)
-	{
-		if(self.classname=="player"&&self.model!="models/sheep.mdl")
-			player_pain();
-		else 
-			self.th_pain (attacker, total_damage);
-	// nightmare mode monsters don't go into pain frames often
-		if (skill == 3)
-			self.pain_finished = time + 5;		
-	}
+		if(self.th_pain!=SUB_Null)
+		{
+			if(self.classname=="player"&&self.model!="models/sheep.mdl")
+				player_pain(attacker, total_damage);
+			else if(self.frozen<=0)
+				self.th_pain (attacker, total_damage);
+		// nightmare mode monsters don't go into pain frames often
+			if (skill >= 3)
+				self.pain_finished = time + 5;		
+		}
 
 	self = oldself;
 };
@@ -776,13 +1108,13 @@ vector	inflictor_org, org;
 		//following stops multiple grenades from blowing each other up
 				if(head.owner==inflictor.owner&&
 					head.classname==inflictor.classname&&
-					(head.classname=="stickmine"||head.classname=="tripwire"))
+					(head.classname=="stickmine"||head.classname=="tripwire"||head.classname=="proximity"))
 					points=0;
 				if((inflictor.classname=="snowball"||inflictor.classname=="blizzard")&&head.frozen>0)
 					points=0;
 				if (points > 0)
 				{
-					if (CanDamage (head, inflictor))
+					if (CanDamage (head, inflictor)||inflictor.classname=="fireballblast")
 					{
 						if(other.movetype!=MOVETYPE_PUSH)
 						{
@@ -795,24 +1127,23 @@ vector	inflictor_org, org;
 		                    head.velocity=head.velocity+normalize(org-inflictor_org)*(points*10/inertia);
 			                head.flags(-)FL_ONGROUND;
 						}
+
+
 						if(inflictor.classname=="fireballblast")
 						{
 							if(points>10||points<5)
 								points=random(5,10);
 
-							if(head.flags&FL_FIREHEAL)
+							if(head.flags2&FL2_FIREHEAL)
 							{
 								if(head.health+points<=head.max_health)
 									head.health=head.health+points;
 								else
 									head.health=head.max_health;
 							}
-							else if(!head.flags&FL_FIRERESIST)
-							{
-								if(head.health<=points)
-									points=1000;
-								T_Damage (head, inflictor, attacker, points);
-							}
+							if(head.health<=points)
+								points=1000;
+							T_Damage (head, inflictor, attacker, points);
 						}
 						else
 							T_Damage (head, inflictor, attacker, points);
@@ -832,13 +1163,13 @@ T_RadiusDamageWater
 
 void(entity inflictor, entity attacker, float dam, entity ignore) T_RadiusDamageWater =
 {
-        local   float   points;
-        local   entity  head;
-	local	vector	org;
+float   points;
+entity  head;
+vector	org;
 
     head = findradius(inflictor.origin, dam);
 	
-	while (head)
+	while (head!=world)
 	{
         if (head != ignore)
 		{
@@ -853,12 +1184,13 @@ void(entity inflictor, entity attacker, float dam, entity ignore) T_RadiusDamage
 					if (points <= 64)
 						points = 1;
 					points = dam/points;
-					if (points < 1||(self.classname=="mjolnir"&&head==self.controller)||head.classname=="monster_hydra")
+					if (points < 1||(self.classname=="mjolnir"&&head==self.controller)||head.classname=="monster_hydra"||(head.classname=="player"&&head==attacker))
 						points = 0;
 					if (points > 0)
 					{
 						head.deathtype="zap";
-						spawnshockball((head.absmax+head.absmin)*0.5);
+//						spawnshockball((head.absmax+head.absmin)*0.5);
+						starteffect(CE_LSHOCK,(head.absmax+head.absmin)*0.5);
 						T_Damage (head, inflictor, attacker, points);
 //Bubbles if dead?
                     }
@@ -947,4 +1279,460 @@ void(entity inflictor, entity attacker, float manadamage, entity ignore) T_Radiu
 	}
 };
 */
-
+/*
+ * $Log: /H2 Mission Pack/HCode/damage.hc $
+ * 
+ * 48    3/27/98 2:14p Mgummelt
+ * Sheephunt fix
+ * 
+ * 47    3/23/98 7:01p Mgummelt
+ * 
+ * 46    3/23/98 6:44p Mgummelt
+ * 
+ * 45    3/23/98 5:48p Mgummelt
+ * 
+ * 44    3/17/98 11:02a Mgummelt
+ * 
+ * 43    3/16/98 8:31p Mgummelt
+ * 
+ * 42    3/14/98 11:09p Mgummelt
+ * 
+ * 41    3/13/98 3:02a Mgummelt
+ * 
+ * 40    3/11/98 7:28p Mgummelt
+ * 
+ * 39    3/10/98 12:21a Mgummelt
+ * 
+ * 38    3/09/98 7:06p Mgummelt
+ * 
+ * 37    3/09/98 3:05p Mgummelt
+ * 
+ * 36    3/09/98 12:30p Mgummelt
+ * 
+ * 35    3/06/98 4:55p Mgummelt
+ * 
+ * 34    3/04/98 5:57p Mgummelt
+ * 
+ * 33    3/04/98 3:39p Mgummelt
+ * 
+ * 32    3/03/98 7:31p Mgummelt
+ * 
+ * 31    3/03/98 1:58p Jmonroe
+ * 
+ * 30    3/03/98 1:56p Mgummelt
+ * 
+ * 29    3/02/98 7:57p Mgummelt
+ * 
+ * 28    3/02/98 11:51a Mgummelt
+ * 
+ * 27    3/01/98 3:12p Mgummelt
+ * 
+ * 26    2/26/98 1:11a Mgummelt
+ * 
+ * 25    2/21/98 4:01p Mgummelt
+ * 
+ * 24    2/17/98 5:31p Mgummelt
+ * 
+ * 23    2/16/98 10:54a Mgummelt
+ * 
+ * 22    2/12/98 2:48p Mgummelt
+ * 
+ * 21    2/10/98 4:21p Mgummelt
+ * 
+ * 20    2/09/98 3:42p Mgummelt
+ * 
+ * 19    2/08/98 3:09p Mgummelt
+ * 
+ * 18    2/07/98 1:58p Mgummelt
+ * 
+ * 17    2/06/98 9:59p Mgummelt
+ * Implemented Succubus' special abilities.
+ * 
+ * 16    2/05/98 12:30p Mgummelt
+ * 
+ * 15    2/04/98 4:58p Mgummelt
+ * spawnflags on monsters cleared out
+ * 
+ * 14    2/03/98 7:08p Mgummelt
+ * 
+ * 13    1/28/98 3:10p Mgummelt
+ * 
+ * 12    1/27/98 4:18p Mgummelt
+ * 
+ * 11    1/26/98 6:18p Mgummelt
+ * 
+ * 10    1/19/98 6:20p Mgummelt
+ * 
+ * 9     1/14/98 7:43p Mgummelt
+ * 
+ * 8     1/08/98 4:25p Mgummelt
+ * 
+ * 7     1/07/98 2:34p Mgummelt
+ * 
+ * 156   10/29/97 4:05p Mgummelt
+ * 
+ * 155   10/28/97 1:00p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 153   10/07/97 12:59p Mgummelt
+ * 
+ * 152   9/25/97 11:11a Mgummelt
+ * 
+ * 151   9/11/97 4:33p Mgummelt
+ * 
+ * 150   9/11/97 12:02p Mgummelt
+ * 
+ * 149   9/10/97 7:50p Mgummelt
+ * 
+ * 148   9/10/97 7:34p Mgummelt
+ * 
+ * 147   9/09/97 3:59p Mgummelt
+ * 
+ * 146   9/03/97 7:50p Mgummelt
+ * 
+ * 145   9/03/97 7:47p Mgummelt
+ * 
+ * 144   9/02/97 9:06p Mgummelt
+ * 
+ * 143   9/02/97 6:05p Mgummelt
+ * 
+ * 142   9/02/97 3:33p Mgummelt
+ * 
+ * 141   9/02/97 2:55a Mgummelt
+ * 
+ * 140   9/01/97 11:12p Rlove
+ * 
+ * 139   9/01/97 3:27p Mgummelt
+ * 
+ * 138   9/01/97 3:08a Mgummelt
+ * 
+ * 137   9/01/97 1:35a Mgummelt
+ * 
+ * 136   8/31/97 10:48p Mgummelt
+ * 
+ * 135   8/31/97 2:36p Mgummelt
+ * 
+ * 134   8/31/97 11:38a Mgummelt
+ * To which I say- shove where the sun don't shine- sideways!  Yeah!
+ * How's THAT for paper cut!!!!
+ * 
+ * 133   8/31/97 8:52a Mgummelt
+ * 
+ * 132   8/29/97 11:42p Mgummelt
+ * 
+ * 131   8/29/97 8:26p Mgummelt
+ * 
+ * 130   8/29/97 4:17p Mgummelt
+ * Long night
+ * 
+ * 129   8/29/97 12:33a Mgummelt
+ * 
+ * 128   8/29/97 12:33a Mgummelt
+ * 
+ * 127   8/28/97 8:56p Mgummelt
+ * 
+ * 126   8/28/97 2:42p Mgummelt
+ * 
+ * 125   8/28/97 12:44a Mgummelt
+ * 
+ * 124   8/27/97 11:44p Mgummelt
+ * 
+ * 123   8/27/97 11:30p Mgummelt
+ * 
+ * 122   8/27/97 10:52p Mgummelt
+ * 
+ * 121   8/26/97 10:28p Mgummelt
+ * 
+ * 120   8/26/97 6:00p Mgummelt
+ * 
+ * 119   8/26/97 10:17a Mgummelt
+ * 
+ * 118   8/26/97 9:30a Mgummelt
+ * 
+ * 117   8/26/97 7:38a Mgummelt
+ * 
+ * 116   8/26/97 2:26a Mgummelt
+ * 
+ * 115   8/24/97 4:03p Rlove
+ * 
+ * 114   8/21/97 1:53p Mgummelt
+ * 
+ * 113   8/21/97 4:23a Mgummelt
+ * 
+ * 112   8/21/97 3:33a Mgummelt
+ * 
+ * 111   8/20/97 3:44p Mgummelt
+ * 
+ * 110   8/20/97 1:16p Rlove
+ * 
+ * 109   8/19/97 1:09p Mgummelt
+ * 
+ * 108   8/19/97 12:57p Mgummelt
+ * 
+ * 107   8/18/97 4:47p Rlove
+ * 
+ * 106   8/17/97 3:45p Mgummelt
+ * 
+ * 105   8/17/97 3:06p Mgummelt
+ * 
+ * 104   8/16/97 6:25p Mgummelt
+ * 
+ * 103   8/15/97 11:27p Mgummelt
+ * 
+ * 102   8/15/97 4:59p Mgummelt
+ * 
+ * 101   8/15/97 2:40p Rlove
+ * 
+ * 100   8/14/97 10:27p Bgokey
+ * 
+ * 99    8/14/97 8:31p Mgummelt
+ * 
+ * 98    8/14/97 4:47p Mgummelt
+ * 
+ * 97    8/14/97 5:55a Rlove
+ * Now it really works when you die and Super Health brings you back to
+ * life.
+ * 
+ * 96    8/13/97 5:33p Rlove
+ * 
+ * 95    8/13/97 5:32p Mgummelt
+ * 
+ * 94    8/13/97 12:11p Mgummelt
+ * 
+ * 93    8/13/97 8:15a Rlove
+ * 
+ * 92    8/11/97 3:27p Rlove
+ * Work on Divine Intervention
+ * 
+ * 91    8/11/97 2:54p Rlove
+ * 
+ * 90    8/09/97 6:28a Mgummelt
+ * 
+ * 89    8/09/97 4:14a Mgummelt
+ * 
+ * 88    8/09/97 2:04a Mgummelt
+ * 
+ * 87    8/09/97 1:49a Mgummelt
+ * 
+ * 86    8/06/97 10:18p Mgummelt
+ * 
+ * 85    8/05/97 8:32p Mgummelt
+ * 
+ * 84    8/05/97 6:47p Mgummelt
+ * 
+ * 83    8/05/97 11:24a Rlove
+ * Only melee hurts the snake
+ * 
+ * 82    8/02/97 10:17a Rlove
+ * Monster don't attack monsters any more.
+ * 
+ * 81    7/30/97 11:49p Mgummelt
+ * 
+ * 80    7/30/97 11:22p Mgummelt
+ * 
+ * 79    7/30/97 3:32p Mgummelt
+ * 
+ * 78    7/29/97 9:15p Mgummelt
+ * 
+ * 77    7/28/97 7:50p Mgummelt
+ * 
+ * 76    7/28/97 2:10p Mgummelt
+ * 
+ * 75    7/28/97 1:51p Mgummelt
+ * 
+ * 74    7/26/97 8:38a Mgummelt
+ * 
+ * 73    7/25/97 11:26p Mgummelt
+ * 
+ * 72    7/25/97 3:50p Mgummelt
+ * 
+ * 71    7/25/97 11:20a Mgummelt
+ * 
+ * 70    7/24/97 12:33p Mgummelt
+ * 
+ * 69    7/24/97 12:30p Mgummelt
+ * 
+ * 68    7/24/97 3:26a Mgummelt
+ * 
+ * 67    7/21/97 3:03p Rlove
+ * 
+ * 66    7/21/97 12:35p Mgummelt
+ * 
+ * 65    7/21/97 11:45a Mgummelt
+ * 
+ * 64    7/19/97 9:53p Mgummelt
+ * 
+ * 63    7/18/97 11:06a Mgummelt
+ * 
+ * 62    7/17/97 4:12p Mgummelt
+ * 
+ * 61    7/17/97 2:17p Mgummelt
+ * 
+ * 60    7/15/97 8:41p Mgummelt
+ * 
+ * 59    7/15/97 8:30p Mgummelt
+ * 
+ * 58    7/15/97 8:03p Mgummelt
+ * 
+ * 57    7/01/97 3:30p Mgummelt
+ * 
+ * 56    7/01/97 2:21p Mgummelt
+ * 
+ * 55    7/01/97 9:46a Rlove
+ * Crusader soul sphere is in. It does double damage.
+ * 
+ * 54    6/30/97 7:30p Rlove
+ * 
+ * 53    6/30/97 3:23p Mgummelt
+ * 
+ * 52    6/29/97 10:56a Rlove
+ * 
+ * 51    6/27/97 10:18a Rlove
+ * 
+ * 50    6/18/97 4:21p Mgummelt
+ * 
+ * 49    6/18/97 10:18a Rjohnson
+ * Removed excess entity fields
+ * 
+ * 48    6/17/97 7:14a Rlove
+ * 
+ * 47    6/16/97 7:35p Mgummelt
+ * 
+ * 46    6/16/97 4:00p Mgummelt
+ * 
+ * 45    6/16/97 2:08p Rlove
+ * Temp fix for armor calc loop
+ * 
+ * 43    6/16/97 12:03p Rjohnson
+ * Removed imp stuff
+ * 
+ * 42    6/10/97 3:43p Rlove
+ * New armor calc
+ * 
+ * 41    6/06/97 9:17p Mgummelt
+ * 
+ * 40    5/31/97 4:00p Mgummelt
+ * 
+ * 39    5/31/97 3:59p Mgummelt
+ * 
+ * 38    5/31/97 12:18a Mgummelt
+ * 
+ * 37    5/29/97 4:33p Mgummelt
+ * 
+ * 36    5/27/97 9:40a Rlove
+ * Took out super_damage and radsuit fields
+ * 
+ * 35    5/23/97 2:54p Mgummelt
+ * 
+ * 34    5/22/97 7:29p Mgummelt
+ * 
+ * 33    5/22/97 6:30p Mgummelt
+ * 
+ * 32    5/22/97 2:50a Mgummelt
+ * 
+ * 31    5/19/97 11:36p Mgummelt
+ * 
+ * 30    5/17/97 8:45p Mgummelt
+ * 
+ * 29    5/15/97 5:05a Mgummelt
+ * 
+ * 28    5/15/97 12:30a Mgummelt
+ * 
+ * 26    5/07/97 4:23p Mgummelt
+ * 
+ * 25    5/05/97 10:09p Mgummelt
+ * 
+ * 24    5/05/97 4:48p Mgummelt
+ * 
+ * 23    5/03/97 8:49a Rlove
+ * 
+ * 22    5/01/97 8:52p Mgummelt
+ * 
+ * 21    4/30/97 5:03p Mgummelt
+ * 
+ * 20    4/28/97 11:15a Rlove
+ * Owner no longer gets hurt by radius explosion
+ * 
+ * 19    4/25/97 8:32p Mgummelt
+ * 
+ * 18    4/24/97 8:48p Mgummelt
+ * 
+ * 17    4/17/97 4:10p Mgummelt
+ * 
+ * 16    4/17/97 2:50p Mgummelt
+ * 
+ * 15    4/17/97 2:03p Mgummelt
+ * 
+ * 14    4/16/97 4:22p Mgummelt
+ * 
+ * 13    4/13/96 3:30p Mgummelt
+ * 
+ * 12    4/11/97 12:32a Mgummelt
+ * 
+ * 11    4/10/96 2:50p Mgummelt
+ * 
+ * 10    4/10/97 11:36a Mgummelt
+ * 
+ * 9     4/09/96 8:28p Mgummelt
+ * 
+ * 8     4/09/96 7:54p Mgummelt
+ * 
+ * 7     4/09/96 7:31p Mgummelt
+ * 
+ * 6     4/09/96 4:49p Mgummelt
+ * 
+ * 5     4/09/96 4:43p Mgummelt
+ * 
+ * 4     4/07/97 4:13p Mgummelt
+ * 
+ * 3     4/07/97 3:07p Mgummelt
+ * 
+ * 2     3/31/97 6:39a Rlove
+ * New stuff
+ * 
+ * 1     3/31/97 6:39a Rlove
+ * 
+ * 15    3/21/97 4:22p Aleggett
+ * Added sliding information to T_Damage for barrels
+ * 
+ * 13    3/21/97 9:38a Rlove
+ * Created CHUNK.HC and MATH.HC, moved brush_die to chunk_death so others
+ * can use it.
+ * 
+ * 12    3/14/97 9:21a Rlove
+ * Plaques are done 
+ * 
+ * 11    3/12/97 4:23p Rlove
+ * New Monster AI
+ * 
+ * 10    2/10/97 4:27p Rjohnson
+ * Made it so that T_Damage will not change an enemy if the attacker has
+ * no target set
+ * 
+ * 9     2/07/97 1:37p Rlove
+ * Artifact of Invincibility
+ * 
+ * 8     2/03/97 4:42p Rlove
+ * Newest soul sphere
+ * 
+ * 7     2/03/97 3:12p Rlove
+ * Added soul spheres
+ * 
+ * 6     1/28/97 10:28a Rjohnson
+ * Added experience fields and awarding experience function
+ * 
+ * 5     12/31/96 8:41a Rlove
+ * Glyph of the Ancients is working
+ * 
+ * 4     12/13/96 10:50a Rjohnson
+ * When damage it being done, if the monster is awake, it will just change
+ * the target, otherwise, it will try to wake the monster (which changes
+ * it think function)
+ * 
+ * 3     12/06/96 2:02p Rjohnson
+ * Revised T_Damage and T_RadiusDamage
+ * 
+ * 2     11/11/96 1:12p Rlove
+ * Added Source Safe stuff
+ */

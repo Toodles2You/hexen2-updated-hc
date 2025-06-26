@@ -1,26 +1,20 @@
 /*
- * $Header: /H3/game/hcode/precache.hc 228   10/03/97 4:06p Rjohnson $
+ * $Header: /H2 Mission Pack/HCode/precache.hc 70    3/19/98 12:17a Mgummelt $
  */
 
 // called by worldspawn
 void() W_Precache =
 {
-	precache_sound ("raven/kiltorch.wav");	// player torch dying
-	precache_sound ("raven/littorch.wav");	// player torch being lit
-	precache_sound ("raven/fire1.wav");    // player torch burning
+	precache_file ("rj/steve.wav");
+	precache_file ("weapons/ric1.wav");	// ricochet (used in c code)
+	precache_file ("weapons/ric2.wav");	// ricochet (used in c code)
+	precache_file ("weapons/ric3.wav");	// ricochet (used in c code)
+	precache_file ("weapons/tink1.wav");	// ricochet (used in c code)
+	precache_file ("weapons/r_exp3.wav");	//Still being used?
 
-	precache_sound ("rj/steve.wav");
-
-	precache_sound ("weapons/ric1.wav");	// ricochet (used in c code)
-	precache_sound ("weapons/ric2.wav");	// ricochet (used in c code)
-	precache_sound ("weapons/ric3.wav");	// ricochet (used in c code)
-	precache_sound ("weapons/tink1.wav");	// ricochet (used in c code)
-	precache_sound ("weapons/r_exp3.wav");	//Still being used?
-//	precache_sound ("items/inv2.wav");		//Quake sounds!
-
-	precache_model ("gfx/puff.spr");
-	precache_model ("models/ball.mdl");
-	precache_model ("models/star.mdl");
+	//why are these here?
+	precache_model4 ("models/ball.mdl");	//magicmis, icemace
+	precache_model ("models/star.mdl");	//lightwp, magicmis
 };
 
 
@@ -35,22 +29,21 @@ void Precache_lmp (void)
 	precache_file ("gfx/tinttab.lmp");
 	precache_file ("gfx/tinttab2.lmp");
 	precache_file ("gfx/invpal.lmp");
-	precache_file ("gfx/skin100.lmp");
+	precache_file ("gfx/skin100.lmp");	//global stone skins
 	precache_file ("gfx/skin101.lmp");
 
-	precache_file ("strings.txt");
+//	precache_file ("strings.txt");
+//	precache_file ("infolist.txt");	//keep these out of the pak for easy localization
 	precache_file ("puzzles.txt");
-	precache_file ("maplist.txt");
 
 	precache_file ("gfx/menu/fontsize.lmp");
 	precache_file ("gfx/menu/backtile.lmp");         
 	precache_file ("gfx/menu/bigfont.lmp");        
 	precache_file ("gfx/menu/bigfont2.lmp");        
 	precache_file ("gfx/menu/conback.lmp");        
-	precache_file ("gfx/menu/conchars.lmp");        
-	precache_file ("gfx/menu/fontsize.lmp");           
-	precache_file ("gfx/menu/help01.lmp");        
-	precache_file ("gfx/menu/help02.lmp");        
+	precache_file4 ("gfx/menu/conchars.lmp");		//updated for mission pack
+	precache_file ("gfx/menu/help01.lmp");
+	precache_file ("gfx/menu/help02.lmp");
 	precache_file ("gfx/menu/help03.lmp");        
 	precache_file ("gfx/menu/help04.lmp");        
 	precache_file ("gfx/menu/help05.lmp");        
@@ -106,16 +99,20 @@ void Precache_lmp (void)
 	precache_file ("gfx/box_bm.lmp");
 	precache_file ("gfx/box_br.lmp");
 
+	//player faces
 	precache_file ("gfx/cport1.lmp");
 	precache_file3 ("gfx/cport2.lmp");
 	precache_file3 ("gfx/cport3.lmp");
 	precache_file ("gfx/cport4.lmp");
+	precache_file4 ("gfx/cport5.lmp");
 
+	//player colors
 	precache_file ("gfx/menu/netp1.lmp");
 	precache_file3 ("gfx/menu/netp2.lmp");
 	precache_file3 ("gfx/menu/netp3.lmp");
 	precache_file ("gfx/menu/netp4.lmp");
 	precache_file ("gfx/menu/frame.lmp");
+	precache_file4 ("gfx/menu/netp5.lmp");
 
 	// Interface graphics
 	precache_file ("gfx/topbar1.lmp");
@@ -287,6 +284,7 @@ void Precache_lmp (void)
 
 	precache_file2 ("gfx/rhlthcv2.lmp");
 
+	//intermission gfx
 	precache_file ("gfx/castle.lmp");
 	precache_file2 ("gfx/meso.lmp");
 	precache_file2 ("gfx/egypt.lmp");
@@ -296,15 +294,6 @@ void Precache_lmp (void)
 	precache_file2 ("gfx/end-2.lmp");
 	precache_file2 ("gfx/end-3.lmp");
 
-/*
-	precache_file ("");
-	precache_file ("");
-	precache_file ("");
-	precache_file ("");
-	precache_file ("");
-	precache_file ("");
-	precache_file ("");
-*/
 
 	// Puzzle Pieces
 	precache_file2("models/puzzle/staff.mdl");
@@ -321,7 +310,6 @@ void Precache_lmp (void)
 	precache_file2("models/puzzle/m5.mdl");
 	precache_file2("models/puzzle/s1.mdl");
 	precache_file2("models/puzzle/s2.mdl");
-	precache_file2("models/puzzle/scepter.mdl");
 	precache_file("models/puzzle/keep1.mdl");
 	precache_file("models/puzzle/keep2.mdl");
 	precache_file("models/puzzle/keep3.mdl");
@@ -387,7 +375,6 @@ void Precache_lmp (void)
 	precache_file2("gfx/puzzle/m5.lmp");
 	precache_file2("gfx/puzzle/s1.lmp");
 	precache_file2("gfx/puzzle/s2.lmp");
-	precache_file2("gfx/puzzle/scepter.lmp");
 	precache_file("gfx/puzzle/keep1.lmp");
 	precache_file("gfx/puzzle/keep2.lmp");
 	precache_file("gfx/puzzle/keep3.lmp");
@@ -437,122 +424,64 @@ void Precache_lmp (void)
 	precache_file2("gfx/puzzle/mage.lmp");
 	precache_file2("gfx/puzzle/rakey.lmp");
 	precache_file2("gfx/puzzle/h-book.lmp");
+//End screens
+	precache_file4 ("gfx/mpmid.lmp");
+	precache_file4 ("gfx/mpend.lmp");
+//MISSION PACK PUZZLE PIECES
+	precache_file4 ("gfx/puzzle/bell.lmp");
+	precache_file4 ("gfx/puzzle/chalice.lmp");
+	precache_file4 ("gfx/puzzle/crosskey.lmp");
+	precache_file4 ("gfx/puzzle/dagger.lmp");
+	precache_file4 ("gfx/puzzle/dtongue.lmp");
+	precache_file4 ("gfx/puzzle/dukeseal.lmp");
+	precache_file4 ("gfx/puzzle/goldgem.lmp");
+	precache_file4 ("gfx/puzzle/greengem.lmp");
+	precache_file4 ("gfx/puzzle/headkey.lmp");
+	precache_file4 ("gfx/puzzle/incense.lmp");
+	precache_file4 ("gfx/puzzle/lbudda.lmp");
+	precache_file4 ("gfx/puzzle/magekey.lmp");
+	precache_file4 ("gfx/puzzle/tienkey.lmp");
+	precache_file4 ("gfx/puzzle/mask.lmp");
+	precache_file4 ("gfx/puzzle/orb.lmp");
+	precache_file4 ("gfx/puzzle/orb2.lmp");
+	precache_file4 ("gfx/puzzle/prayer2.lmp");
+	precache_file4 ("gfx/puzzle/redgem.lmp");
+	precache_file4 ("gfx/puzzle/scepter.lmp");
+	precache_file4 ("gfx/puzzle/scroll.lmp");
+	precache_file4 ("gfx/puzzle/stonet.lmp");
+	precache_file4 ("gfx/puzzle/tbtkey.lmp");
+	precache_file4 ("gfx/puzzle/tbtmask.lmp");
+	precache_file4 ("gfx/puzzle/vial.lmp");
 
-	//RIDER_INIT
-    precache_file3 ("models/boss/shaft.mdl");
-    precache_file3 ("models/boss/circle.mdl");
-    precache_file3 ("models/boss/star.mdl");
-	precache_sound3 ("famine/flashdie.wav");
+	precache_file4 ("models/puzzle/bell.mdl");
+	precache_file4 ("models/puzzle/chalice.mdl");
+	precache_file4 ("models/puzzle/crosskey.mdl");
+	precache_file4 ("models/puzzle/dagger.mdl");
+	precache_file4 ("models/puzzle/dtongue.mdl");
+	precache_file4 ("models/puzzle/dukeseal.mdl");
+	precache_file4 ("models/puzzle/goldgem.mdl");
+	precache_file4 ("models/puzzle/greengem.mdl");
+	precache_file4 ("models/puzzle/headkey.mdl");
+	precache_file4 ("models/puzzle/incense.mdl");
+	precache_file4 ("models/puzzle/lbudda.mdl");
+	precache_file4 ("models/puzzle/magekey.mdl");
+	precache_file4 ("models/puzzle/tienkey.mdl");
+	precache_file4 ("models/puzzle/mask.mdl");
+	precache_file4 ("models/puzzle/orb.mdl");
+	precache_file4 ("models/puzzle/orb2.mdl");
+	precache_file4 ("models/puzzle/prayer.mdl");
+	precache_file4 ("models/puzzle/prayer2.mdl");
+	precache_file4 ("models/puzzle/redgem.mdl");
+	precache_file4 ("models/puzzle/scepter.mdl");
+	precache_file4 ("models/puzzle/scroll.mdl");
+	precache_file4 ("models/puzzle/stonet.mdl");
+	precache_file4 ("models/puzzle/tbtkey.mdl");
+	precache_file4 ("models/puzzle/tbtmask.mdl");
+	precache_file4 ("models/puzzle/vial.mdl");
+//NOTE: Add any train models, designer-spoecified sounds & models, 
+//		Anything used in C that isn't precached, anything we're
+//		replacing that was in the old .pak files
 
-	//EIDOLON
-	precache_file2 ("models/boss/smaleido.mdl");
-	precache_file2 ("models/boss/bigeido.mdl");
-	precache_file2 ("models/eidoball.mdl");
-	precache_file2 ("models/eidoflam.spr");
-	precache_file2 ("models/glowball.mdl");
-	precache_file2 ("models/boss/chaosorb.mdl");
-	precache_sound3 ("eidolon/roar.wav");
-	precache_sound3 ("eidolon/pain.wav");	//Hurt
-	precache_sound3 ("eidolon/death.wav");	//Dies- long and agonizing
-	precache_sound3 ("eidolon/fakedie.wav");//1st death- fake
-	precache_sound3 ("eidolon/spell.wav");	//Spell attack (tracking globes)
-	precache_sound3 ("eidolon/stomp.wav");	//Hot-steppin'
-	precache_sound3 ("eidolon/fireball.wav");	//Launching Nasty fireballs
-	precache_sound3 ("eidolon/flamstrt.wav");	//
-	precache_sound3 ("eidolon/flambrth.wav");	//
-	precache_sound3 ("eidolon/flamend.wav");	//
-	precache_sound3 ("eidolon/growl.wav");		//
-	precache_sound3 ("eidolon/chrgstrt.wav"); 	//Orb starts recharging Eido
-	precache_sound3 ("eidolon/orbhurt.wav");	//Orb gets hit
-	precache_sound3 ("eidolon/orbxpld.wav");	//Orb gets destroyed
-	precache_sound3 ("eidolon/orbpulse.wav");	//Orb pulsating
-
-	//PESTILENCE
-	precache_file2 ("models/boss/boar.mdl");
-	precache_file2 ("models/boss/pstrider.mdl");
-	precache_file2 ("models/boss/hive.mdl");
-	precache_file2 ("models/boss/swarm.mdl");
-    precache_file2 ("models/boss/shaft.mdl");
-	precache_file2 ("models/pestshot.mdl");
-	precache_file2 ("sound/pest/snort.wav");
-	precache_file2 ("sound/pest/clop1.wav");
-	precache_file2 ("sound/pest/clop2.wav");
-	precache_file2 ("sound/pest/clop3.wav");
-	precache_file2 ("sound/pest/gallop.wav");
-	precache_file2 ("sound/pest/sight.wav");
-	precache_file2 ("sound/pest/sting1.wav");
-	precache_file2 ("sound/pest/sting2.wav");
-	precache_file2 ("sound/pest/sting3.wav");
-	precache_file2 ("sound/pest/buzz.wav");
-	precache_file2 ("sound/pest/hivehit.wav");
-	precache_file2 ("sound/pest/xbowfire.wav");
-	precache_file2 ("sound/pest/xbowhit.wav");
-	precache_file2 ("sound/pest/die.wav");
-	precache_file2 ("sound/pest/charge.wav");
-	precache_file2 ("sound/pest/laugh.wav");
-	precache_file2 ("sound/pest/snort2.wav");
-
-	// Famine Rider
-	precache_file3 ("models/boss/famhorse.mdl");
-	precache_file3 ("models/boss/famrider.mdl");
-	precache_file3 ("models/famshot.mdl");
-	precache_file3 ("sound/famine/die.wav");
-	precache_file3 ("sound/famine/laugh.wav");
-	precache_file3 ("sound/famine/whinny.wav");
-	precache_file3 ("sound/famine/pull.wav");
-	precache_file3 ("sound/famine/shot.wav");
-	precache_file3 ("sound/famine/snort.wav");
-	precache_file3 ("sound/famine/clop1.wav");
-	precache_file3 ("sound/famine/clop2.wav");
-	precache_file3 ("sound/famine/clop3.wav");
-	precache_file3 ("sound/misc/null.wav");
-	precache_file3 ("sound/raven/blast.wav");
-	precache_file3 ("sound/skullwiz/blinkout.wav");
-	precache_file3 ("sound/skullwiz/blinkin.wav");
-
-	// War Rider
-	precache_file2 ("models/boss/warhorse.mdl");
-	precache_file2 ("models/boss/warrider.mdl");
-    precache_file2 ("models/boss/waraxe.mdl");
-	precache_file2 ("sound/war/fire_big.wav");
-	precache_file2 ("sound/war/die.wav");
-	precache_file2 ("sound/war/laugh.wav");
-	precache_file2 ("sound/war/laugh_sm.wav");
-	precache_file2 ("sound/war/fire.wav");
-	precache_file2 ("sound/war/whinny.wav");
-	precache_file2 ("sound/war/whinbig.wav");
-	precache_file2 ("sound/boss/wartrot1.wav");
-	precache_file2 ("sound/boss/wartrot2.wav");
-	precache_file2 ("sound/boss/wartrot3.wav");
-
-	// Death Rider
-	precache_file2 ("models/boss/dthhorse.mdl");
-	precache_file2 ("models/boss/dthrider.mdl");
-	precache_file2 ("models/famshot.mdl");
-    precache_file2 ("models/boss/bone1.mdl");
-    precache_file2 ("models/boss/bone2.mdl");
-    precache_file2 ("models/boss/bone3.mdl");
-    precache_file2 ("models/boss/bone4.mdl");
-    precache_file2 ("models/boss/bone5.mdl");
-    precache_file2 ("models/boss/bone6.mdl");
-	precache_file2 ("models/mumshot.mdl");
-	precache_file2 ("models/booberry.mdl");
-	precache_file2 ("sound/mummy/mislfire.wav");
-	precache_file2 ("sound/eidolon/flamend.wav");
-	precache_file2 ("sound/misc/fburn_bg.wav");
-	precache_file2 ("sound/death/fout.wav");
-	precache_file2 ("sound/death/dthdie.wav");
-	precache_file2 ("sound/death/dthfire.wav");
-	precache_file2 ("sound/death/victory.wav");
-	precache_file2 ("sound/death/dthlaugh.wav");
-	precache_file2 ("sound/death/clop.wav");
-	precache_file2 ("sound/death/clop1.wav");
-	precache_file2 ("sound/death/clop2.wav");
-	precache_file2 ("sound/death/clop3.wav");
-	precache_file2 ("sound/death/shot.wav");
-	precache_file2 ("sound/ambience/moan1.wav");
-	precache_file2 ("sound/ambience/moan2.wav");
-	precache_file2 ("sound/ambience/moan3.wav");
 }
 
 
@@ -561,7 +490,9 @@ void Precache_lmp (void)
 //**********************************************
 void Precache_wav (void)
 {
-//DEMO
+	precache_sound ("raven/kiltorch.wav");	// player torch dying
+	precache_sound ("raven/littorch.wav");	// player torch being lit
+	precache_sound ("raven/fire1.wav");    // player torch burning
 
 //Miscellaneous
 	precache_sound ("misc/drip.wav");		//Ambience
@@ -615,6 +546,7 @@ void Precache_wav (void)
 	precache_sound ("items/artpkup.wav");
 	precache_sound ("items/armrpkup.wav");
 	precache_sound ("misc/warning.wav");   //glyph about to explode
+	precache_sound ("golem/gbfire.wav");	//force cube
 	//Summoning Stone
 	precache_sound3 ("imp/upbig.wav");
 	precache_sound3 ("imp/diebig.wav");
@@ -623,6 +555,7 @@ void Precache_wav (void)
 	precache_sound3 ("imp/flybig.wav");
 	precache_sound3 ("imp/fireball.wav");
 	precache_sound3 ("imp/shard.wav");
+	precache_sound  ("hydra/turn-s.wav");
 
 //SHARED PLAYER SOUNDS
 	//General body/physics sounds
@@ -655,78 +588,28 @@ void Precache_wav (void)
 	precache_sound ("weapons/hithurt2.wav");	// Damaging non-flesh with a melee weapon
 	precache_sound ("weapons/hitwall.wav");		// Hitting (not damaging) a wall with a melee weapon
 
-//PALADIN
-//Body sounds
-	precache_sound ("player/paljmp.wav");		// player jump
-	precache_sound ("player/pallnd.wav");		// player hurt when landing
-	precache_sound ("player/paldieh2.wav");		// player dying in water
-	precache_sound ("player/paldie1.wav");		// player death 1
-	precache_sound ("player/paldie2.wav");		// player death 2
-	precache_sound ("player/palpain1.wav");		// player pain 1
-	precache_sound ("player/palpain2.wav");		// player pain 2
-	precache_sound ("player/palgasp1.wav");		// little air
-	precache_sound ("player/palgasp2.wav");		// no air
-	precache_sound ("player/paldrown.wav");		// he's drowning
-	precache_sound ("paladin/devine.wav");		// Devine Intervention
+//PALADIN SHARED SOUNDS
 //Weapon sounds
 	//Gauntlets
-	precache_sound ("weapons/gaunt1.wav");		
-	precache_sound ("weapons/gauntht1.wav");	
-	precache_sound ("weapons/gauntht2.wav");	
+	precache_sound ("weapons/gaunt1.wav");		//SHARED!
+	precache_sound ("weapons/gauntht1.wav");	//SHARED!	
+	precache_sound ("weapons/gauntht2.wav");	//SHARED!	
 	//Vorpal Sword
-	precache_sound ("weapons/vorpswng.wav");	// Vorpal sword swinging
-	precache_sound ("weapons/vorpht1.wav");		// Vorpal sword hitting something it can damage
-	precache_sound ("weapons/vorpht2.wav");		// Vorpal sword hitting something it cannot da
+	precache_sound ("weapons/vorpswng.wav");	//SHARED! Vorpal sword swinging
+	precache_sound ("weapons/vorpht2.wav");		//SHARED! Vorpal sword hitting something it cannot da
 
-	precache_sound ("weapons/vorpturn.wav");	// Vorpal Sword - weapon 2
-	precache_sound ("weapons/vorpblst.wav");
-	precache_sound ("weapons/vorppwr.wav");
+	precache_sound ("weapons/vorpturn.wav");	//SHARED! Vorpal Sword - weapon 2
 	//Axe
-	precache_sound ("paladin/axric1.wav");		// Double Headed Axe - weapon 3
-	precache_sound ("paladin/axgen.wav");		
-	precache_sound ("paladin/axgenpr.wav");		
-	precache_sound ("paladin/axblade.wav");		
-	//Purifier
-	precache_sound ("paladin/purfire.wav");	
-	precache_sound ("paladin/purfireb.wav");	
-	//Glyph: delayed fireball
-	precache_sound ("weapons/fbfire.wav");		//Delayed fireball explosion sound	
-
+	precache_sound ("paladin/axric1.wav");		//SHARED! Double Headed Axe - weapon 3
+	precache_sound ("paladin/axblade.wav");		//SHARED!
 
 //ASSASSIN
-//Body sounds
-	precache_sound ("player/assjmp.wav");		// player jump
-	precache_sound ("player/asslnd.wav");		// player hurt when landing
-	precache_sound ("player/assdieh2.wav");		// player dying in water
-	precache_sound ("player/assdie1.wav");		// player death 1
-	precache_sound ("player/assdie2.wav");		// player death 2
-	precache_sound ("player/asspain1.wav");		// player pain 1
-	precache_sound ("player/asspain2.wav");		// player pain 2
-	precache_sound ("player/assgasp1.wav");		// little air
-	precache_sound ("player/assgasp2.wav");		// no air
-	precache_sound ("player/assdrown.wav");		// she's drowning
 //Weapon sounds
-	//Crossbow
-	precache_sound ("assassin/arrowfly.wav");	
-	precache_sound ("assassin/arr2flsh.wav");	
-	precache_sound ("assassin/arr2wood.wav");	
-	precache_sound ("assassin/arrowbrk.wav");
-	precache_sound ("assassin/firefblt.wav");	
-	precache_sound ("assassin/firebolt.wav");	
 	//Grenades
-	precache_sound ("assassin/gbounce.wav");	
+	precache_sound ("assassin/gbounce.wav");	//SHARED! (Bouncers)
 	//Scarab Staff
-	precache_sound ("assassin/build.wav");	
-	precache_sound ("assassin/pincer.wav");	
-	precache_sound ("assassin/chntear.wav");	
-	precache_sound ("assassin/chn2flsh.wav");	
-	precache_sound ("assassin/chain.wav");	
-//	precache_sound ("assassin/clink.wav");	
-	precache_sound ("assassin/scarab.wav");	
-	precache_sound ("assassin/scrbfly.wav");	
-	precache_sound ("assassin/spin.wav");	
-	precache_sound ("assassin/core.wav");	
-	precache_sound ("misc/pulse.wav");			//Fully charged staff
+	precache_sound ("assassin/chntear.wav");	//SHARED! (Imp)
+	precache_sound ("misc/pulse.wav");			//SHARED! (Eidolon) Fully charged staff
 
 //REGISTERED======================================================
 
@@ -738,66 +621,33 @@ void Precache_wav (void)
 
 //CRUSADER
 	//Warhammer
-	precache_sound3 ("crusader/lghtn1.wav");	
-	precache_sound3 ("crusader/lghtn2.wav");	
-	precache_sound3 ("raven/lightng1.wav");
+	precache_sound3 ("crusader/lghtn1.wav");	//SHARED! (weather)
+	precache_sound3 ("crusader/lghtn2.wav");	//SHARED! (weather)	
+	precache_sound3 ("raven/lightng1.wav");		//SHARED! (weather)
 	//Ice Staff
-	precache_sound3 ("crusader/icehit.wav");	
-	precache_sound3 ("crusader/icewall.wav");	
-	precache_sound3 ("crusader/icefire.wav");	
-	precache_sound3 ("misc/tink.wav");				//Ice shots bounce
-	precache_sound3 ("crusader/blizfire.wav");	
-	precache_sound3 ("crusader/blizzard.wav");	
-	precache_sound3 ("crusader/frozen.wav");	
-	precache_sound3 ("misc/icestatx.wav");	//Ice statue breaking
+	precache_sound3 ("crusader/icehit.wav");	//SHARED? (ice shatter)
+	precache_sound3 ("crusader/frozen.wav");	//SHARED! (Monster unfreezing)	
+	precache_sound3 ("misc/icestatx.wav");		//SHARED! Ice statue breaking
 	//Meteor Staff
-	precache_sound3 ("crusader/metfire.wav");	
-	precache_sound3 ("misc/rubble.wav");			//Meteor bits fall, stoned player bits fall (from Medusa)
-	precache_sound3 ("crusader/torngo.wav");	
-	precache_sound3 ("crusader/tornado.wav");	
+	precache_sound3 ("misc/rubble.wav");		//SHARED chunks, Meteor bits fall, stoned player bits fall (from Medusa)
 	//Sunstaff
-	precache_sound3 ("crusader/sunstart.wav");	
-	precache_sound3 ("crusader/sunhum.wav");	
-	precache_sound3 ("crusader/sunhit.wav");	
+	precache_sound3 ("crusader/sunhum.wav");	//SHARED! (weather)
+	precache_sound3 ("crusader/sunhit.wav");	//SHARED! (weather)
 
 //NECROMANCER
-	//Sickle
-	precache_sound3 ("weapons/drain.wav");
 	//Magic Missiles
-	precache_sound3 ("necro/mmfire.wav");	
-	//Bone Shards
-	precache_sound3 ("necro/bonefpow.wav");	
-	precache_sound3 ("necro/bonefnrm.wav");	
-	precache_sound3 ("necro/bonephit.wav");	
-	precache_sound3 ("necro/bonenhit.wav");	
-	precache_sound3 ("necro/bonenwal.wav");	
-	//Raven Staff
-	precache_sound3 ("raven/ravengo.wav");		
-	precache_sound3 ("raven/squawk2.wav");		
-	precache_sound3 ("raven/death.wav");
-	precache_sound3 ("raven/rfire1.wav");
-	precache_sound3 ("raven/rfire2.wav");
-	precache_sound3 ("raven/split.wav");
-}
-
-//**********************************************
-// ***************  Id models
-//**********************************************
-void Precache_Id_mdl (void)
-{
-//REMOVE!!!!
-	precache_model ("models/s_light.spr");	// sphere light
+	precache_sound3 ("necro/mmfire.wav");		//SHARED! (Eidolon)
 }
 
 
 //**********************************************
 // ***************  Raven models
 //**********************************************
-void Precache_mdl (void)
+
+void Precache_misc (void)
 {
 //REMOVE!!!
 	precache_model("models/akarrow.mdl");//Mummy, archer, pstboar
-	precache_model("models/dthball.mdl");//Goes in dthfire.hc
 
 //MISC
 	precache_model ("models/teleport.mdl");	//Teleport model
@@ -827,19 +677,24 @@ void Precache_mdl (void)
 	precache_model("models/flesh2.mdl");
 	precache_model("models/flesh3.mdl");
 	precache_model("models/brains.mdl");
-	precache_model("models/clshard1.mdl");
-	precache_model("models/clshard2.mdl");
-	precache_model("models/clshard3.mdl");
-	precache_model("models/clshard4.mdl");
+	precache_model4("models/clshard1.mdl");	//updated need in new pak
+	precache_model4("models/clshard2.mdl");
+	precache_model4("models/clshard3.mdl");
+	precache_model4("models/clshard4.mdl");
 	precache_model("models/hay1.mdl");
 	precache_model("models/hay2.mdl");
 	precache_model("models/hay3.mdl");
 	precache_model("models/shard.mdl");	//shard model for ice, rock, ashes
+	precache_model("models/schunk1.mdl");
+	precache_model("models/schunk2.mdl");
+	precache_model("models/schunk3.mdl");
+	precache_model("models/schunk4.mdl");
 
 //ARTIFACTS
 	precache_model("models/a_shbost.mdl");
 	precache_model("models/a_hboost.mdl");
 	precache_model("models/a_torch.mdl");
+	//precache_model("models/torch.mdl");
 	precache_model("models/a_blast.mdl");
 	precache_model("models/a_mboost.mdl");
 	precache_model("models/a_telprt.mdl");
@@ -857,15 +712,16 @@ void Precache_mdl (void)
 	precache_model("models/a_invis.mdl");
 	precache_model("models/cube.mdl");
 	precache_model("models/ringft.mdl");
+	precache_model("models/glyphwir.mdl");	//Tripwire version of glyph
 
 	//Lambinator
 	precache_model("models/sheep.mdl");
 	precache_model("models/snout.mdl");
 	//Summoning Stone
-	precache_model3 ("models/imp.mdl");
+	precache_model4 ("models/imp.mdl");//converted for MP
 	precache_model3 ("models/h_imp.mdl");//empty for now
 	precache_model3 ("models/shardice.mdl");
-	precache_model ("models/fireball.mdl");
+	precache_model ("models/fireball.mdl");//imp, dthhorse,ai,fireball.hc
 
 //ITEMS
 	precache_model("models/i_bracer.mdl");	// Armor
@@ -876,157 +732,264 @@ void Precache_mdl (void)
 	precache_model ("models/i_bmana.mdl");
 	precache_model ("models/i_btmana.mdl");
 	precache_model ("models/i_hboost.mdl");	// Instant Health
+	
 	precache_model ("models/bag.mdl");	// Our version of a backpack
 
 //TE_STREAM models
 	// TE_STREAM_SUNSTAFF1 / TE_STREAM_SUNSTAFF2
 	precache_model3("models/stsunsf1.mdl");	//Sunbeam and ball models
-	precache_model3("models/stsunsf2.mdl");
+	precache_model3("models/stsunsf2.mdl");	//(weather_sunbeam,sunstaff)
 	precache_model3("models/stsunsf3.mdl");
 	precache_model3("models/stsunsf4.mdl");
 	precache_model3("models/stsunsf5.mdl");
+
 	// TE_STREAM_LIGHNING
-	precache_model3	("models/stlghtng.mdl");	//Lightning- also warhammer
-	// TE_STREAM_CHAIN
-	precache_model("models/stchain.mdl");	//Chain- also for Scarab staff
+	precache_model3	("models/stlghtng.mdl");	//Lightning- (warhammer, eidolon, lightwp)
+
 	// TE_STREAM_COLORBEAM
-	precache_model3("models/stclrbm.mdl");	//Colored beams of light
-	// TE_STREAM_ICECHUNKS
-	precache_model("models/stice.mdl");		//For blizzard
-	// TE_STREAM_GAZE
-	precache_model("models/stmedgaz.mdl");	//Medusa's gaze
-	// TE_STREAM_FAMINE
-	precache_model3("models/fambeam.mdl");	//Famine's beam attack
+	precache_model3("models/stclrbm.mdl");	//Colored beams of light (weather,golem,fangel,buddha)
 
-//GLYPHS
 	precache_model("models/glyph.mdl");		//Non-artifact flagged glyph
-	//Paladin
-	precache_model ("models/blast.mdl");	//Delayed fireball
-	//Assassin
-	precache_model("models/glyphwir.mdl");	//Tripwire version of glyph
-	precache_model ("models/twspike.mdl");	//Trip wire spike
 
+//Miscellaneous Shared
+	precache_model3 ("models/test.mdl");	//For testing
+
+	// CE_LSHOCK
+	precache_model("models/vorpshok.mdl");	//Vorpal sword & lightning hit 
+}
+
+
+void Precache_Male (void)
+{
+	precache_sound ("player/paljmp.wav");		// player jump
+	precache_sound ("player/pallnd.wav");		// player hurt when landing
+	precache_sound ("player/paldieh2.wav");		// player dying in water
+	precache_sound ("player/paldie1.wav");		// player death 1
+	precache_sound ("player/paldie2.wav");		// player death 2
+	precache_sound ("player/palpain1.wav");		// player pain 1
+	precache_sound ("player/palpain2.wav");		// player pain 2
+	precache_sound ("player/palgasp1.wav");		// little air
+	precache_sound ("player/palgasp2.wav");		// no air
+	precache_sound ("player/paldrown.wav");		// he's drowning
+}
+
+void Precache_Paladin (void)
+{
 //PALADIN
-	precache_model ("models/paladin.mdl");
+	precache_model4 ("models/paladin.mdl");//converted for MP
 	precache_model ("models/h_pal.mdl");
 	//Gauntlets
-	precache_model("models/gauntlet.mdl");		// Paladin Weapons
+	precache_model4("models/gauntlet.mdl");//converted for MP	// Paladin Weapons
 	//Axe
-	precache_model("models/axe.mdl");
+	precache_model4("models/axe.mdl");//converted for MP
 	precache_model("models/axblade.mdl");
 	precache_model("models/axtail.mdl");
 	//Vorpal Sword
-	precache_model("models/vorpal.mdl");
+	precache_model4("models/vorpal.mdl");//converted for MP
 	precache_model("models/vorpswip.mdl");
 	precache_model("models/vorpshot.mdl");
-	precache_model("models/vorpshok.mdl");	//Vorpal sword & lightning hit
 	precache_model("models/vorpshk2.mdl");
 	//Purifier
-	precache_model("models/purifier.mdl");
+	precache_model4("models/purifier.mdl");//converted for MP
 	precache_model("models/purfir1.mdl");	//Purifier flame
 	precache_model("models/drgnball.mdl");	//Purifier fireball, take 2
-	precache_model("models/ring.mdl");		//Smoke ring
+	precache_model ("models/blast.mdl");	//Delayed fireball
+	precache_model("models/xplod29.spr");	//eidolon and purifier
 
+//SOUNDS
+//Body sounds
+	Precache_Male ();
+	precache_sound ("paladin/devine.wav");		// Devine Intervention
+//Weapon sounds
+	//Vorpal Sword
+	precache_sound ("weapons/vorpht1.wav");		// Vorpal sword hitting something it can damage
+
+	precache_sound ("weapons/vorpblst.wav");
+	precache_sound ("weapons/vorppwr.wav");
+	//Axe
+	precache_sound ("paladin/axgen.wav");		
+	precache_sound ("paladin/axgenpr.wav");		
+	//Purifier
+	precache_sound ("paladin/purfire.wav");	
+	precache_sound ("paladin/purfireb.wav");	
+	precache_model("models/ring.mdl");		//Smoke ring
+	//Glyph: delayed fireball
+	precache_sound ("weapons/fbfire.wav");		//Delayed fireball explosion sound	
+}
+
+void Precache_Crusader (void)
+{
+//CRUSADER
+	precache_model4("models/crusader.mdl");//converted for MP
+	precache_model3 ("models/h_cru.mdl");
+	//Warhammer
+	precache_model4("models/warhamer.mdl");//converted for MP
+	precache_model3("models/hamthrow.mdl");
+	//Ice Staff
+	precache_model4("models/icestaff.mdl");//converted for MP
+	precache_model3("models/iceshot1.mdl");
+	precache_model3("models/iceshot2.mdl");
+	precache_model("models/stice.mdl");		//For blizzard  (used by crusader only)
+	//Meteor Staff
+	precache_model3("models/meteor.mdl");
+	precache_model3("models/tempmetr.mdl");//temp- meteor projectile
+	precache_model4("models/tornato.mdl");//converted for MP
+	precache_model4("models/funnal.mdl");//converted for MP
+	//Sunstaff
+	precache_model3("models/sunstaff.mdl");
+	//Crusader
+	precache_model3 ("models/goodsphr.mdl");//Smiting Sphere
+	precache_model3 ("models/cross.mdl");
+//SOUNDS
+//Body Sounds
+	Precache_Male ();
+	//Ice Staff
+	precache_sound3 ("crusader/icewall.wav");	
+	precache_sound3 ("crusader/icefire.wav");	
+	precache_sound3 ("misc/tink.wav");				//Ice shots bounce
+	precache_sound3 ("crusader/blizfire.wav");	
+	precache_sound3 ("crusader/blizzard.wav");	
+	//Meteor Staff
+	precache_sound3 ("crusader/metfire.wav");	
+	precache_sound3 ("crusader/torngo.wav");	
+	precache_sound3 ("crusader/tornado.wav");	
+	//Sunstaff
+	precache_sound3 ("crusader/sunstart.wav");	
+}
+
+//REGISTERED=======================================================
+
+void Precache_Necromancer (void)
+{
+//NECROMANCER
+	precache_model4("models/necro.mdl");//converted for MP
+	precache_model3 ("models/h_nec.mdl");
+	//Sickle
+	precache_model4("models/sickle.mdl");//converted for MP		// Necromancer Weapons
+	//Magic Missiles
+	precache_model3("models/spllbook.mdl");
+	precache_model3("models/handfx.mdl");
+	//Bone Shards
+//	precache_model3("models/bonefx.mdl");
+	precache_model3("models/boneshot.mdl");
+	precache_model3("models/boneshrd.mdl");
+	precache_model3("models/bonelump.mdl");
+	//Raven Staff
+	precache_model4("models/ravenstf.mdl");//converted for MP
+	precache_model3("models/vindsht1.mdl");
+	precache_model3("models/ravproj.mdl");
+	precache_model3("models/birdmsl2.mdl");
+	//Necromancer
+	precache_model3 ("models/soulball.mdl");//Soul sphere
+	precache_model3 ("models/soulskul.mdl");
+	precache_model3 ("models/birdmisl.mdl");
+//SOUNDS
+//Body Sounds
+	Precache_Male ();
+	//Sickle
+	precache_sound3 ("weapons/drain.wav");
+	//Bone Shards
+	precache_sound3 ("necro/bonefpow.wav");	
+	precache_sound3 ("necro/bonefnrm.wav");	
+	precache_sound3 ("necro/bonephit.wav");	
+	precache_sound3 ("necro/bonenhit.wav");	
+	precache_sound3 ("necro/bonenwal.wav");	
+	//Raven Staff
+	precache_sound3 ("raven/ravengo.wav");		
+	precache_sound3 ("raven/squawk2.wav");		
+	precache_sound3 ("raven/death.wav");
+	precache_sound3 ("raven/rfire1.wav");
+	precache_sound3 ("raven/rfire2.wav");
+	precache_sound3 ("raven/split.wav");
+}
+
+void Precache_Female (void)
+{
+	precache_sound ("player/assjmp.wav");		// player jump
+	precache_sound ("player/asslnd.wav");		// player hurt when landing
+	precache_sound ("player/assdieh2.wav");		// player dying in water
+	precache_sound ("player/assdie1.wav");		// player death 1
+	precache_sound ("player/assdie2.wav");		// player death 2
+	precache_sound ("player/asspain1.wav");		// player pain 1
+	precache_sound ("player/asspain2.wav");		// player pain 2
+	precache_sound ("player/assgasp1.wav");		// little air
+	precache_sound ("player/assgasp2.wav");		// no air
+	precache_sound ("player/assdrown.wav");		// she's drowning
+}
+
+void Precache_Assassin (void)
+{
 //ASSASSIN
-	precache_model ("models/assassin.mdl");
+	precache_model4 ("models/assassin.mdl");//converted for MP
 	precache_model ("models/h_ass.mdl");
-	precache_model ("models/h_fangel.mdl");//Temp head model for Assassin
 	//Punch Dagger
-	precache_model("models/punchdgr.mdl");
+	precache_model4("models/punchdgr.mdl");//converted for MP
 	//Crossbow
-	precache_model("models/crossbow.mdl");
+	precache_model4("models/crossbow.mdl");//converted for MP
 	precache_model ("models/arrow.mdl");
 	precache_model ("models/arrowhit.mdl");
 	precache_model ("models/flaming.mdl");
 	precache_model ("models/NFarrow.mdl");
 	//Grenades
-	precache_model("models/v_assgr.mdl");
+	precache_model4("models/v_assgr.mdl");//converted for MP
 	precache_model("models/assgren.mdl");
 	//Scarab Staff
-	precache_model("models/scarabst.mdl");
+	precache_model4("models/scarabst.mdl");//converted for MP
 	precache_model("models/scrbstp1.mdl");
 	precache_model("models/scrbpbdy.mdl");
 	precache_model("models/scrbpwng.mdl");
+	precache_model ("models/twspike.mdl");	//Trip wire spike
+	// TE_STREAM_CHAIN
+	precache_model("models/stchain.mdl");	//Chain- also for Scarab staff (assasin only)
+//SOUNDS
+//ASSASSIN
+//Body sounds
+	Precache_Female();
+//Weapon sounds
+	//Crossbow
+	precache_sound ("assassin/arrowfly.wav");	
+	precache_sound ("assassin/arr2flsh.wav");	
+	precache_sound ("assassin/arr2wood.wav");	
+	precache_sound ("assassin/arrowbrk.wav");
+	precache_sound ("assassin/firefblt.wav");	
+	precache_sound ("assassin/firebolt.wav");	
+	//Scarab Staff
+	precache_sound ("assassin/build.wav");	
+	precache_sound ("assassin/pincer.wav");	
+	precache_sound ("assassin/chn2flsh.wav");	
+	precache_sound ("assassin/chain.wav");	
+//	precache_sound ("assassin/clink.wav");	
+	precache_sound ("assassin/scarab.wav");	
+	precache_sound ("assassin/scrbfly.wav");	
+	precache_sound ("assassin/spin.wav");	
+	precache_sound ("assassin/core.wav");	
+	precache_sound ("misc/pulse.wav");			//Fully charged staff
 
-
-//REGISTERED=======================================================
-
-//NECROMANCER
-	precache_model3("models/necro.mdl");
-	precache_model3 ("models/h_nec.mdl");
-	//Sickle
-	precache_model3("models/sickle.mdl");		// Necromancer Weapons
-	//Magic Missiles
-	precache_model3("models/spllbook.mdl");
-	precache_model3("models/handfx.mdl");
-	//Bone Shards
-	precache_model3("models/bonefx.mdl");
-	precache_model3("models/boneshot.mdl");
-	precache_model3("models/boneshrd.mdl");
-	precache_model3("models/bonelump.mdl");
-	//Raven Staff
-	precache_model3("models/ravenstf.mdl");
-	precache_model3("models/vindsht1.mdl");
-	precache_model3("models/ravproj.mdl");
-	precache_model3("models/birdmsl2.mdl");
-
-//CRUSADER
-	precache_model3("models/crusader.mdl");
-	precache_model3 ("models/h_cru.mdl");
-	//Warhammer
-	precache_model3("models/warhamer.mdl");
-	precache_model3("models/hamthrow.mdl");
-	//Ice Staff
-	precache_model3("models/icestaff.mdl");
-	precache_model3("models/iceshot1.mdl");
-	precache_model3("models/iceshot2.mdl");
-	//Meteor Staff
-	precache_model3("models/meteor.mdl");
-	precache_model3("models/tempmetr.mdl");//temp- meteor projectile
-	precache_model3("models/tornato.mdl");
-	precache_model3("models/funnal.mdl");
-	//Sunstaff
-	precache_model3("models/sunstaff.mdl");
-
-//SPECIAL ABILITIES
-	//Necromancer
-	precache_model3 ("models/soulball.mdl");//Soul sphere
-	precache_model3 ("models/soulskul.mdl");
-	//Crusader
-	precache_model3 ("models/goodsphr.mdl");//Smiting Sphere
-	precache_model3 ("models/cross.mdl");
-
-	precache_model3 ("models/birdmisl.mdl");
-//Miscellaneous Shared
-	precache_model ("models/fireball.mdl");//Fireball traps, imps
-	precache_model3 ("models/test.mdl");	//For testing
 }
-
 
 //**********************************************
 // ***************  Raven sprites
 //**********************************************
 void Precache_spr (void)
 {//ALPHABETIZED!
+	precache_model ("models/s_light.spr");	// id's sphere light	(used by plats and lights still)
 //FIXME: Which of these aren't being used anymore?
 	precache_model("models/bg_expld.spr");
-	precache_model("models/bldspot1.spr");
-	precache_model("models/bldspot2.spr");
-	precache_model("models/bldspot3.spr");
+//	precache_model("models/bldspot1.spr");
+//	precache_model("models/bldspot2.spr");
+//	precache_model("models/bldspot3.spr");
 	precache_model("models/bldspot4.spr");
 	precache_model("models/bluflash.spr");
 	precache_model("models/bonexpld.spr");
 	precache_model("models/bspark.spr");
 	precache_model("models/rcloud.spr");
 
-	precache_model ("models/eidoflam.spr");
-
-	precache_model("models/fcircle.spr");
-	precache_model("models/fl_expld.spr");
+	precache_model("models/fcircle.spr");//mummy and purifier
+	precache_model("models/fl_expld.spr");//dthhorse and BecomeImp(Summon)
 
 	precache_model("models/gen_expl.spr");
 	precache_model ("models/ghost.spr");
-	precache_model ("gfx/glass.spr");
+//	precache_model ("gfx/glass.spr");	//create sprite chunks not used
 	precache_model("models/grnsmk1.spr");
 	precache_model ("models/gryspt.spr");
 	precache_model("models/grysmk1.spr");
@@ -1046,27 +1009,28 @@ void Precache_spr (void)
 	precache_model ("models/redspt.spr");
 	precache_model("models/rspark.spr");
 
-	precache_model ("gfx/s_blast.spr");
+//	precache_model ("gfx/s_blast.spr");		//not used anywhere
 	precache_model ("models/s_bubble.spr");	// drowning bubbles
-	precache_model ("models/s_explod.spr");	// Not sure, but it was in our directory
+//	precache_model ("models/s_explod.spr");	// old ogre
 	precache_model ("models/s_light.spr");
+	//CE_SM_BLUE_FLASH(CreateLittleBlueFlash)
 	precache_model("models/sm_blue.spr");
 	precache_model("models/sm_expld.spr");
 	precache_model("models/sm_white.spr");
-	precache_model("gfx/smoke1.spr");
+//	precache_model("gfx/smoke1.spr");	//not used anywhere
 	precache_model("models/spark.spr");
-	precache_model("models/spark0.spr");
-	precache_model ("gfx/stone.spr");
+//	precache_model("models/spark0.spr");	//not used anywhere
+//	precache_model ("gfx/stone.spr");	//sprite chunks not used
 
+	//CE_TELESMK1
 	precache_model("models/telesmk1.spr");
 	precache_model("models/telesmk2.spr");
 	precache_model("models/telesmk3.spr");
 
 	precache_model("models/whtsmk1.spr");
-	precache_model("models/wsplash.spr");
+//	precache_model("models/wsplash.spr");
 
 	precache_model("models/xbowexpl.spr");	//Crossbow explosion
-	precache_model("models/xplod29.spr");	//old Eidolon flames
 	precache_model("models/xpspblue.spr");
 
 	precache_model("models/yr_flsh.spr");
@@ -1076,12 +1040,13 @@ void Precache_spr (void)
 void precache_archer()
 {
 	precache_model("models/archer.mdl");
-	precache_model("models/archerhd.mdl");
-
-	precache_model("models/gspark.spr");
 
 	precache_sound ("archer/arrowg.wav");
 	precache_sound ("archer/arrowr.wav");
+
+	precache_model("models/archerhd.mdl");
+
+	precache_model("models/gspark.spr");
 
 	precache_sound ("archer/growl.wav");
 	precache_sound ("archer/pain.wav");
@@ -1104,4 +1069,640 @@ void precache_spider ()
 	precache_sound("spider/step2.wav");
 	precache_sound("spider/step3.wav");
 }
-
+/*
+ * $Log: /H2 Mission Pack/HCode/precache.hc $
+ * 
+ * 70    3/19/98 12:17a Mgummelt
+ * last bug fixes
+ * 
+ * 69    3/16/98 3:52p Jmonroe
+ * fixed info_masks for load/save changelevel
+ * 
+ * 68    3/15/98 2:22p Jmonroe
+ * dammit!
+ * 
+ * 67    3/15/98 1:53p Jmonroe
+ * dammit
+ * 
+ * 66    3/14/98 9:24p Mgummelt
+ * 
+ * 65    3/14/98 5:52p Mgummelt
+ * changed precaches to precache 4 for old models converted for MP
+ * 
+ * 64    3/13/98 3:02a Mgummelt
+ * 
+ * 63    3/12/98 10:50p Jmonroe
+ * 
+ * 62    3/12/98 6:33p Jmonroe
+ * fixed stupid hexen2 wrong precache for scepter
+ * 
+ * 61    3/12/98 4:02p Mgummelt
+ * 
+ * 60    3/10/98 2:25p Jweier
+ * 
+ * 59    3/10/98 10:56a Mgummelt
+ * 
+ * 58    3/10/98 10:55a Mgummelt
+ * 
+ * 57    3/05/98 5:12p Jmonroe
+ * changed ball to precache4 to get it in the new pak
+ * 
+ * 56    3/05/98 2:38p Jmonroe
+ * 
+ * 55    3/05/98 11:00a Jmonroe
+ * 
+ * 54    3/03/98 4:45p Jmonroe
+ * 
+ * 53    3/03/98 4:36p Jmonroe
+ * changed over to precache 4 to build my pak
+ * 
+ * 52    3/03/98 3:32p Jmonroe
+ * added the pak builder cmds for the maps and midi
+ * 
+ * 51    3/02/98 1:18p Jmonroe
+ * 
+ * 50    3/02/98 12:41p Mgummelt
+ * 
+ * 49    2/28/98 1:15a Jweier
+ * 
+ * 48    2/27/98 11:52a Mgummelt
+ * 
+ * 47    2/26/98 2:04p Mgummelt
+ * 
+ * 46    2/25/98 6:10p Mgummelt
+ * 
+ * 45    2/20/98 2:36p Jmonroe
+ * precaches the bonebrk sound
+ * 
+ * 44    2/19/98 12:05p Jmonroe
+ * 
+ * 43    2/18/98 6:10p Jmonroe
+ * 
+ * 42    2/18/98 6:02p Jmonroe
+ * added cache4 functions, added puzzle piece cache_file4 cmds
+ * 
+ * 41    2/18/98 1:32p Jmonroe
+ * 
+ * 40    2/12/98 5:55p Jmonroe
+ * remove unreferenced funcs
+ * 
+ * 39    2/12/98 2:48p Mgummelt
+ * 
+ * 38    2/11/98 12:57p Jmonroe
+ * 
+ * 37    2/11/98 11:37a Jmonroe
+ * put paladin in his own precache section
+ * 
+ * 36    2/10/98 8:50p Jmonroe
+ * 
+ * 35    2/10/98 3:53p Jmonroe
+ * smarter precache, removed unused sprites and funcs
+ * 
+ * 34    2/10/98 2:42p Jmonroe
+ * improved precache some more
+ * 
+ * 33    2/09/98 5:11p Jweier
+ * 
+ * 32    2/08/98 3:09p Mgummelt
+ * 
+ * 31    2/07/98 1:28p Jweier
+ * 
+ * 30    2/06/98 3:47p Mgummelt
+ * 
+ * 29    2/05/98 11:21p Mgummelt
+ * Making weaps network friendly
+ * 
+ * 28    2/03/98 3:51p Mgummelt
+ * 
+ * 27    2/03/98 10:56a Mgummelt
+ * 
+ * 26    2/02/98 1:20p Jmonroe
+ * moved some more sprites to specific precache
+ * 
+ * 25    2/02/98 10:26a Mgummelt
+ * 
+ * 24    1/29/98 6:34p Mgummelt
+ * 
+ * 23    1/28/98 3:10p Mgummelt
+ * 
+ * 22    1/26/98 12:29p Mgummelt
+ * 
+ * 21    1/22/98 4:05p Mgummelt
+ * 
+ * 20    1/21/98 10:30a Jweier
+ * 
+ * 19    1/20/98 11:12a Mgummelt
+ * 
+ * 18    1/20/98 10:58a Mgummelt
+ * 
+ * 17    1/20/98 10:31a Mgummelt
+ * 
+ * 16    1/14/98 7:43p Mgummelt
+ * 
+ * 15    1/14/98 6:06p Mgummelt
+ * 
+ * 232   10/29/97 5:39p Jheitzman
+ * 
+ * 231   10/29/97 11:55a Mgummelt
+ * 
+ * 230   10/28/97 1:01p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 228   10/03/97 4:06p Rjohnson
+ * Updates
+ * 
+ * 227   9/16/97 4:17p Rjohnson
+ * Updates
+ * 
+ * 226   9/11/97 7:13p Rjohnson
+ * Caching Updates
+ * 
+ * 225   9/09/97 2:31p Rjohnson
+ * Updates
+ * 
+ * 224   9/03/97 4:09a Mgummelt
+ * 
+ * 223   9/03/97 2:32a Mgummelt
+ * 
+ * 222   9/02/97 1:58p Rlove
+ * 
+ * 221   9/01/97 6:42p Rlove
+ * 
+ * 220   9/01/97 4:31p Rjohnson
+ * Stuff
+ * 
+ * 219   9/01/97 5:44a Jweier
+ * 
+ * 218   9/01/97 4:11a Rjohnson
+ * Updates
+ * 
+ * 217   8/31/97 12:54p Jweier
+ * 
+ * 216   8/31/97 12:44p Rjohnson
+ * Updates
+ * 
+ * 215   8/28/97 8:55p Mgummelt
+ * 
+ * 214   8/28/97 8:52p Rjohnson
+ * Updates
+ * 
+ * 213   8/26/97 3:01p Rlove
+ * 
+ * 212   8/26/97 10:23a Rlove
+ * 
+ * 211   8/26/97 9:11a Rlove
+ * 
+ * 210   8/26/97 9:05a Rlove
+ * 
+ * 209   8/26/97 8:42a Mgummelt
+ * 
+ * 208   8/26/97 8:37a Mgummelt
+ * 
+ * 207   8/26/97 8:34a Rjohnson
+ * Updates
+ * 
+ * 206   8/22/97 9:51p Mgummelt
+ * 
+ * 205   8/22/97 2:18p Jweier
+ * 
+ * 204   8/22/97 2:16p Rjohnson
+ * Updates
+ * 
+ * 203   8/20/97 10:50p Rlove
+ * Update
+ * 
+ * 202   8/20/97 2:58p Rjohnson
+ * Change of precache for strings
+ * 
+ * 201   8/20/97 2:34p Rjohnson
+ * Change for precache of fireball
+ * 
+ * 200   8/19/97 11:59p Rjohnson
+ * Updates
+ * 
+ * 199   8/19/97 8:36p Rjohnson
+ * Precache Update
+ * 
+ * 198   8/19/97 7:13p Rjohnson
+ * Precache update
+ * 
+ * 197   8/18/97 4:47p Rlove
+ * 
+ * 196   8/18/97 4:14p Mgummelt
+ * 
+ * 195   8/18/97 3:01p Rjohnson
+ * Fix for precaching
+ * 
+ * 194   8/18/97 11:16a Rjohnson
+ * Added rankings
+ * 
+ * 193   8/17/97 11:47p Rjohnson
+ * Added puzzle item
+ * 
+ * 192   8/17/97 1:37p Mgummelt
+ * 
+ * 191   8/17/97 12:22p Rjohnson
+ * Fixed precache
+ * 
+ * 190   8/16/97 5:47p Mgummelt
+ * 
+ * 189   8/16/97 5:23p Mgummelt
+ * 
+ * 188   8/16/97 10:51a Rjohnson
+ * Precache update
+ * 
+ * 187   8/15/97 8:10p Mgummelt
+ * 
+ * 186   8/15/97 5:29p Rjohnson
+ * Updates
+ * 
+ * 185   8/15/97 3:00p Rjohnson
+ * Updates
+ * 
+ * 184   8/14/97 7:48a Rlove
+ * 
+ * 183   8/13/97 3:39p Rlove
+ * 
+ * 182   8/13/97 1:48p Rlove
+ * 
+ * 181   8/13/97 12:55p Rlove
+ * added a raven sound
+ * 
+ * 180   8/13/97 12:08p Mgummelt
+ * 
+ * 179   8/13/97 12:05p Mgummelt
+ * 
+ * 
+ * 178   8/13/97 12:04p Rjohnson
+ * Precache adjustments
+ * 
+ * 177   8/11/97 10:54a Rlove
+ * 
+ * 176   8/09/97 11:14a Rlove
+ * 
+ * 175   8/09/97 1:58a Mgummelt
+ * 
+ * 174   8/09/97 1:54a Mgummelt
+ * 
+ * 172   8/05/97 6:47p Mgummelt
+ * 
+ * 171   8/01/97 5:45p Rlove
+ * 
+ * 170   7/31/97 4:58p Mgummelt
+ * 
+ * 169   7/31/97 4:57p Mgummelt
+ * 
+ * 168   7/30/97 4:39p Mgummelt
+ * 
+ * 167   7/30/97 3:35p Mgummelt
+ * 
+ * 165   7/29/97 4:48p Rlove
+ * 
+ * 164   7/28/97 8:27p Mgummelt
+ * 
+ * 163   7/28/97 7:50p Mgummelt
+ * 
+ * 162   7/25/97 4:04p Mgummelt
+ * 
+ * 161   7/25/97 11:36a Rjohnson
+ * 
+ * 160   7/24/97 12:32p Mgummelt
+ * 
+ * 159   7/24/97 3:27a Mgummelt
+ * 
+ * 158   7/23/97 2:53p Rlove
+ * 
+ * 157   7/22/97 5:26p Bgokey
+ * 
+ * 156   7/22/97 11:24a Bgokey
+ * 
+ * 155   7/21/97 2:02p Bgokey
+ * 
+ * 154   7/21/97 1:28p Rlove
+ * Added some puzzle models
+ * 
+ * 153   7/19/97 9:57p Mgummelt
+ * 
+ * 152   7/18/97 2:25p Rlove
+ * 
+ * 151   7/18/97 11:06a Mgummelt
+ * 
+ * 150   7/17/97 1:53p Rlove
+ * 
+ * 149   7/15/97 9:19p Mgummelt
+ * 
+ * 148   7/15/97 8:44p Mgummelt
+ * 
+ * 147   7/15/97 2:31p Mgummelt
+ * 
+ * 146   7/15/97 11:20a Mgummelt
+ * 
+ * 145   7/14/97 4:11p Mgummelt
+ * 
+ * 144   7/14/97 10:06a Rjohnson
+ * Added more puzzle pieces
+ * 
+ * 143   7/11/97 12:34p Rjohnson
+ * Added a puzzle precache, changed puzzle precaching, added a parameter
+ * to the call back for client reentering a level
+ * 
+ * 142   7/09/97 3:23p Bgokey
+ * 
+ * 141   7/09/97 11:53a Mgummelt
+ * 
+ * 140   7/07/97 11:12a Mgummelt
+ * 
+ * 139   7/02/97 4:07p Mgummelt
+ * 
+ * 138   7/01/97 6:28p Rlove
+ * 
+ * 137   7/01/97 5:23p Rjohnson
+ * More file caching
+ * 
+ * 136   7/01/97 5:17p Rjohnson
+ * Removed water splashes
+ * 
+ * 135   7/01/97 5:06p Rlove
+ * 
+ * 134   7/01/97 3:55p Mgummelt
+ * 
+ * 133   7/01/97 3:50p Bgokey
+ * 
+ * 132   6/30/97 8:01p Mgummelt
+ * 
+ * 131   6/30/97 7:22p Rlove
+ * 
+ * 130   6/30/97 7:09p Rlove
+ * More puzzle models
+ * 
+ * 129   6/30/97 4:52p Mgummelt
+ * 
+ * 128   6/28/97 6:32p Mgummelt
+ * 
+ * 127   6/27/97 5:37p Mgummelt
+ * 
+ * 126   6/27/97 3:40p Rlove
+ * 
+ * 125   6/27/97 2:37p Rlove
+ * 
+ * 124   6/27/97 10:44a Mgummelt
+ * 
+ * 123   6/27/97 10:18a Rlove
+ * Monsters drop stuff on death
+ * 
+ * 122   6/26/97 11:58p Rjohnson
+ * Added cube
+ * 
+ * 121   6/26/97 4:56p Rlove
+ * 
+ * 120   6/26/97 4:46p Rlove
+ * 
+ * 119   6/26/97 7:36a Rlove
+ * Changed Vindictus to Ravenstaff
+ * 
+ * 118   6/25/97 3:00p Mgummelt
+ * 
+ * 117   6/25/97 10:08a Rlove
+ * 
+ * 116   6/19/97 5:55p Jweier
+ * 
+ * 115   6/19/97 12:10p Jweier
+ * 
+ * 114   6/16/97 4:05p Rlove
+ * 
+ * 113   6/16/97 2:55p Rlove
+ * New explosion sounds added
+ * 
+ * 112   6/16/97 10:04a Rlove
+ * 
+ * 111   6/16/97 8:04a Rlove
+ * Fixed null.wav error, also paladin weapons deplete mana now
+ * 
+ * 110   6/14/97 2:22p Rjohnson
+ * Precached more puzzle pieces
+ * 
+ * 109   6/13/97 6:08p Rlove
+ * 
+ * 108   6/13/97 10:51a Rlove
+ * Moved some precache code
+ * 
+ * 107   6/13/97 10:11a Rlove
+ * Moved all message.hc to strings.hc
+ * 
+ * 106   6/12/97 4:32p Rlove
+ * 
+ * 105   6/12/97 12:13p Rlove
+ * Archer arrows generate red or green sparks
+ * 
+ * 104   6/10/97 4:02p Rlove
+ * 
+ * 103   6/09/97 3:36p Rlove
+ * 
+ * 102   6/07/97 3:35p Rlove
+ * Added water splash animation.  It ain't done yet.
+ * 
+ * 101   6/06/97 4:46p Rlove
+ * Now using just the generic weapon artifacts.
+ * 
+ * 100   6/04/97 8:16p Mgummelt
+ * 
+ * 99    6/04/97 8:41a Rlove
+ * New weapon artifact models
+ * 
+ * 98    6/03/97 9:00a Rlove
+ * Added fx_smoke_generator entity
+ * 
+ * 97    6/03/97 7:59a Rlove
+ * Change take_art.wav to artpkup.wav
+ * 
+ * 96    6/03/97 7:41a Rlove
+ * Added ring of absorption model
+ * 
+ * 95    6/02/97 9:30a Rlove
+ * Added haste blur to player model, changed chase camera - but will
+ * change it back once testing is done
+ * 
+ * 94    5/30/97 3:46p Rlove
+ * Added smoke ring
+ * 
+ * 93    5/30/97 12:01p Rlove
+ * New blue explosion
+ * 
+ * 92    5/29/97 9:23p Mgummelt
+ * 
+ * 91    5/29/97 4:24p Rlove
+ * Added axe tail model
+ * 
+ * 90    5/29/97 11:28a Mgummelt
+ * 
+ * 89    5/28/97 8:25p Mgummelt
+ * 
+ * 87    5/28/97 10:45a Rlove
+ * Moved sprite effects to client side - smoke, explosions, and flashes.
+ * 
+ * 86    5/27/97 4:59p Rlove
+ * Taking out Id sounds
+ * 
+ * 85    5/27/97 10:58a Rlove
+ * Took out old Id sound files
+ * 
+ * 84    5/27/97 7:58a Rlove
+ * New thingtypes of GreyStone,BrownStone, and Cloth.
+ * 
+ * 83    5/24/97 2:48p Rlove
+ * Taking out old Id sounds
+ * 
+ * 82    5/23/97 4:17p Rlove
+ * Getting rid of Quake sounds
+ * 
+ * 79    5/23/97 12:22p Bgokey
+ * 
+ * 78    5/23/97 11:56a Rlove
+ * 
+ * 77    5/22/97 5:18p Rlove
+ * New door sounds
+ * 
+ * 76    5/22/97 10:28a Rlove
+ * Added fire circle fx
+ * 
+ * 75    5/21/97 3:34p Rlove
+ * New chunks
+ * 
+ * 74    5/21/97 1:25p Rlove
+ * 
+ * 73    5/20/97 9:32p Mgummelt
+ * 
+ * 72    5/19/97 11:36p Mgummelt
+ * 
+ * 71    5/19/97 12:43p Mgummelt
+ * 
+ * 70    5/19/97 12:07p Mgummelt
+ * 
+ * 69    5/19/97 12:01p Rlove
+ * New sprites for axe
+ * 
+ * 68    5/19/97 10:56a Rlove
+ * 
+ * 67    5/19/97 8:58a Rlove
+ * Adding sprites and such to the axe.
+ * 
+ * 66    5/16/97 1:52p Rlove
+ * 
+ * 65    5/15/97 8:28p Mgummelt
+ * 
+ * 64    5/15/97 6:34p Rjohnson
+ * Code cleanup
+ * 
+ * 63    5/15/97 1:33p Rlove
+ * 
+ * 62    5/15/97 12:30a Mgummelt
+ * 
+ * 61    5/13/97 3:52p Mgummelt
+ * 
+ * 60    5/13/97 9:55a Rlove
+ * 
+ * 59    5/12/97 7:46a Rlove
+ * For the bell animations
+ * 
+ * 58    5/09/97 7:43a Rlove
+ * 
+ * 57    5/07/97 4:09p Rlove
+ * 
+ * 56    5/07/97 11:03a Rlove
+ * 
+ * 55    5/06/97 5:18p Rjohnson
+ * Added the precache stuff for the existing puzzle models
+ * 
+ * 54    5/06/97 9:12a Rlove
+ * Added thingtype_leaves
+ * 
+ * 53    5/05/97 5:40p Rlove
+ * 
+ * 52    5/05/97 10:29a Mgummelt
+ * 
+ * 51    5/03/97 3:23p Rlove
+ * 
+ * 50    5/03/97 12:59p Rlove
+ * 
+ * 49    5/02/97 8:06p Mgummelt
+ * 
+ * 48    5/02/97 8:05a Rlove
+ * 
+ * 47    5/01/97 8:52p Mgummelt
+ * 
+ * 46    5/01/97 5:06p Rlove
+ * New camera
+ * 
+ * 45    4/30/97 5:02p Mgummelt
+ * 
+ * 44    4/28/97 6:53p Mgummelt
+ * 
+ * 43    4/28/97 10:17a Rlove
+ * New artifacts and items
+ * 
+ * 42    4/26/97 6:23p Mgummelt
+ * 
+ * 41    4/26/97 3:52p Mgummelt
+ * 
+ * 38    4/25/97 8:32p Mgummelt
+ * 
+ * 37    4/24/97 10:00p Rjohnson
+ * Fixed problem with precache and spawning artifacts
+ * 
+ * 36    4/24/97 8:48p Mgummelt
+ * 
+ * 35    4/24/97 2:22p Mgummelt
+ * 
+ * 34    4/21/97 8:47p Mgummelt
+ * 
+ * 33    4/21/97 12:31p Mgummelt
+ * 
+ * 32    4/18/97 5:24p Mgummelt
+ * 
+ * 31    4/18/97 11:16a Rlove
+ * Added smoke sprite
+ * 
+ * 30    4/18/97 7:01a Rlove
+ * Added new gib models
+ * 
+ * 29    4/17/97 4:11p Mgummelt
+ * 
+ * 28    4/17/97 4:10p Mgummelt
+ * 
+ * 27    4/17/97 2:50p Mgummelt
+ * 
+ * 26    4/16/96 11:52p Mgummelt
+ * 
+ * 25    4/15/97 8:59a Rlove
+ * Pulled out old Id wav
+ * 
+ * 24    4/14/97 3:29p Rlove
+ * Precaching a wav
+ * 
+ * 23    4/14/96 2:36p Mgummelt
+ * 
+ * 22    4/13/96 4:05p Mgummelt
+ * 
+ * 21    4/13/96 3:30p Mgummelt
+ * 
+ * 20    4/12/96 8:56p Mgummelt
+ * 
+ * 19    4/12/97 3:20p Rlove
+ * Fixed problem with assassin grenade model.
+ * 
+ * 18    4/12/96 9:01a Mgummelt
+ * 
+ * 17    4/11/97 7:33p Mgummelt
+ * 
+ * 16    4/11/97 7:30p Mgummelt
+ * 
+ * 15    4/11/96 1:04p Mgummelt
+ * 
+ * 14    4/11/97 12:38a Mgummelt
+ * 
+ * 13    4/10/96 3:29p Mgummelt
+ * 
+ * 12    4/10/97 2:14p Rlove
+ * Some tweaking of gauntlets and vorpal sword.
+ */

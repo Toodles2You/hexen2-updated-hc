@@ -4,7 +4,7 @@
 //** scorpion.hc
 //** bgokey
 //**
-//** $Header: /H3/game/HCode/scorpion.hc 40    8/31/97 12:54p Jweier $
+//** $Header: /H2 Mission Pack/HCode/scorpion.hc 7     3/09/98 3:05p Mgummelt $
 //**
 //**************************************************************************
 
@@ -89,7 +89,7 @@ void ScorpionMelee1(void);
 void ScorpionMelee2(void);
 void ScorpionMelee3(void);
 void ScorpionMelee4(void);
-void ScorpionDie(void);
+//void ScorpionDie(void);
 void ScorpionDieInit(void);
 entity ScorpionLookProjectiles(void);
 float ScorpionCheckDefense(void);
@@ -120,6 +120,11 @@ AMBUSH
 
 void monster_scorpion_yellow(void)
 {
+	if(!self.th_init)
+	{
+		self.th_init=monster_scorpion_yellow;
+		self.init_org=self.origin;
+	}
 	ScorpionInit(SCORPION_YELLOW);
 }
 
@@ -139,6 +144,11 @@ AMBUSH
 
 void monster_scorpion_black(void)
 {
+	if(!self.th_init)
+	{
+		self.th_init=monster_scorpion_black;
+		self.init_org=self.origin;
+	}
 	ScorpionInit(SCORPION_BLACK);
 }
 
@@ -156,7 +166,7 @@ void ScorpionInit(float type)
 		return;
 	}
 
-	if not(self.flags2&FL_SUMMONED)
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 	{
 		precache_model2("models/scorpion.mdl");
 
@@ -184,17 +194,22 @@ void ScorpionInit(float type)
 	//self.touch = SUB_Null;
 	//self.use = SUB_Null;
 	setsize(self, '-16 -16 0', '16 16 64');
+	self.hull=HULL_PLAYER;
 
 	if(type == SCORPION_YELLOW)
 	{
-		self.health = 100;
+		if(!self.health)
+			self.health = 100;
 		self.experience_value = 60;
 	}
 	else
 	{
-		self.health = 200;
+		if(!self.health)
+			self.health = 200;
 		self.experience_value = 150;
 	}
+	if(!self.max_health)
+		self.max_health=self.health;
 
 	self.takedamage = DAMAGE_YES;
 
@@ -217,6 +232,7 @@ void ScorpionInit(float type)
 	{
 		self.skin = 1;
 	}
+	self.init_exp_val = self.experience_value;
 	walkmonster_start();
 }
 
@@ -275,7 +291,7 @@ void ScorpionWalk(void) [++ $scwalk1..$scwalk16]
 	}
 	ai_walk(2);
 	if(random()<0.1)
-		pitch_roll_for_slope('0 0 0');
+		pitch_roll_for_slope('0 0 0',self);
 }
 
 //==========================================================================
@@ -334,7 +350,7 @@ void ScorpionRunBlack(void) [++ $scwalk1..$scwalk16]
 
 	ai_run(8);
 	if(random()<0.1)
-		pitch_roll_for_slope('0 0 0');
+		pitch_roll_for_slope('0 0 0',self);
 }
 
 //==========================================================================
@@ -394,7 +410,7 @@ void ScorpionRun(void) [++ $scwalk1..$scwalk16]
 
 	ai_run(6);
 	if(random()<0.1)
-		pitch_roll_for_slope('0 0 0');
+		pitch_roll_for_slope('0 0 0',self);
 }
 //==========================================================================
 //

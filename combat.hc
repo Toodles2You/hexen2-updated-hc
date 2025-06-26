@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/COMBAT.hc 34    7/12/97 9:09a Rlove $
+ * $Header: /H3MP/hcode/COMBAT.hc 36    10/28/97 1:00p Mgummelt $
  */
 void(vector org, vector vel, float damage, entity victim) SpawnPuff;
 
@@ -118,4 +118,52 @@ void FireMelee (float damage_base,float damage_mod,float attack_radius)
 	}
 
 }
-
+/*
+ * $Log: /H3MP/hcode/COMBAT.hc $
+ * 
+ * 36    10/28/97 1:00p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 34    7/12/97 9:09a Rlove
+ * Reworked Assassin Punch Dagger
+ * 
+ * 32    7/07/97 2:59p Mgummelt
+ * 
+ * 31    6/30/97 6:14p Rlove
+ * 
+ * 30    6/30/97 5:30p Rlove
+ * 
+ * 29    6/28/97 6:32p Mgummelt
+ * 
+ * 28    6/26/97 4:46p Rlove
+ * 
+ * 27    6/26/97 4:39p Rlove
+ * Special ability #2 for Necromancer: Vampiric Drain
+ * 
+ * 26    6/18/97 6:08p Mgummelt
+ * 
+ * 25    5/28/97 8:13p Mgummelt
+ * 
+ * 24    5/27/97 9:40a Rlove
+ * Took out super_damage and radsuit fields
+ * 
+ * 23    5/12/97 10:31a Rlove
+ * 
+ * 22    5/06/97 1:29p Mgummelt
+ * 
+ * 21    4/25/97 8:31p Mgummelt
+ * 
+ * 20    4/24/97 2:15p Mgummelt
+ * 
+ * 19    4/12/96 8:55p Mgummelt
+ * 
+ * 18    4/09/97 2:41p Rlove
+ * New Raven weapon sounds
+ * 
+ * 17    4/04/97 5:40p Rlove
+ * 
+ * 16    3/31/97 6:45a Rlove
+ * Moved most of COMBAT.HC over to DAMAGE.HC
+ * 
+ */

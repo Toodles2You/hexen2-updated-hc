@@ -3,7 +3,7 @@
 //**
 //** global.hc
 //**
-//** $Header: /H3/game/hcode/global.hc 19    9/11/97 7:13p Rjohnson $
+//** $Header: /H3MP/hcode/global.hc 23    10/29/97 5:39p Jheitzman $
 //**
 //**************************************************************************
 

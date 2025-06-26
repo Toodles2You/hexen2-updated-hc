@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/imp.hc 38    9/11/97 7:13p Rjohnson $
+ * $Header: /H2 Mission Pack/HCode/imp.hc 16    3/14/98 5:52p Mgummelt $
  */
 /*
 ==============================================================================
@@ -155,6 +155,8 @@ void summoned_imp_die () [-- $impup23 .. $impup1]
 {
 	if(self.health<-40)
 	{
+		stopSound(self,CHAN_BODY);
+		//sound (self, CHAN_BODY, "misc/null.wav", 1, ATTN_NORM);
 		chunk_death();
 		return;
 	}
@@ -195,7 +197,8 @@ void imp_die ()
 	self.touch=SUB_Null;
 	if(self.health<-30)
 	{
-		sound (self, CHAN_BODY, "misc/null.wav", 1, ATTN_NONE);
+		stopSound(self,CHAN_BODY);
+		//sound (self, CHAN_BODY, "misc/null.wav", 1, ATTN_NORM);
 		chunk_death();
 		return;
 	}
@@ -249,7 +252,7 @@ void imp_die ()
 		if(self.classname=="monster_imp_lord")
 		{
 			setsize (self, '-32 -32 0', '32 32 56');
-			self.hull=HULL_SCORPION;
+			self.hull=HULL_SCORPION;//HYDRA;
 		}
 		else
 		{
@@ -601,7 +604,10 @@ void imp_rise () [++ $impfly1 .. $impfly20]
 	if(self.frame==$impfly1)
 	{
 //		dprint("shooting up\n");
-		self.attack_finished=time+1.7;
+		if(skill>=4)
+			self.attack_finished=0;
+		else
+			self.attack_finished=time+1.7;
 		self.velocity_z=600;
 	}
 	else if(self.frame>$impfly14 &&self.attack_finished<time)
@@ -788,7 +794,10 @@ void imp_attack_anim() [++ $impfir1 .. $impfir21]
 		if(visible(self.enemy)&&self.enemy.flags2&FL_ALIVE)
 			if(random()<0.2+skill/10)
 				self.think=imp_attack_anim;
-		self.attack_finished=time + 1;
+		if(skill>=4)
+			self.attack_finished=0;
+		else
+			self.attack_finished=time + 1;
 		thinktime self : 0;
 	}
 }
@@ -808,7 +817,10 @@ void imp_abort_swoop () [++ $swpout1 .. $swpout15]
 
 	if(self.frame==$swpout15)
 	{
-		self.attack_finished=time + 1;
+		if(skill>=4)
+			self.attack_finished=0;
+		else
+			self.attack_finished=time + 1;
 		self.think=imp_fly;
 		thinktime self : 0;
 	}
@@ -826,7 +838,10 @@ void imp_swoop_end () [++ $swpend1 .. $swpend15]
 
 	if (self.frame == $swpend15)
 	{	// Finished swooping
-		self.attack_finished=time + 1;
+		if(skill>=4)
+			self.attack_finished=0;
+		else
+			self.attack_finished=time + 1;
 		self.velocity = '0 0 0';
 		self.yaw_speed = 8;
 		self.think=imp_hover;
@@ -1220,7 +1235,7 @@ void() stone_imp_awaken = [++ $impup7 .. $impup23]
 		sound (self, CHAN_VOICE, "fx/wallbrk.wav", 1, ATTN_NORM);
 		while(chunk_cnt < CHUNK_MAX)
 		{
-			CreateModelChunks(self.size,.7);
+			CreateModelChunks(self.size,.7, 1);
 			chunk_cnt+=1;
 		}
 		self.skin=self.oldskin;
@@ -1301,6 +1316,8 @@ void(entity attacker, float damage) imp_pain =
 
 void imp_use (void)
 {
+	if (!self.flags2&FL_ALIVE)
+		return;
 	self.use=SUB_Null;
 	self.targetname="";
 
@@ -1458,9 +1475,9 @@ void init_imp (float which_skin)
 		return;
 	}
 
-	if(!self.flags2&FL_SUMMONED)
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 	{
-		precache_model3 ("models/imp.mdl");
+		precache_model4 ("models/imp.mdl");//converted for MP
 		precache_model3 ("models/h_imp.mdl");//empty for now
 		if (self.classname == "monster_imp_lord")
 		{
@@ -1495,7 +1512,7 @@ void init_imp (float which_skin)
 		self.drawflags(+)SCALE_ORIGIN_CENTER;
 		self.scale=2.3;//2?
 		setsize (self, '-32 -32 -32', '32 32 32');
-		self.hull=HULL_HYDRA;
+		self.hull=HULL_SCORPION;//HYDRA;
 		self.view_ofs=self.proj_ofs='0 0 82';
 	}
 	else
@@ -1508,11 +1525,11 @@ void init_imp (float which_skin)
 	self.headmodel = "models/h_imp.mdl";
 
 	if(which_skin==3)
-		self.flags (+) FL_COLDHEAL|FL_FIREHEAL;
+		self.flags2 (+) FL2_COLDHEAL|FL2_FIREHEAL;
 	else if(which_skin==1)
-		self.flags (+) FL_COLDHEAL;
+		self.flags2 (+) FL2_COLDHEAL;
 	else
-		self.flags (+) FL_FIREHEAL;
+		self.flags2 (+) FL2_FIREHEAL;
 
 	if(self.wait!=-1)
 	{
@@ -1533,7 +1550,8 @@ void init_imp (float which_skin)
 		}
 		else
 		{
-			self.max_health=self.health = 75+self.skin*25;
+			if(!self.health)
+				self.max_health=self.health = 75+self.skin*25;
 			self.experience_value = 400 +self.skin*100;
 			self.mass = 3;
 			self.th_die = imp_die_init;
@@ -1587,6 +1605,10 @@ void init_imp (float which_skin)
 	else
 		self.flags (+) FL_MONSTER | FL_FLY;
 
+	if(!self.max_health)
+		self.max_health=self.health;
+	self.init_exp_val = self.experience_value;
+
 	total_monsters += 1;
 	if(self.enemy)
 		self.th_run();
@@ -1596,11 +1618,11 @@ void init_imp (float which_skin)
 		self.frame = $impwat1;
 }
 
-/*QUAKED monster_imp_ice (1 0.3 0) (-16 -16 0) (16 16 55) STAND HOVER x x gargoyle
+/*QUAKED monster_imp_ice (1 0.3 0) (-16 -16 0) (16 16 55) STAND HOVER x x gargoyle x FROZEN
 Grunt monster - common.  Shoots multiple ice shards. Can only be killed by defrosting it.
 immune to ice attacks
 
-gargoyle = uses the grey stone texture to make it look like a gargoyl- will wake up if the player looks at him long enough, gets close, or hurts him.
+gargoyle = uses the grey stone texture to make it look like a gargoyle- will wake up if the player looks at him long enough, gets close, or hurts him.
 -------------------------FIELDS-------------------------
 wait = if you give it a -1, the gargoyle will not come alive, it's just a decoration
 --------------------------------------------------------
@@ -1608,13 +1630,18 @@ wait = if you give it a -1, the gargoyle will not come alive, it's just a decora
 */
 void monster_imp_ice ()
 {
+	if(!self.th_init)
+	{
+		self.th_init=monster_imp_ice;
+		self.init_org=self.origin;
+	}
 	init_imp(1);
 }
 
-/*QUAKED monster_imp_fire (1 0.3 0) (-16 -16 0) (16 16 55) STAND HOVER x x gargoyle
+/*QUAKED monster_imp_fire (1 0.3 0) (-16 -16 0) (16 16 55) STAND HOVER x x gargoyle x FROZEN
 Grunt monster - common.  Shoots a fireball. Can only be killed by defrosting it.
 
-gargoyle = uses the grey stone texture to make it look like a gargoyl- will wake up if the player looks at him long enough, gets close, or hurts him.
+gargoyle = uses the grey stone texture to make it look like a gargoyle- will wake up if the player looks at him long enough, gets close, or hurts him.
 -------------------------FIELDS-------------------------
 wait = if you give it a -1, the gargoyle will not come alive, it's just a decoration
 --------------------------------------------------------
@@ -1622,13 +1649,18 @@ wait = if you give it a -1, the gargoyle will not come alive, it's just a decora
 */
 void monster_imp_fire ()
 {
+	if(!self.th_init)
+	{
+		self.th_init=monster_imp_fire;
+		self.init_org=self.origin;
+	}
 	init_imp(0);
 }
 
-/*QUAKED monster_imp_lord (1 0.3 0) (-16 -16 0) (16 16 55) STAND HOVER x x gargoyle
+/*QUAKED monster_imp_lord (1 0.3 0) (-16 -16 0) (16 16 55) STAND HOVER x x gargoyle x FROZEN
 Big imp dude- kicks butt and takes names
 
-gargoyle = uses the grey stone texture to make it look like a gargoyl- will wake up if the player looks at him long enough, gets close, or hurts him.
+gargoyle = uses the grey stone texture to make it look like a gargoyle- will wake up if the player looks at him long enough, gets close, or hurts him.
 -------------------------FIELDS-------------------------
 wait = if you give it a -1, the gargoyle will not come alive, it's just a decoration
 --------------------------------------------------------

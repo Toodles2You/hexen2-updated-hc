@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/HCode/famhorse.hc 30    9/11/97 8:15p Mgummelt $
+ * $Header: /H2 Mission Pack/HCode/famhorse.hc 6     3/17/98 11:41p Jmonroe $
  */
 
 /*
@@ -679,7 +679,8 @@ void famhorse_move(void)
 				{
 					if(self.controller)
 						remove(self.controller);
-					sound(self,CHAN_WEAPON,"misc/null.wav",1,ATTN_NORM);
+					stopSound(self,CHAN_WEAPON);
+					//sound(self,CHAN_WEAPON,"misc/null.wav",1,ATTN_NORM);
 				}
 
 				hurttime = time + 1;
@@ -689,7 +690,8 @@ void famhorse_move(void)
 			{
 				if(self.controller)
 					remove(self.controller);
-				sound(self,CHAN_WEAPON,"misc/null.wav",1,ATTN_NORM);
+				stopSound(self,CHAN_WEAPON);
+				//sound(self,CHAN_WEAPON,"misc/null.wav",1,ATTN_NORM);
 
 				self.movechain.drawflags(-)MLS_ABSLIGHT;
 				self.movechain.frame += 50;				
@@ -747,10 +749,14 @@ void rider_famine(void)
 		return;
 	}
 
+	// TE_STREAM_FAMINE
+	precache_model3("models/fambeam.mdl");	//Famine's beam attack
+
 	precache_model3 ("models/boss/famhorse.mdl");
 	precache_model3 ("models/boss/famrider.mdl");
 
 	precache_model3 ("models/famshot.mdl");
+	precache_model3 ("models/soulball.mdl");//Soul sphere
 
 	precache_sound3 ("famine/die.wav");
 	precache_sound3 ("famine/laugh.wav");
@@ -761,7 +767,7 @@ void rider_famine(void)
 	precache_sound3 ("famine/clop1.wav");
 	precache_sound3 ("famine/clop2.wav");
 	precache_sound3 ("famine/clop3.wav");
-	precache_sound3 ("misc/null.wav");
+//	precache_sound3 ("misc/null.wav");
 	precache_sound3 ("raven/blast.wav");
 	precache_sound3 ("skullwiz/blinkout.wav");
 	precache_sound3 ("skullwiz/blinkin.wav");
@@ -788,7 +794,7 @@ void rider_famine(void)
 	self.flags2 (+) FL_ALIVE;
 	self.monsterclass = CLASS_BOSS;
 	self.yaw_speed = 10;
-	self.experience_value = 500;
+	self.experience_value = self.init_exp_val = 500;
 
 	create_famrider(self);
 	self.attack_finished = 0;
@@ -802,3 +808,69 @@ void rider_famine(void)
 	thinktime self : 1;
 }
 
+
+/*
+ * $Log: /H2 Mission Pack/HCode/famhorse.hc $
+ * 
+ * 6     3/17/98 11:41p Jmonroe
+ * he uses the necros soul sphere
+ * 
+ * 5     3/13/98 3:27a Mgummelt
+ * Replaced all sounds that played a null.wav with stopSound commands
+ * 
+ * 4     3/03/98 7:31p Mgummelt
+ * 
+ * 3     2/18/98 6:02p Jmonroe
+ * added cache4 functions, added puzzle piece cache_file4 cmds
+ * 
+ * 2     2/10/98 2:42p Jmonroe
+ * improved precache some more
+ * 
+ * 32    10/28/97 1:00p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 30    9/11/97 8:15p Mgummelt
+ * 
+ * 29    9/11/97 7:13p Rjohnson
+ * Caching Updates
+ * 
+ * 28    9/11/97 12:04p Mgummelt
+ * 
+ * 27    9/11/97 12:02p Mgummelt
+ * 
+ * 26    9/01/97 12:11a Rlove
+ * 
+ * 25    8/31/97 6:51p Rlove
+ * 
+ * 24    8/31/97 6:44p Rlove
+ * 
+ * 23    8/31/97 6:11p Rlove
+ * 
+ * 22    8/31/97 4:21p Mgummelt
+ * 
+ * 21    8/31/97 12:54p Jweier
+ * 
+ * 20    8/29/97 11:44p Jweier
+ * 
+ * 19    8/26/97 3:01p Rlove
+ * 
+ * 18    8/23/97 7:15p Rlove
+ * 
+ * 13    8/19/97 10:46a Rlove
+ * 
+ * 5     8/08/97 3:01p Rjohnson
+ * Fix for position
+ * 
+ * 4     8/06/97 4:31p Rjohnson
+ * Update for initialization
+ * 
+ * 3     7/25/97 5:35p Rjohnson
+ * Updates
+ * 
+ * 2     6/19/97 3:08p Rjohnson
+ * Code space optimizations
+ * 
+ * 1     6/10/97 3:35p Rjohnson
+ * Initial Version
+ */

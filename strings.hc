@@ -3,7 +3,7 @@
 //**
 //** strings.hc
 //**
-//** $Header: /H3/game/hcode/strings.hc 18    9/02/97 2:01a Rlove $
+//** $Header: /H2 Mission Pack/HCode/strings.hc 2     2/25/98 6:10p Mgummelt $
 //**
 //**************************************************************************
 
@@ -32,6 +32,9 @@ string STR_MAGICMISSILE;
 string STR_BONESHARD;
 string STR_SET1;
 string STR_SET2;
+
+string STR_LIGHTNING1;
+string STR_LIGHTNING2;
 
 string STR_NOCARRYWEAPON;
 string STR_NOTENOUGHMANA;

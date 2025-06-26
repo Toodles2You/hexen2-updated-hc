@@ -1,5 +1,5 @@
 /*
- * $Header: /H3/game/hcode/sound.hc 15    8/27/97 5:12p Jweier $
+ * $Header: /H2 Mission Pack/HCode/sound.hc 4     3/16/98 6:40p Jmonroe $
  */
 
 void sound_maker_run(void)
@@ -160,7 +160,7 @@ void sound_ambient (void)
 	}
 	else if (self.soundtype == 10)
 	{
-		precache_sound ("ambience/water.wav");
+		precache_sound4 ("ambience/water.wav");	//updated for mission pack
 		self.noise1 = ("ambience/water.wav");
 	}
 	else if (self.soundtype == 11)
@@ -211,3 +211,48 @@ void sound_ambient (void)
 
 }
 
+/*
+ * $Log: /H2 Mission Pack/HCode/sound.hc $
+ * 
+ * 4     3/16/98 6:40p Jmonroe
+ * 
+ * 3     3/03/98 4:36p Jmonroe
+ * changed over to precache 4 to build my pak
+ * 
+ * 2     2/24/98 3:36p Jweier
+ * 
+ * 17    10/28/97 1:01p Mgummelt
+ * Massive replacement, rewrote entire code... just kidding.  Added
+ * support for 5th class.
+ * 
+ * 15    8/27/97 5:12p Jweier
+ * 
+ * 14    8/26/97 6:27a Rlove
+ * 
+ * 13    8/25/97 2:43p Rlove
+ * 
+ * 12    8/21/97 5:21a Rlove
+ * 
+ * 11    7/31/97 3:39p Rlove
+ * 
+ * 10    7/31/97 3:24p Rlove
+ * 
+ * 9     7/31/97 2:04p Rlove
+ * 
+ * 8     7/28/97 2:01p Rlove
+ * 
+ * 7     7/15/97 9:00a Rlove
+ * 
+ * 6     6/30/97 11:29a Rlove
+ * 
+ * 5     6/16/97 8:53a Rlove
+ * 
+ * 4     6/16/97 8:52a Rlove
+ * Added windmill sound
+ * 
+ * 3     11/18/96 3:30p Rlove
+ * changed variable sounds to soundtype
+ * 
+ * 2     11/11/96 1:19p Rlove
+ * Added Source Safe stuff
+ */
