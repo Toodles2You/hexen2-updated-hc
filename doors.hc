@@ -140,7 +140,7 @@ void door_crash_next()
 
 	if(len < 0.1 || nextlen > testlen)
 	{
-		door_hit_bottom;
+		door_hit_bottom ();
 		return;
 	}
 	else 
