@@ -473,8 +473,6 @@ void firewalker_think(void)
 
 void buddha_firewalker_spawn(void)
 {
-	local entity newmis;
-
 	newmis = spawn();
 
 	newmis.classname = "buddha_firewalker";
